@@ -254,7 +254,6 @@
       <div class="startText">
         <div class="line1">タップしてスタート</div>
         <div class="line2">（一部の端末では音声・動画の許可が必要です）</div>
-      </div>
         <div class="line2">(This enables video/audio on some devices)</div>
       </div>
 
@@ -378,18 +377,15 @@
 
     // Fallback if ended fires before timeupdate threshold
     introVideo.addEventListener('ended', goToWeek);
-      setTimeout(() => {
-        showScene(hubScene);
-        // Fade back in
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => fadeToBlack(false));
-        });
-      }, 520);
-    });
 
     // Safety: if video errors, just go to hub
     introVideo.addEventListener('error', () => {
       fadeToBlack(true);
+      setTimeout(() => {
+        showScene(hubScene);
+        requestAnimationFrame(() => requestAnimationFrame(() => fadeToBlack(false)));
+      }, FADE_MS);
+    });
       setTimeout(() => {
         showScene(hubScene);
         requestAnimationFrame(() => requestAnimationFrame(() => fadeToBlack(false)));
