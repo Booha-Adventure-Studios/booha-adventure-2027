@@ -657,6 +657,42 @@
     return div;
   }
 
+  // ── Picker: bound once, never duplicated ──
+  const picker      = document.getElementById('picker');
+  const pickerTitle = document.getElementById('pickerTitle');
+  const pickerDates = document.getElementById('pickerDates');
+  const pickerClose = document.getElementById('pickerClose');
+  const mazeBtn     = document.getElementById('mazeBtn');
+
+  let currentPickerWeekId = '';
+
+  function openPicker(tagEn, tagJp, dates, weekId){
+    if (!weekId) return;
+    currentPickerWeekId = weekId;
+    pickerTitle.textContent = `${tagEn}（${tagJp}）`;
+    pickerDates.textContent = dates;
+    picker.classList.add('show');
+    picker.setAttribute('aria-hidden','false');
+  }
+
+  function closePicker(){
+    currentPickerWeekId = '';
+    picker.classList.remove('show');
+    picker.setAttribute('aria-hidden','true');
+  }
+
+  pickerClose.addEventListener('click', closePicker);
+  picker.addEventListener('click', e => { if (e.target === picker) closePicker(); });
+
+  document.querySelectorAll('.pickTile').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const curr = btn.dataset.curr;
+      alert(`PLACEHOLDER\nweek: ${currentPickerWeekId}\ncurriculum: ${curr}`);
+    });
+  });
+
+  if (mazeBtn) mazeBtn.addEventListener('click', () => alert('MAZE (placeholder)'));
+
   async function renderHub(){
     const weekCards = document.getElementById('weekCards');
     weekCards.innerHTML = '';
@@ -668,7 +704,7 @@
       if (res.ok) year = await res.json();
     } catch(e){ /* no json available, use fallback */ }
 
-    // Cycle start = Jan 3 2027 (first Monday of the school year)
+    // Cycle start = Jan 3 2027 (Sunday-based 48-week cycle)
     const CYCLE_START_STR = (year && year.cycleStart) || '2027-01-03';
     const cycleStart   = parseYMD(CYCLE_START_STR);
     const cycleStartMs = ymdToMs(cycleStart.y, cycleStart.m, cycleStart.d);
@@ -686,7 +722,6 @@
       // Before cycle start → we're in December Week 4 (pre-launch)
       thisIdx    = -1;
       thisWeekId = (year && year.preStartWeek) || 'dec_w4_pre';
-      // Dec Week 4 starts 14 days before cycle start (Dec 20)
       thisStart  = addDays(cycleStart, -14);
     } else {
       thisIdx    = Math.floor(diffDays / 7) % cycleLength;
@@ -698,13 +733,12 @@
     // ── LAST WEEK ──
     let lastWeekId=null, lastStart=null, lastEnd=null;
     if (thisIdx === -1){
-      // Pre-cycle: no last week yet
       lastWeekId = null;
     } else if (thisIdx === 0){
       // January Week 1 is always first — last week is always December Week 4
       lastWeekId = 'dec_w4_pre';
-      lastStart  = {y:2026, m:12, d:20};   // Dec 20 2026
-      lastEnd    = {y:2026, m:12, d:26};   // Dec 26 2026
+      lastStart  = {y:2026, m:12, d:20};
+      lastEnd    = {y:2026, m:12, d:26};
     } else {
       const lIdx = (thisIdx - 1 + cycleLength) % cycleLength;
       lastWeekId = weeks[lIdx] || `week_${lIdx+1}`;
@@ -755,51 +789,18 @@
       hint:      nextWeekId ? 'TAP TO OPEN' : 'LOCKED'
     }));
 
-    // ── Picker logic ──
-    const picker      = document.getElementById('picker');
-    const pickerTitle = document.getElementById('pickerTitle');
-    const pickerDates = document.getElementById('pickerDates');
-    const pickerClose = document.getElementById('pickerClose');
-
-    function openPicker(tagEn, tagJp, dates, weekId){
-      if (!weekId) return;
-      pickerTitle.textContent = `${tagEn}（${tagJp}）`;
-      pickerDates.textContent = dates;
-      picker.dataset.weekId = weekId;
-      picker.classList.add('show');
-      picker.setAttribute('aria-hidden','false');
-    }
-    function closePicker(){
-      picker.classList.remove('show');
-      picker.setAttribute('aria-hidden','true');
-      picker.dataset.weekId = '';
-    }
-
-    pickerClose.onclick = closePicker;
-    picker.addEventListener('click', e => { if (e.target===picker) closePicker(); });
-
+    // ── Wire card clicks (safe to re-run; cards are replaced each time) ──
     weekCards.querySelectorAll('.weekCard').forEach(card => {
       card.addEventListener('click', () => {
         const wid   = card.dataset.weekId;
         if (!wid) return;
-        const dates = card.querySelector('.weekDates')?.textContent||'';
-        const tag   = card.querySelector('.weekTag')?.textContent||'';
+        const dates = card.querySelector('.weekDates')?.textContent || '';
+        const tag   = card.querySelector('.weekTag')?.textContent   || '';
         if      (tag.includes('LAST WEEK')) openPicker('LAST WEEK','先週', dates, wid);
         else if (tag.includes('THIS WEEK')) openPicker('THIS WEEK','今週', dates, wid);
         else                                openPicker('NEXT WEEK','来週', dates, wid);
       });
     });
-
-    document.querySelectorAll('.pickTile').forEach(btn => {
-      btn.onclick = () => {
-        const weekId = picker.dataset.weekId;
-        const curr   = btn.dataset.curr;
-        alert(`PLACEHOLDER\nweek: ${weekId}\ncurriculum: ${curr}`);
-      };
-    });
-
-    const mazeBtn = document.getElementById('mazeBtn');
-    if (mazeBtn) mazeBtn.onclick = () => alert('MAZE (placeholder)');
   }
 
   /* ── Start flow ── */
@@ -821,7 +822,8 @@
     try {
       await introVideo.play();
     } catch(err){
-      started = false;
+      started   = false;
+      fadingOut = false;  // reset so goToHub can fire correctly later
       ghostWrap.classList.remove('flyAway');
       showScene(startScene);
       fadeToBlack(false);
@@ -850,7 +852,7 @@
   introVideo.addEventListener('timeupdate', () => {
     const d = introVideo.duration;
     if (!isFinite(d) || d <= 0) return;
-    if (d - introVideo.currentTime <= 0.65) goToHub();
+    if (d - introVideo.currentTime <= 0.85) goToHub();  // bumped from 0.65 for iOS
   });
   introVideo.addEventListener('ended', goToHub);
 
