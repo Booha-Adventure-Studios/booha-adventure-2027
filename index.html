@@ -179,81 +179,152 @@
 
     /* HUB placeholder */
     #hubScene{
-      padding: calc(24px + var(--safe-top)) calc(24px + var(--safe-right)) calc(24px + var(--safe-bottom)) calc(24px + var(--safe-left));
+      padding: calc(22px + var(--safe-top)) calc(22px + var(--safe-right)) calc(22px + var(--safe-bottom)) calc(22px + var(--safe-left));
       align-items:center;
       justify-content:center;
       background:#000;
     }
 
-    .hubPlaceholder{
-      width:100%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding: 10px;
-    }
-
-    .hubTitle{
-      font-size: clamp(28px, 4.2vw, 52px);
-      font-weight: 1000;
-      letter-spacing: 1px;
-      color: rgba(255,255,255,.92);
-      text-shadow: 0 10px 28px rgba(0,0,0,.75);
-    }
-
-    /* (placeholder styles below were removed for now) */
-
-    .hubHeader{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:10px;
-      border:1px solid rgba(255,255,255,.14);
-      border-radius:18px;
-      padding:14px 14px;
-      background: rgba(255,255,255,.04);
-    }
-    .hubHeader .left{
+    .hub{
+      width:min(1100px, 100%);
       display:flex;
       flex-direction:column;
-      gap:6px;
-      min-width:0;
+      gap:14px;
     }
-    .hubHeader .tag{
-      font-weight:900;
-      letter-spacing:1px;
-      font-size:14px;
-    }
-    .hubHeader .tag span{ color:rgba(255,255,255,.75); font-weight:800; margin-left:6px; }
-    .hubHeader .weekTitle{ font-size:18px; font-weight:900; }
-    .hubHeader .dates{ font-size:14px; color:rgba(255,255,255,.70); }
 
-    .grid{
+    .hubRow{
       display:grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap:12px;
-      flex: 1;
     }
 
-    .tile{
+    .weekCard{
       border-radius:22px;
       border:1px solid rgba(255,255,255,.14);
       background: rgba(255,255,255,.05);
-      padding:14px;
-      min-height: 140px;
+      padding:14px 14px 12px;
+      min-height: 150px;
       display:flex;
       flex-direction:column;
-      gap:10px;
       justify-content:space-between;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+      transform: translateZ(0);
     }
-    .tile .label{ font-size:16px; font-weight:900; }
-    .tile .sub{ font-size:13px; color:rgba(255,255,255,.65); line-height:1.3; }
+    .weekCard:active{ transform: scale(.99); }
 
-    .bottomBar{
-      display:flex;
+    .weekTag{
+      font-weight: 1000;
+      letter-spacing: 1px;
+      font-size: 14px;
+    }
+    .weekTag span{ color: rgba(255,255,255,.75); font-weight: 900; margin-left: 6px; }
+
+    .weekTitle{
+      font-size: 20px;
+      font-weight: 1000;
+      letter-spacing: .4px;
+      margin-top: 10px;
+    }
+
+    .weekDates{
+      font-size: 14px;
+      color: rgba(255,255,255,.72);
+      margin-top: 6px;
+    }
+
+    .weekHint{
+      margin-top: 12px;
+      font-size: 12px;
+      color: rgba(255,255,255,.55);
+    }
+
+    .hubBottom{ display:flex; justify-content:center; padding-top: 4px; }
+
+    .btnSmall{ padding: 12px 18px; font-size: 16px; }
+
+    @media (max-width: 860px){
+      .hubRow{ grid-template-columns: 1fr; }
+      .weekCard{ min-height: 120px; }
+    }
+
+    /* Picker overlay */
+    .picker{
+      position:absolute; inset:0;
+      display:none;
+      align-items:center;
       justify-content:center;
-      padding-top:6px;
+      padding: calc(18px + var(--safe-top)) calc(18px + var(--safe-right)) calc(18px + var(--safe-bottom)) calc(18px + var(--safe-left));
+      background: rgba(0,0,0,.86);
+      z-index: 60;
+    }
+    .picker.show{ display:flex; }
+
+    .pickerPanel{
+      width: min(900px, 100%);
+      border-radius: 26px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(20,20,20,.92);
+      box-shadow: 0 24px 60px rgba(0,0,0,.65);
+      padding: 16px;
+    }
+
+    .pickerTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+
+    .pickerTitle{
+      font-size: 18px;
+      font-weight: 1000;
+      letter-spacing: 1px;
+    }
+
+    .ghostBtn{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.92);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 1000;
+      letter-spacing: .4px;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .ghostBtn:active{ transform: scale(.99); }
+
+    .pickerSub{ margin-top: 8px; color: rgba(255,255,255,.75); font-size: 14px; }
+
+    .pickerGrid{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .pickTile{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+      color: rgba(255,255,255,.92);
+      border-radius: 22px;
+      padding: 18px 14px;
+      font-size: 16px;
+      font-weight: 1000;
+      letter-spacing: .3px;
+      cursor:pointer;
+    }
+    .pickTile span{ display:block; margin-top: 8px; font-size: 13px; color: rgba(255,255,255,.70); font-weight: 900; }
+    .pickTile:active{ transform: scale(.99); }
+
+    .pickerNote{ margin-top: 14px; font-size: 12px; color: rgba(255,255,255,.58); }
+
+    @media (max-width: 860px){
+      .pickerGrid{ grid-template-columns: 1fr; }
     }
 
     /* Responsive tweaks */
@@ -298,12 +369,38 @@
       </video>
     </section>
 
-    <!-- HUB (placeholder) -->
-    <section id="hubScene" class="scene" aria-label="Week 1">
-      <div class="hubPlaceholder">
-        <div class="hubTitle">January Week 1</div>
+    <!-- HUB (3-week window) -->
+    <section id="hubScene" class="scene" aria-label="Week Hub">
+      <div class="hub">
+        <div class="hubRow" id="weekCards">
+          <!-- cards injected by JS -->
+        </div>
+
+        <div class="hubBottom">
+          <button id="mazeBtn" class="btn btnSmall" type="button">めいろへ（Maze）</button>
+        </div>
       </div>
     </section>
+
+    <!-- Curriculum picker (placeholder) -->
+    <div id="picker" class="picker" aria-hidden="true">
+      <div class="pickerPanel" role="dialog" aria-modal="true" aria-label="Choose Curriculum">
+        <div class="pickerTop">
+          <div class="pickerTitle" id="pickerTitle">THIS WEEK（今週）</div>
+          <button id="pickerClose" class="ghostBtn" type="button" aria-label="Back">戻る</button>
+        </div>
+
+        <div class="pickerSub" id="pickerDates">Jan 3 – Jan 9（1月3日–1月9日）</div>
+
+        <div class="pickerGrid">
+          <button class="pickTile" type="button" data-curr="preboo">Pre-Boo<br><span>プレブー</span></button>
+          <button class="pickTile" type="button" data-curr="booriculum">Boo-riculum<br><span>ブーリキュラム</span></button>
+          <button class="pickTile" type="button" data-curr="boocontinuum">Boo-continuum<br><span>ブーコンティニューム</span></button>
+        </div>
+
+        <div class="pickerNote">※ ここはプレースホルダーです（後でリンクします）</div>
+      </div>
+    </div>
 
     <div id="fade" aria-hidden="true"></div>
   </div>
@@ -340,6 +437,218 @@
     }
     window.addEventListener('resize', updateOrientationOverlay, { passive:true });
     updateOrientationOverlay();
+
+    // --- Week hub (auto 48-week cycle; only LAST/THIS/NEXT openable) ---
+    const YEAR_URL = 'data/year.json';
+
+    const MONTH_NAME = {
+      jan:'January', feb:'February', mar:'March', apr:'April', may:'May', jun:'June',
+      jul:'July', aug:'August', sep:'September', oct:'October', nov:'November', dec:'December'
+    };
+
+    function tokyoTodayYMD(){
+      const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Tokyo',
+        year: 'numeric', month: '2-digit', day: '2-digit'
+      }).formatToParts(new Date());
+      const map = Object.fromEntries(parts.filter(p=>p.type!=='literal').map(p=>[p.type,p.value]));
+      return { y: +map.year, m: +map.month, d: +map.day };
+    }
+
+    function ymdToUtcMs(y,m,d){
+      return Date.UTC(y, m-1, d, 0, 0, 0);
+    }
+
+    function parseYMD(str){
+      const [y,m,d] = str.split('-').map(n=>+n);
+      return { y, m, d };
+    }
+
+    function addDaysToYMD(ymd, add){
+      const ms = ymdToUtcMs(ymd.y, ymd.m, ymd.d) + add*86400000;
+      const dt = new Date(ms);
+      return { y: dt.getUTCFullYear(), m: dt.getUTCMonth()+1, d: dt.getUTCDate() };
+    }
+
+    function fmtRange(startYMD, endYMD){
+      const en = (ymd) => {
+        const mm = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][ymd.m-1];
+        return `${mm} ${ymd.d}`;
+      };
+      const jp = (ymd) => `${ymd.m}月${ymd.d}日`;
+      return `${en(startYMD)} – ${en(endYMD)}（${jp(startYMD)}–${jp(endYMD)}）`;
+    }
+
+    function labelFromWeekId(weekId){
+      if (!weekId) return '—';
+      if (weekId.startsWith('2026_')) return 'December Week 4';
+      const parts = weekId.split('_');
+      const mon = parts[2];
+      const wIn = (parts[3]||'w1').replace('w','');
+      const monName = MONTH_NAME[mon] || mon;
+      return `${monName} Week ${wIn}`;
+    }
+
+    function buildCard({ tagEn, tagJp, weekId, title, rangeText, hint }){
+      const div = document.createElement('div');
+      div.className = 'weekCard';
+      div.dataset.weekId = weekId || '';
+      div.innerHTML = `
+        <div>
+          <div class="weekTag">${tagEn}<span>（${tagJp}）</span></div>
+          <div class="weekTitle">${title}</div>
+          <div class="weekDates">${rangeText}</div>
+        </div>
+        <div class="weekHint">${hint || 'OPEN'}</div>
+      `;
+      return div;
+    }
+
+    async function loadYearData(){
+      const res = await fetch(`${YEAR_URL}?v=${Date.now()}`);
+      if (!res.ok) throw new Error('Failed to load year.json');
+      return res.json();
+    }
+
+    async function renderHub(){
+      const weekCards = document.getElementById('weekCards');
+      weekCards.innerHTML = '';
+
+      const year = await loadYearData();
+      const cycleStart = parseYMD(year.cycleStart);
+      const cycleStartMs = ymdToUtcMs(cycleStart.y, cycleStart.m, cycleStart.d);
+
+      const today = tokyoTodayYMD();
+      const todayMs = ymdToUtcMs(today.y, today.m, today.d);
+
+      const diffDays = Math.floor((todayMs - cycleStartMs) / 86400000);
+
+      let thisIdx = null;
+      let thisWeekId = null;
+      let thisStart = null;
+
+      if (diffDays < 0){
+        // before Jan 3, 2027
+        thisIdx = -1;
+        thisWeekId = year.preStartWeek;
+        thisStart = addDaysToYMD(cycleStart, -14); // Dec 20, 2026
+      } else {
+        thisIdx = Math.floor(diffDays / 7) % year.cycleLength;
+        thisWeekId = year.weeks[thisIdx];
+        thisStart = addDaysToYMD(cycleStart, thisIdx * 7);
+      }
+
+      const thisEnd = addDaysToYMD(thisStart, 6);
+
+      let lastWeekId = null, lastStart=null, lastEnd=null;
+      let nextWeekId = null, nextStart=null, nextEnd=null;
+
+      if (thisIdx === -1){
+        nextWeekId = year.weeks[0];
+        nextStart = cycleStart;
+        nextEnd = addDaysToYMD(nextStart, 6);
+      } else {
+        const nIdx = (thisIdx + 1) % year.cycleLength;
+        nextWeekId = year.weeks[nIdx];
+        nextStart = addDaysToYMD(cycleStart, nIdx * 7);
+        nextEnd = addDaysToYMD(nextStart, 6);
+
+        if (thisIdx === 0){
+          // Week 1: last is special Dec week 4
+          lastWeekId = year.preStartWeek;
+          lastStart = addDaysToYMD(cycleStart, -14);
+          lastEnd = addDaysToYMD(lastStart, 6);
+        } else {
+          const lIdx = (thisIdx - 1 + year.cycleLength) % year.cycleLength;
+          lastWeekId = year.weeks[lIdx];
+          lastStart = addDaysToYMD(cycleStart, lIdx * 7);
+          lastEnd = addDaysToYMD(lastStart, 6);
+        }
+      }
+
+      // Render only 3 openable weeks
+      if (lastWeekId){
+        weekCards.appendChild(buildCard({
+          tagEn:'LAST WEEK', tagJp:'先週',
+          weekId:lastWeekId,
+          title: labelFromWeekId(lastWeekId),
+          rangeText: fmtRange(lastStart, lastEnd)
+        }));
+      } else {
+        weekCards.appendChild(buildCard({
+          tagEn:'LAST WEEK', tagJp:'先週',
+          weekId:'',
+          title:'—',
+          rangeText:'—',
+          hint:'LOCKED'
+        }));
+      }
+
+      weekCards.appendChild(buildCard({
+        tagEn:'THIS WEEK', tagJp:'今週',
+        weekId:thisWeekId,
+        title: labelFromWeekId(thisWeekId),
+        rangeText: fmtRange(thisStart, thisEnd)
+      }));
+
+      weekCards.appendChild(buildCard({
+        tagEn:'NEXT WEEK', tagJp:'来週',
+        weekId: nextWeekId || '',
+        title: nextWeekId ? labelFromWeekId(nextWeekId) : '—',
+        rangeText: nextWeekId ? fmtRange(nextStart, nextEnd) : '—',
+        hint: nextWeekId ? 'OPEN' : 'LOCKED'
+      }));
+
+      // Click -> curriculum picker (placeholder)
+      const picker = document.getElementById('picker');
+      const pickerTitle = document.getElementById('pickerTitle');
+      const pickerDates = document.getElementById('pickerDates');
+      const pickerClose = document.getElementById('pickerClose');
+
+      function openPicker(tagEn, tagJp, dates, weekId){
+        if (!weekId) return;
+        pickerTitle.textContent = `${tagEn}（${tagJp}）`;
+        pickerDates.textContent = dates;
+        picker.dataset.weekId = weekId;
+        picker.classList.add('show');
+        picker.setAttribute('aria-hidden','false');
+      }
+      function closePicker(){
+        picker.classList.remove('show');
+        picker.setAttribute('aria-hidden','true');
+        picker.dataset.weekId = '';
+      }
+
+      pickerClose.onclick = closePicker;
+      picker.addEventListener('click', (e) => {
+        if (e.target === picker) closePicker();
+      });
+
+      weekCards.querySelectorAll('.weekCard').forEach(card => {
+        card.addEventListener('click', () => {
+          const weekId = card.dataset.weekId;
+          if (!weekId) return;
+          const dates = card.querySelector('.weekDates')?.textContent || '';
+          const tag = card.querySelector('.weekTag')?.textContent || '';
+          if (tag.includes('LAST WEEK')) openPicker('LAST WEEK','先週', dates, weekId);
+          else if (tag.includes('THIS WEEK')) openPicker('THIS WEEK','今週', dates, weekId);
+          else openPicker('NEXT WEEK','来週', dates, weekId);
+        });
+      });
+
+      document.querySelectorAll('.pickTile').forEach(btn => {
+        btn.onclick = () => {
+          const weekId = picker.dataset.weekId;
+          const curr = btn.dataset.curr;
+          alert(`PLACEHOLDER
+week: ${weekId}
+curriculum: ${curr}`);
+        };
+      });
+
+      const mazeBtn = document.getElementById('mazeBtn');
+      if (mazeBtn) mazeBtn.onclick = () => alert('MAZE (placeholder)');
+    }
 
     // --- Start flow ---
     let started = false;
@@ -417,38 +726,49 @@
     const FADE_MS = 520;
     let fadingOut = false;
 
-    function goToWeek(){
-      if (fadingOut) return;
-      fadingOut = true;
-      fadeToBlack(true);
-      setTimeout(() => {
-        try { introVideo.pause(); } catch(e) {}
-        showScene(hubScene);
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => fadeToBlack(false));
-        });
-      }, FADE_MS);
-    }
+    async function goToHub(){
+  if (fadingOut) return;
+  fadingOut = true;
+  fadeToBlack(true);
 
-    introVideo.addEventListener('timeupdate', () => {
-      const d = introVideo.duration;
-      if (!isFinite(d) || d <= 0) return;
-      const remaining = d - introVideo.currentTime;
-      // Trigger fade ~0.65s before end
-      if (remaining <= 0.65) goToWeek();
+  setTimeout(async () => {
+    try { introVideo.pause(); } catch(e) {}
+    showScene(hubScene);
+
+    // This builds LAST / THIS / NEXT from year.json
+    try { await renderHub(); } catch (e){ console.error(e); }
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => fadeToBlack(false));
     });
+  }, FADE_MS);
+}
 
-    // Fallback if ended fires before timeupdate threshold
-    introVideo.addEventListener('ended', goToWeek);
+introVideo.addEventListener('timeupdate', () => {
+  const d = introVideo.duration;
+  if (!isFinite(d) || d <= 0) return;
+  const remaining = d - introVideo.currentTime;
+  if (remaining <= 0.65) goToHub();
+});
 
-    // Safety: if video errors, just go to hub
-    introVideo.addEventListener('error', () => {
-      fadeToBlack(true);
-      setTimeout(() => {
-        showScene(hubScene);
-        requestAnimationFrame(() => requestAnimationFrame(() => fadeToBlack(false)));
-      }, FADE_MS);
-    });
+// Fallback if ended fires before timeupdate threshold
+introVideo.addEventListener('ended', goToHub);
+
+   // Safety: if video errors, just go to hub
+introVideo.addEventListener('error', () => {
+  fadeToBlack(true);
+
+  setTimeout(async () => {
+    showScene(hubScene);
+
+    // IMPORTANT: build the 3-week window
+    try { await renderHub(); } catch (e){ console.error(e); }
+
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => fadeToBlack(false))
+    );
+  }, FADE_MS);
+});
 
     // iOS/Safari best practice: pause video when leaving the page
     document.addEventListener('visibilitychange', () => {
