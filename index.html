@@ -59,8 +59,8 @@
     /* Ghost + sparkles container (consistent across devices) */
     .ghostOuter{
       position: relative;
-      width: min(42vmin, 360px);
-      height: min(42vmin, 360px);
+      width: min(32vmin, 260px);
+      height: min(32vmin, 260px);
       /* intentionally NO overflow:hidden */
       transform: translateZ(0);
     }
@@ -83,8 +83,10 @@
 
     .ghostWrap.flyAway{
       animation:none;
-      transition: transform 900ms cubic-bezier(.2,.9,.2,1), opacity 900ms ease;
-      transform: translate3d(0,-75vh,0) scale(.85) rotate(-6deg);
+      transition:
+        transform 1800ms cubic-bezier(.15,.8,.25,1),
+        opacity 1600ms ease 200ms;
+      transform: translate3d(0,-85vh,0) scale(.7) rotate(-4deg);
       opacity:0;
     }
 
@@ -280,10 +282,10 @@
     <!-- START -->
     <section id="startScene" class="scene active" aria-label="Start">
       <div class="ghostOuter">
+        <div class="sparkleField" aria-hidden="true"></div>
         <div class="ghostWrap" aria-hidden="true">
           <img id="boohaGhost" src="assets/img/booha_ghost.png" alt="Booha" />
         </div>
-        <div class="sparkleField" aria-hidden="true"></div>
       </div>
 
       <button id="startBtn" class="btn" type="button">スタート</button>
@@ -353,7 +355,7 @@
       fadeToBlack(true);
 
       // Wait a beat so the fly-away + fade reads on all devices
-      await new Promise(r => setTimeout(r, 420));
+      await new Promise(r => setTimeout(r, 900));
 
       // Move to video scene so the element is visible (helps iOS)
       showScene(videoScene);
@@ -383,23 +385,30 @@
     // Sparkles (pure CSS animation; JS only randomizes positions)
     (function initSparkles(){
       if (!sparkleField) return;
-      const COUNT = 18;
+      const COUNT = 32;
       sparkleField.innerHTML = '';
+
       for (let i = 0; i < COUNT; i++){
         const sp = document.createElement('div');
         sp.className = 'sp';
-        const size = 3 + Math.random() * 5;       // 3–8px
-        const x = Math.random() * 100;            // % across field
-        const y = Math.random() * 100;            // % down field
-        const dur = 1.6 + Math.random() * 2.2;    // 1.6–3.8s
-        const delay = -(Math.random() * dur);     // negative = mid-cycle on load
+
+        const angle = (i / COUNT) * Math.PI * 2;
+        const radius = 28 + Math.random() * 22; // 28–50
+        const cx = 50 + Math.cos(angle) * radius;
+        const cy = 50 + Math.sin(angle) * radius;
+
+        const size = 2 + Math.random() * 3;     // 2–5px
+        const dur = 1.4 + Math.random() * 2.0;  // 1.4–3.4s
+        const delay = -(Math.random() * dur);
+
         sp.style.cssText = `
           --size: ${size}px;
-          --x: ${x}%;
-          --y: ${y}%;
+          --x: ${cx}%;
+          --y: ${cy}%;
           --dur: ${dur}s;
           --delay: ${delay}s;
         `;
+
         sparkleField.appendChild(sp);
       }
     })();
