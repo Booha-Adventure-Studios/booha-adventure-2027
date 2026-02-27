@@ -67,7 +67,17 @@
       pointer-events:none;
       animation: floaty 3.8s ease-in-out infinite;
       filter: drop-shadow(0 14px 28px rgba(0,0,0,.75));
+      transform: translateZ(0);
+      will-change: transform, opacity;
     }
+
+    .ghostWrap.flyAway{
+      animation: none;
+      transition: transform 900ms cubic-bezier(.2,.9,.2,1), opacity 900ms ease;
+      transform: translate3d(0,-75vh,0) scale(.85) rotate(-6deg);
+      opacity: 0;
+    }
+
     @keyframes floaty{
       0%{ transform: translateY(0px); }
       50%{ transform: translateY(-14px); }
@@ -93,12 +103,15 @@
       border-radius: 999px;
       padding: 14px 22px;
       font-size: 18px;
-      font-weight: 800;
-      letter-spacing: .5px;
+      font-weight: 900;
+      letter-spacing: .6px;
       cursor:pointer;
       color:#000;
       background: linear-gradient(180deg, var(--pink2), var(--pink));
-      box-shadow: 0 10px 22px rgba(255,59,189,.25);
+      box-shadow:
+        0 10px 22px rgba(255,59,189,.28),
+        0 0 0 2px rgba(255,59,189,.15),
+        0 0 26px rgba(255,59,189,.35);
       transform: translateZ(0);
       -webkit-tap-highlight-color: transparent;
     }
@@ -134,11 +147,31 @@
 
     /* HUB placeholder */
     #hubScene{
-      padding: calc(18px + var(--safe-top)) calc(18px + var(--safe-right)) calc(18px + var(--safe-bottom)) calc(18px + var(--safe-left));
+      padding: calc(24px + var(--safe-top)) calc(24px + var(--safe-right)) calc(24px + var(--safe-bottom)) calc(24px + var(--safe-left));
       display:flex;
-      flex-direction:column;
-      gap:14px;
+      align-items:center;
+      justify-content:center;
+      background:#000;
     }
+
+    .hubPlaceholder{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding: 10px;
+    }
+
+    .hubTitle{
+      font-size: clamp(28px, 4.2vw, 52px);
+      font-weight: 1000;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,.92);
+      text-shadow: 0 10px 28px rgba(0,0,0,.75);
+    }
+
+    /* (placeholder styles below were removed for now) */
 
     .hubHeader{
       display:flex;
@@ -222,7 +255,9 @@
       </div>
 
       <div class="startText">
-        <div class="line1">Click START to begin</div>
+        <div class="line1">タップしてスタート</div>
+        <div class="line2">（一部の端末では音声・動画の許可が必要です）</div>
+      </div>
         <div class="line2">(This enables video/audio on some devices)</div>
       </div>
 
@@ -237,46 +272,9 @@
     </section>
 
     <!-- HUB (placeholder) -->
-    <section id="hubScene" class="scene" aria-label="This Week">
-      <div class="hubHeader">
-        <div class="left">
-          <div class="tag">THIS WEEK<span>（今週）</span></div>
-          <div class="weekTitle">January Week 1</div>
-          <div class="dates">Jan 3 – Jan 9（1月3日–1月9日）</div>
-        </div>
-        <div style="opacity:.55; font-weight:800; font-size:12px; text-align:right; white-space:nowrap;">
-          placeholders<br/>only
-        </div>
-      </div>
-
-      <div class="grid">
-        <div class="tile">
-          <div>
-            <div class="label">Pre-Boo</div>
-            <div class="sub">(placeholder) study decks + streaming + story</div>
-          </div>
-          <button class="btn" type="button" style="align-self:flex-start; padding:10px 16px; font-size:14px;">OPEN</button>
-        </div>
-
-        <div class="tile">
-          <div>
-            <div class="label">Boo-riculum</div>
-            <div class="sub">(placeholder) study decks + streaming + story + game decks</div>
-          </div>
-          <button class="btn" type="button" style="align-self:flex-start; padding:10px 16px; font-size:14px;">OPEN</button>
-        </div>
-
-        <div class="tile">
-          <div>
-            <div class="label">Boo-continuum</div>
-            <div class="sub">(placeholder) study decks + streaming + story</div>
-          </div>
-          <button class="btn" type="button" style="align-self:flex-start; padding:10px 16px; font-size:14px;">OPEN</button>
-        </div>
-      </div>
-
-      <div class="bottomBar">
-        <button class="btn" type="button" style="padding:12px 18px; font-size:16px;">GO TO THE MAZE</button>
+    <section id="hubScene" class="scene" aria-label="Week 1">
+      <div class="hubPlaceholder">
+        <div class="hubTitle">January Week 1</div>
       </div>
     </section>
 
@@ -291,6 +289,7 @@
     const introVideo = document.getElementById('introVideo');
     const fade       = document.getElementById('fade');
     const rotateOverlay = document.getElementById('rotateOverlay');
+    const ghostWrap = document.querySelector('.ghostWrap');
 
     // --- Scene helpers ---
     function showScene(sceneEl){
@@ -321,36 +320,67 @@
       if (started) return;
       started = true;
 
-      // Move to video scene first so the element is visible (helps iOS)
+      // Ghost flies away
+      ghostWrap.classList.add('flyAway');
+
+      // Fade to black before video starts
+      fadeToBlack(true);
+
+      // Wait a beat so the fly-away + fade reads on all devices
+      await new Promise(r => setTimeout(r, 420));
+
+      // Move to video scene so the element is visible (helps iOS)
       showScene(videoScene);
 
-      // Make sure video starts from beginning
+      // Ensure video starts from beginning
       try { introVideo.currentTime = 0; } catch(e) {}
 
-      // Small fade-in from black into video
-      fadeToBlack(true);
-      // next tick
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => fadeToBlack(false));
-      });
+      // Keep black for a moment, then reveal video
+      setTimeout(() => fadeToBlack(false), 60);
 
       // Attempt playback (must be initiated by user gesture)
       try {
         await introVideo.play();
       } catch (err){
-        // If blocked, fall back: show a quick message by returning to start
+        // If blocked, fall back
         started = false;
+        ghostWrap.classList.remove('flyAway');
         showScene(startScene);
-        alert('Tap START again to enable video/audio.');
+        fadeToBlack(false);
+        alert('もう一度「スタート」をタップしてください。');
         return;
       }
     }
 
     startBtn.addEventListener('click', startIntro);
 
-    // When video ends, fade out then show hub placeholders
-    introVideo.addEventListener('ended', () => {
+    // Fade to Week screen slightly before the end (so it feels cinematic)
+    const FADE_MS = 520;
+    let fadingOut = false;
+
+    function goToWeek(){
+      if (fadingOut) return;
+      fadingOut = true;
       fadeToBlack(true);
+      setTimeout(() => {
+        try { introVideo.pause(); } catch(e) {}
+        showScene(hubScene);
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => fadeToBlack(false));
+        });
+      }, FADE_MS);
+    }
+
+    introVideo.addEventListener('timeupdate', () => {
+      const d = introVideo.duration;
+      if (!isFinite(d) || d <= 0) return;
+      const remaining = d - introVideo.currentTime;
+      // Trigger fade ~0.65s before end
+      if (remaining <= 0.65) goToWeek();
+    });
+
+    // Fallback if ended fires before timeupdate threshold
+    introVideo.addEventListener('ended', goToWeek);
       setTimeout(() => {
         showScene(hubScene);
         // Fade back in
