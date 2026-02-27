@@ -1,1 +1,380 @@
 
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Booha Adventure 2027</title>
+  <style>
+    :root{
+      --bg:#000;
+      --pink:#ff3bbd;
+      --pink2:#ff79d7;
+      --text:#ffffff;
+      --muted:rgba(255,255,255,.7);
+      --safe-top: env(safe-area-inset-top);
+      --safe-right: env(safe-area-inset-right);
+      --safe-bottom: env(safe-area-inset-bottom);
+      --safe-left: env(safe-area-inset-left);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; margin:0; background:var(--bg); color:var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif; }
+
+    /* App container */
+    #app{ position:fixed; inset:0; background:var(--bg); overflow:hidden; }
+
+    /* Simple landscape guidance overlay (placeholder; can be styled later) */
+    #rotateOverlay{
+      position:absolute; inset:0;
+      display:none;
+      align-items:center; justify-content:center;
+      padding: calc(24px + var(--safe-top)) calc(24px + var(--safe-right)) calc(24px + var(--safe-bottom)) calc(24px + var(--safe-left));
+      text-align:center;
+      background:rgba(0,0,0,.92);
+      z-index:50;
+    }
+    #rotateOverlay .card{
+      max-width:520px;
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:22px;
+      padding:22px 18px;
+    }
+    #rotateOverlay h2{ margin:0 0 8px; font-size:22px; letter-spacing:.5px; }
+    #rotateOverlay p{ margin:0; color:var(--muted); line-height:1.4; }
+
+    /* Scenes */
+    .scene{ position:absolute; inset:0; display:none; }
+    .scene.active{ display:block; }
+
+    /* START scene */
+    #startScene{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:18px;
+      padding: calc(24px + var(--safe-top)) calc(24px + var(--safe-right)) calc(24px + var(--safe-bottom)) calc(24px + var(--safe-left));
+    }
+
+    /* Floating ghost wrapper keeps consistent sizing across devices */
+    .ghostWrap{
+      width: min(42vmin, 360px);
+      height: min(42vmin, 360px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      pointer-events:none;
+      animation: floaty 3.8s ease-in-out infinite;
+      filter: drop-shadow(0 14px 28px rgba(0,0,0,.75));
+    }
+    @keyframes floaty{
+      0%{ transform: translateY(0px); }
+      50%{ transform: translateY(-14px); }
+      100%{ transform: translateY(0px); }
+    }
+
+    #boohaGhost{
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      image-rendering: auto;
+      user-select:none;
+      -webkit-user-drag:none;
+    }
+
+    .startText{ text-align:center; }
+    .startText .line1{ font-size:16px; letter-spacing:.2px; color:var(--muted); }
+    .startText .line2{ font-size:14px; letter-spacing:.2px; color:rgba(255,255,255,.55); margin-top:6px; }
+
+    .btn{
+      appearance:none;
+      border:0;
+      border-radius: 999px;
+      padding: 14px 22px;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: .5px;
+      cursor:pointer;
+      color:#000;
+      background: linear-gradient(180deg, var(--pink2), var(--pink));
+      box-shadow: 0 10px 22px rgba(255,59,189,.25);
+      transform: translateZ(0);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:active{ transform: scale(.98); }
+
+    /* VIDEO scene */
+    #videoScene{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#000;
+    }
+
+    /* Fit video in landscape, keep crisp */
+    #introVideo{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background:#000;
+    }
+
+    /* Fade layer */
+    #fade{
+      position:absolute;
+      inset:0;
+      background:#000;
+      opacity:0;
+      pointer-events:none;
+      transition: opacity 520ms ease;
+      z-index:40;
+    }
+    #fade.on{ opacity:1; }
+
+    /* HUB placeholder */
+    #hubScene{
+      padding: calc(18px + var(--safe-top)) calc(18px + var(--safe-right)) calc(18px + var(--safe-bottom)) calc(18px + var(--safe-left));
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .hubHeader{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:18px;
+      padding:14px 14px;
+      background: rgba(255,255,255,.04);
+    }
+    .hubHeader .left{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:0;
+    }
+    .hubHeader .tag{
+      font-weight:900;
+      letter-spacing:1px;
+      font-size:14px;
+    }
+    .hubHeader .tag span{ color:rgba(255,255,255,.75); font-weight:800; margin-left:6px; }
+    .hubHeader .weekTitle{ font-size:18px; font-weight:900; }
+    .hubHeader .dates{ font-size:14px; color:rgba(255,255,255,.70); }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap:12px;
+      flex: 1;
+    }
+
+    .tile{
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+      padding:14px;
+      min-height: 140px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      justify-content:space-between;
+    }
+    .tile .label{ font-size:16px; font-weight:900; }
+    .tile .sub{ font-size:13px; color:rgba(255,255,255,.65); line-height:1.3; }
+
+    .bottomBar{
+      display:flex;
+      justify-content:center;
+      padding-top:6px;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 780px){
+      .grid{ grid-template-columns: 1fr; }
+      .tile{ min-height: 110px; }
+    }
+
+    /* Prefer-reduced-motion */
+    @media (prefers-reduced-motion: reduce){
+      .ghostWrap{ animation:none; }
+      #fade{ transition:none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+
+    <div id="rotateOverlay" aria-hidden="true">
+      <div class="card">
+        <h2>Rotate to Landscape</h2>
+        <p>Please turn your device sideways for Booha Adventure.</p>
+      </div>
+    </div>
+
+    <!-- START -->
+    <section id="startScene" class="scene active" aria-label="Start">
+      <div class="ghostWrap" aria-hidden="true">
+        <img id="boohaGhost" src="assets/img/booha_ghost.png" alt="Booha" />
+      </div>
+
+      <div class="startText">
+        <div class="line1">Click START to begin</div>
+        <div class="line2">(This enables video/audio on some devices)</div>
+      </div>
+
+      <button id="startBtn" class="btn" type="button">スタート</button>
+    </section>
+
+    <!-- VIDEO -->
+    <section id="videoScene" class="scene" aria-label="Intro video">
+      <video id="introVideo" preload="auto" playsinline webkit-playsinline>
+        <source src="assets/video/intro.mp4" type="video/mp4" />
+      </video>
+    </section>
+
+    <!-- HUB (placeholder) -->
+    <section id="hubScene" class="scene" aria-label="This Week">
+      <div class="hubHeader">
+        <div class="left">
+          <div class="tag">THIS WEEK<span>（今週）</span></div>
+          <div class="weekTitle">January Week 1</div>
+          <div class="dates">Jan 3 – Jan 9（1月3日–1月9日）</div>
+        </div>
+        <div style="opacity:.55; font-weight:800; font-size:12px; text-align:right; white-space:nowrap;">
+          placeholders<br/>only
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="tile">
+          <div>
+            <div class="label">Pre-Boo</div>
+            <div class="sub">(placeholder) study decks + streaming + story</div>
+          </div>
+          <button class="btn" type="button" style="align-self:flex-start; padding:10px 16px; font-size:14px;">OPEN</button>
+        </div>
+
+        <div class="tile">
+          <div>
+            <div class="label">Boo-riculum</div>
+            <div class="sub">(placeholder) study decks + streaming + story + game decks</div>
+          </div>
+          <button class="btn" type="button" style="align-self:flex-start; padding:10px 16px; font-size:14px;">OPEN</button>
+        </div>
+
+        <div class="tile">
+          <div>
+            <div class="label">Boo-continuum</div>
+            <div class="sub">(placeholder) study decks + streaming + story</div>
+          </div>
+          <button class="btn" type="button" style="align-self:flex-start; padding:10px 16px; font-size:14px;">OPEN</button>
+        </div>
+      </div>
+
+      <div class="bottomBar">
+        <button class="btn" type="button" style="padding:12px 18px; font-size:16px;">GO TO THE MAZE</button>
+      </div>
+    </section>
+
+    <div id="fade" aria-hidden="true"></div>
+  </div>
+
+  <script>
+    const startScene = document.getElementById('startScene');
+    const videoScene = document.getElementById('videoScene');
+    const hubScene   = document.getElementById('hubScene');
+    const startBtn   = document.getElementById('startBtn');
+    const introVideo = document.getElementById('introVideo');
+    const fade       = document.getElementById('fade');
+    const rotateOverlay = document.getElementById('rotateOverlay');
+
+    // --- Scene helpers ---
+    function showScene(sceneEl){
+      for (const el of [startScene, videoScene, hubScene]) el.classList.remove('active');
+      sceneEl.classList.add('active');
+    }
+
+    function fadeToBlack(on=true){
+      fade.classList.toggle('on', !!on);
+    }
+
+    // --- Landscape guidance (non-blocking for desktop) ---
+    function updateOrientationOverlay(){
+      const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+      // Show on small devices only (so desktop resizing doesn't annoy you)
+      const small = Math.min(window.innerWidth, window.innerHeight) < 700;
+      const show = small && isPortrait;
+      rotateOverlay.style.display = show ? 'flex' : 'none';
+      rotateOverlay.setAttribute('aria-hidden', show ? 'false' : 'true');
+    }
+    window.addEventListener('resize', updateOrientationOverlay, { passive:true });
+    updateOrientationOverlay();
+
+    // --- Start flow ---
+    let started = false;
+
+    async function startIntro(){
+      if (started) return;
+      started = true;
+
+      // Move to video scene first so the element is visible (helps iOS)
+      showScene(videoScene);
+
+      // Make sure video starts from beginning
+      try { introVideo.currentTime = 0; } catch(e) {}
+
+      // Small fade-in from black into video
+      fadeToBlack(true);
+      // next tick
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => fadeToBlack(false));
+      });
+
+      // Attempt playback (must be initiated by user gesture)
+      try {
+        await introVideo.play();
+      } catch (err){
+        // If blocked, fall back: show a quick message by returning to start
+        started = false;
+        showScene(startScene);
+        alert('Tap START again to enable video/audio.');
+        return;
+      }
+    }
+
+    startBtn.addEventListener('click', startIntro);
+
+    // When video ends, fade out then show hub placeholders
+    introVideo.addEventListener('ended', () => {
+      fadeToBlack(true);
+      setTimeout(() => {
+        showScene(hubScene);
+        // Fade back in
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => fadeToBlack(false));
+        });
+      }, 520);
+    });
+
+    // Safety: if video errors, just go to hub
+    introVideo.addEventListener('error', () => {
+      fadeToBlack(true);
+      setTimeout(() => {
+        showScene(hubScene);
+        requestAnimationFrame(() => requestAnimationFrame(() => fadeToBlack(false)));
+      }, 520);
+    });
+
+    // iOS/Safari best practice: pause video when leaving the page
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        try { introVideo.pause(); } catch(e) {}
+      }
+    });
+  </script>
+</body>
+</html>
