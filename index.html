@@ -45,11 +45,10 @@
 
     /* Scenes */
     .scene{ position:absolute; inset:0; display:none; }
-    .scene.active{ display:block; }
+    .scene.active{ display:flex; }
 
     /* START scene */
     #startScene{
-      display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:center;
@@ -119,7 +118,6 @@
 
     /* VIDEO scene */
     #videoScene{
-      display:flex;
       align-items:center;
       justify-content:center;
       background:#000;
@@ -148,7 +146,6 @@
     /* HUB placeholder */
     #hubScene{
       padding: calc(24px + var(--safe-top)) calc(24px + var(--safe-right)) calc(24px + var(--safe-bottom)) calc(24px + var(--safe-left));
-      display:flex;
       align-items:center;
       justify-content:center;
       background:#000;
