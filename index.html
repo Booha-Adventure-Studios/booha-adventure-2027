@@ -56,34 +56,72 @@
       padding: calc(24px + var(--safe-top)) calc(24px + var(--safe-right)) calc(24px + var(--safe-bottom)) calc(24px + var(--safe-left));
     }
 
-    /* Floating ghost wrapper keeps consistent sizing across devices */
-    .ghostWrap{
+    /* Ghost + sparkles container (consistent across devices) */
+    .ghostOuter{
+      position: relative;
       width: min(42vmin, 360px);
       height: min(42vmin, 360px);
+      /* intentionally NO overflow:hidden */
+      transform: translateZ(0);
+    }
+
+    /* ghostWrap fills ghostOuter */
+    .ghostWrap{
+      position:absolute;
+      inset:0;
       display:flex;
       align-items:center;
       justify-content:center;
       pointer-events:none;
       animation: floaty 3.8s ease-in-out infinite;
       filter: drop-shadow(0 14px 28px rgba(0,0,0,.75));
-      transform: translateZ(0);
       will-change: transform, opacity;
+      transform: translateZ(0);
     }
 
     .ghostWrap.flyAway{
-      animation: none;
+      animation:none;
       transition: transform 900ms cubic-bezier(.2,.9,.2,1), opacity 900ms ease;
       transform: translate3d(0,-75vh,0) scale(.85) rotate(-6deg);
-      opacity: 0;
+      opacity:0;
     }
 
-    @keyframes floaty{
-      0%{ transform: translateY(0px); }
-      50%{ transform: translateY(-14px); }
-      100%{ transform: translateY(0px); }
+    .sparkleField{
+      position:absolute;
+      inset:-60px;
+      pointer-events:none;
+    }
+
+    .sp{
+      position:absolute;
+      border-radius:50%;
+      background:#fff;
+      opacity:0;
+      animation: sparkleLife var(--dur) ease-in-out var(--delay) infinite;
+      width: var(--size);
+      height: var(--size);
+      top: var(--y);
+      left: var(--x);
+      box-shadow:
+        0 0 4px 1px rgba(255,255,255,.9),
+        0 0 10px 3px rgba(255,100,220,.6);
+    }
+
+    @keyframes sparkleLife{
+      0%{ opacity:0; transform: scale(.4) translateY(0px); }
+      20%{ opacity:1; transform: scale(1) translateY(-6px); }
+      60%{ opacity:.85; transform: scale(.9) translateY(-14px); }
+      100%{ opacity:0; transform: scale(.3) translateY(-22px); }
     }
 
     #boohaGhost{
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      user-select:none;
+      -webkit-user-drag:none;
+    }
+
       width: 100%;
       height: 100%;
       object-fit: contain;
@@ -247,14 +285,11 @@
 
     <!-- START -->
     <section id="startScene" class="scene active" aria-label="Start">
-      <div class="ghostWrap" aria-hidden="true">
-        <img id="boohaGhost" src="assets/img/booha_ghost.png" alt="Booha" />
-      </div>
-
-      <div class="startText">
-        <div class="line1">タップしてスタート</div>
-        <div class="line2">（一部の端末では音声・動画の許可が必要です）</div>
-        <div class="line2">(This enables video/audio on some devices)</div>
+      <div class="ghostOuter">
+        <div class="ghostWrap" aria-hidden="true">
+          <img id="boohaGhost" src="assets/img/booha_ghost.png" alt="Booha" />
+        </div>
+        <div class="sparkleField" aria-hidden="true"></div>
       </div>
 
       <button id="startBtn" class="btn" type="button">スタート</button>
@@ -286,6 +321,7 @@
     const fade       = document.getElementById('fade');
     const rotateOverlay = document.getElementById('rotateOverlay');
     const ghostWrap = document.querySelector('.ghostWrap');
+    const sparkleField = document.querySelector('.sparkleField');
 
     // --- Scene helpers ---
     function showScene(sceneEl){
@@ -349,6 +385,30 @@
     }
 
     startBtn.addEventListener('click', startIntro);
+
+    // Sparkles (pure CSS animation; JS only randomizes positions)
+    (function initSparkles(){
+      if (!sparkleField) return;
+      const COUNT = 18;
+      sparkleField.innerHTML = '';
+      for (let i = 0; i < COUNT; i++){
+        const sp = document.createElement('div');
+        sp.className = 'sp';
+        const size = 3 + Math.random() * 5;       // 3–8px
+        const x = Math.random() * 100;            // % across field
+        const y = Math.random() * 100;            // % down field
+        const dur = 1.6 + Math.random() * 2.2;    // 1.6–3.8s
+        const delay = -(Math.random() * dur);     // negative = mid-cycle on load
+        sp.style.cssText = `
+          --size: ${size}px;
+          --x: ${x}%;
+          --y: ${y}%;
+          --dur: ${dur}s;
+          --delay: ${delay}s;
+        `;
+        sparkleField.appendChild(sp);
+      }
+    })();
 
     // Fade to Week screen slightly before the end (so it feels cinematic)
     const FADE_MS = 520;
