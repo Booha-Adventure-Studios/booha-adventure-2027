@@ -69,6 +69,8 @@
     .ghostWrap{
       position:absolute;
       inset:0;
+      width:100%;
+      height:100%;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -118,14 +120,6 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
-      user-select:none;
-      -webkit-user-drag:none;
-    }
-
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      image-rendering: auto;
       user-select:none;
       -webkit-user-drag:none;
     }
@@ -445,11 +439,6 @@
         showScene(hubScene);
         requestAnimationFrame(() => requestAnimationFrame(() => fadeToBlack(false)));
       }, FADE_MS);
-    });
-      setTimeout(() => {
-        showScene(hubScene);
-        requestAnimationFrame(() => requestAnimationFrame(() => fadeToBlack(false)));
-      }, 520);
     });
 
     // iOS/Safari best practice: pause video when leaving the page
