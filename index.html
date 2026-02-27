@@ -69,11 +69,13 @@
     #rotateOverlay p{ margin:0; color:var(--muted); line-height:1.4; }
 
     /* ── Scenes ── */
-    /* Transparent so #app background image always shows through */
     .scene{ position:absolute; inset:0; display:none; z-index:1; background:transparent; }
     .scene.active{ display:flex; }
-    /* Only video scene needs solid black */
+    /* Start + video = solid black */
+    #startScene{ background:#000; }
     #videoScene{ background:#000; }
+    /* Hub = transparent so background-1.png shows through */
+    #hubScene{ background:transparent; }
 
     /* ── START scene ── */
     #startScene{
@@ -460,12 +462,6 @@
       </div>
     </div>
 
-    <div class="startText">
-      <div class="line1">タップしてスタート</div>
-      <div class="line2">（一部の端末では音声・動画の許可が必要です）</div>
-      <div class="line2">(This enables video/audio on some devices)</div>
-    </div>
-
     <button id="startBtn" class="btn" type="button">スタート</button>
   </section>
 
@@ -626,10 +622,16 @@
   function labelFromWeekId(id){
     if (!id) return '—';
     if (id === 'dec_w4_pre') return 'December Week 4';
-    const p = id.split('_');
-    const mon = p[2];
-    const wn  = (p[3]||'w1').replace('w','');
-    return `${MONTH_NAME[mon]||mon} Week ${wn}`;
+    // Structured IDs from year.json e.g. "2027_01_jan_w1"
+    if (id.includes('_') && id.split('_').length >= 4){
+      const p = id.split('_');
+      const mon = p[2];
+      const wn  = (p[3]||'w1').replace('w','');
+      return `${MONTH_NAME[mon]||mon} Week ${wn}`;
+    }
+    // Generic fallback e.g. "week_1" → "Week 1"
+    if (id.startsWith('week_')) return `Week ${id.replace('week_','')}`;
+    return id;
   }
 
   function buildCard({tagEn, tagJp, weekId, title, rangeText, hint}){
@@ -688,13 +690,13 @@
     // ── LAST WEEK ──
     let lastWeekId=null, lastStart=null, lastEnd=null;
     if (thisIdx === -1){
-      // Pre-cycle: no last week
+      // Pre-cycle: no last week yet
       lastWeekId = null;
     } else if (thisIdx === 0){
-      // January Week 1 → last is December Week 4
-      lastWeekId = (year && year.preStartWeek) || 'dec_w4_pre';
-      lastStart  = addDays(cycleStart, -14);   // Dec 20
-      lastEnd    = addDays(lastStart, 6);       // Dec 26
+      // January Week 1 is always first — last week is always December Week 4
+      lastWeekId = 'dec_w4_pre';
+      lastStart  = {y:2026, m:12, d:20};   // Dec 20 2026
+      lastEnd    = {y:2026, m:12, d:26};   // Dec 26 2026
     } else {
       const lIdx = (thisIdx - 1 + cycleLength) % cycleLength;
       lastWeekId = weeks[lIdx] || `week_${lIdx+1}`;
