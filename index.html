@@ -588,7 +588,15 @@
     sep:'September', oct:'October', nov:'November', dec:'December'
   };
 
+  // ── DEV DATE OVERRIDE ──
+  // Set to any date string to simulate that day. Set to null before launch.
+  const DEV_DATE = '2027-01-03';
+
   function tokyoTodayYMD(){
+    if (DEV_DATE){
+      const [y,m,d] = DEV_DATE.split('-').map(Number);
+      return {y, m, d};
+    }
     const parts = new Intl.DateTimeFormat('en-US', {
       timeZone:'Asia/Tokyo',
       year:'numeric', month:'2-digit', day:'2-digit'
