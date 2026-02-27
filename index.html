@@ -5,6 +5,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Booha Adventure 2027</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bowlby+One&display=swap" rel="stylesheet" />
   <style>
     :root{
       --bg:#000;
@@ -39,8 +42,8 @@
       content:'';
       position:absolute; inset:0;
       background: radial-gradient(ellipse at center,
-        rgba(0,0,0,.18) 0%,
-        rgba(0,0,0,.55) 100%);
+        rgba(0,0,0,.10) 0%,
+        rgba(0,0,0,.48) 100%);
       pointer-events:none;
       z-index:0;
     }
@@ -66,8 +69,11 @@
     #rotateOverlay p{ margin:0; color:var(--muted); line-height:1.4; }
 
     /* ── Scenes ── */
-    .scene{ position:absolute; inset:0; display:none; z-index:1; }
+    /* Transparent so #app background image always shows through */
+    .scene{ position:absolute; inset:0; display:none; z-index:1; background:transparent; }
     .scene.active{ display:flex; }
+    /* Only video scene needs solid black */
+    #videoScene{ background:#000; }
 
     /* ── START scene ── */
     #startScene{
@@ -202,13 +208,16 @@
     /* Hub title */
     .hubHeading{
       text-align:center;
-      font-size: clamp(20px, 3vw, 36px);
-      font-weight:1000;
-      letter-spacing:2px;
+      font-family: 'Bowlby One', system-ui, sans-serif;
+      font-size: clamp(26px, 4vw, 52px);
+      font-weight:400; /* Bowlby One is already heavy */
+      letter-spacing:3px;
       color:#fff;
-      text-shadow: 0 0 28px rgba(255,180,255,.55), 0 2px 8px rgba(0,0,0,.8);
+      text-shadow:
+        0 0 32px rgba(255,140,255,.65),
+        0 0 80px rgba(255,80,200,.3),
+        0 2px 8px rgba(0,0,0,.9);
     }
-    .hubHeading span{ color: var(--pink2); }
 
     /* 3-card row */
     .hubRow{
@@ -470,7 +479,7 @@
   <!-- ── HUB ── -->
   <section id="hubScene" class="scene" aria-label="Week Hub">
     <div class="hub">
-      <div class="hubHeading">Booha Adventure <span>2027</span></div>
+      <div class="hubHeading">BOOHA ADVENTURE</div>
 
       <div class="hubRow" id="weekCards">
         <!-- injected by JS -->
@@ -567,7 +576,16 @@
     }
   })();
 
-  /* ── Week / date helpers ── */
+  /* ── Hardcoded week data (launch = January Week 1) ── */
+  /*
+    LAST WEEK  = December Week 4  (Dec 20 – Dec 26)
+    THIS WEEK  = January Week 1   (Jan 3  – Jan 9)
+    NEXT WEEK  = January Week 2   (Jan 10 – Jan 16)
+
+    The date math still runs so the hub stays accurate as real weeks pass,
+    but the special pre-cycle Dec Week 4 is always resolvable.
+  */
+
   const MONTH_NAME = {
     jan:'January', feb:'February', mar:'March', apr:'April',
     may:'May',     jun:'June',     jul:'July',  aug:'August',
@@ -585,21 +603,21 @@
     return { y:+map.year, m:+map.month, d:+map.day };
   }
 
-  function ymdToMs(y, m, d){ return Date.UTC(y, m-1, d); }
+  function ymdToMs(y,m,d){ return Date.UTC(y,m-1,d); }
 
   function parseYMD(str){
     const [y,m,d] = str.split('-').map(Number);
-    return { y, m, d };
+    return {y,m,d};
   }
 
-  function addDays(ymd, n){
-    const ms = ymdToMs(ymd.y, ymd.m, ymd.d) + n * 86400000;
+  function addDays(ymd,n){
+    const ms = ymdToMs(ymd.y,ymd.m,ymd.d) + n*86400000;
     const dt = new Date(ms);
-    return { y:dt.getUTCFullYear(), m:dt.getUTCMonth()+1, d:dt.getUTCDate() };
+    return {y:dt.getUTCFullYear(), m:dt.getUTCMonth()+1, d:dt.getUTCDate()};
   }
 
-  function fmtRange(s, e){
-    const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function fmtRange(s,e){
+    const MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     const en = ymd => `${MO[ymd.m-1]} ${ymd.d}`;
     const jp = ymd => `${ymd.m}月${ymd.d}日`;
     return `${en(s)} – ${en(e)}（${jp(s)}–${jp(e)}）`;
@@ -607,16 +625,14 @@
 
   function labelFromWeekId(id){
     if (!id) return '—';
-    // Special case: December Week 4 placeholder before cycle start
-    if (id === 'dec_w4_pre' || id.startsWith('2026_')) return 'December Week 4';
+    if (id === 'dec_w4_pre') return 'December Week 4';
     const p = id.split('_');
     const mon = p[2];
-    const wn  = (p[3] || 'w1').replace('w','');
-    return `${MONTH_NAME[mon] || mon} Week ${wn}`;
+    const wn  = (p[3]||'w1').replace('w','');
+    return `${MONTH_NAME[mon]||mon} Week ${wn}`;
   }
 
-  /* ── Build a week card ── */
-  function buildCard({ tagEn, tagJp, weekId, title, rangeText, hint }){
+  function buildCard({tagEn, tagJp, weekId, title, rangeText, hint}){
     const div = document.createElement('div');
     div.className = 'weekCard';
     div.dataset.weekId = weekId || '';
@@ -626,83 +642,85 @@
         <div class="weekTitle">${title}</div>
         <div class="weekDates">${rangeText}</div>
       </div>
-      <div class="weekHint">${hint || 'TAP TO OPEN'}</div>
+      <div class="weekHint">${hint||'TAP TO OPEN'}</div>
     `;
     return div;
   }
 
-  /* ── Load year.json & render hub ── */
   async function renderHub(){
     const weekCards = document.getElementById('weekCards');
     weekCards.innerHTML = '';
 
-    const year = await fetch(`data/year.json?v=${Date.now()}`).then(r => {
-      if (!r.ok) throw new Error('Failed to load year.json');
-      return r.json();
-    });
+    // ── Try to load year.json; fall back to hardcoded Jan Week 1 launch data ──
+    let year = null;
+    try {
+      const res = await fetch(`data/year.json?v=${Date.now()}`);
+      if (res.ok) year = await res.json();
+    } catch(e){ /* no json available, use fallback */ }
 
-    const cycleStart   = parseYMD(year.cycleStart);          // e.g. 2027-01-03
+    // Cycle start = Jan 3 2027 (first Monday of the school year)
+    const CYCLE_START_STR = (year && year.cycleStart) || '2027-01-03';
+    const cycleStart   = parseYMD(CYCLE_START_STR);
     const cycleStartMs = ymdToMs(cycleStart.y, cycleStart.m, cycleStart.d);
+    const cycleLength  = (year && year.cycleLength) || 48;
+    const weeks        = (year && year.weeks)       || [];
 
     const today   = tokyoTodayYMD();
     const todayMs = ymdToMs(today.y, today.m, today.d);
     const diffDays = Math.floor((todayMs - cycleStartMs) / 86400000);
 
-    /* ── Determine THIS week ── */
+    // ── THIS WEEK ──
     let thisIdx, thisWeekId, thisStart;
 
     if (diffDays < 0){
-      // Before Jan 3 2027 → we're in December Week 4
+      // Before cycle start → we're in December Week 4 (pre-launch)
       thisIdx    = -1;
-      thisWeekId = year.preStartWeek || 'dec_w4_pre';
-      thisStart  = addDays(cycleStart, -14);  // Dec 20 2026
+      thisWeekId = (year && year.preStartWeek) || 'dec_w4_pre';
+      // Dec Week 4 starts 14 days before cycle start (Dec 20)
+      thisStart  = addDays(cycleStart, -14);
     } else {
-      thisIdx    = Math.floor(diffDays / 7) % year.cycleLength;
-      thisWeekId = year.weeks[thisIdx];
+      thisIdx    = Math.floor(diffDays / 7) % cycleLength;
+      thisWeekId = weeks[thisIdx] || `week_${thisIdx+1}`;
       thisStart  = addDays(cycleStart, thisIdx * 7);
     }
     const thisEnd = addDays(thisStart, 6);
 
-    /* ── Determine LAST week ── */
-    let lastWeekId = null, lastStart = null, lastEnd = null;
-
+    // ── LAST WEEK ──
+    let lastWeekId=null, lastStart=null, lastEnd=null;
     if (thisIdx === -1){
-      // We're in Dec W4 pre-cycle; "last" doesn't exist yet
+      // Pre-cycle: no last week
       lastWeekId = null;
     } else if (thisIdx === 0){
-      // First real week → last is Dec Week 4
-      lastWeekId = year.preStartWeek || 'dec_w4_pre';
-      lastStart  = addDays(cycleStart, -14);
-      lastEnd    = addDays(lastStart, 6);
+      // January Week 1 → last is December Week 4
+      lastWeekId = (year && year.preStartWeek) || 'dec_w4_pre';
+      lastStart  = addDays(cycleStart, -14);   // Dec 20
+      lastEnd    = addDays(lastStart, 6);       // Dec 26
     } else {
-      const lIdx = (thisIdx - 1 + year.cycleLength) % year.cycleLength;
-      lastWeekId = year.weeks[lIdx];
+      const lIdx = (thisIdx - 1 + cycleLength) % cycleLength;
+      lastWeekId = weeks[lIdx] || `week_${lIdx+1}`;
       lastStart  = addDays(cycleStart, lIdx * 7);
       lastEnd    = addDays(lastStart, 6);
     }
 
-    /* ── Determine NEXT week ── */
-    let nextWeekId = null, nextStart = null, nextEnd = null;
-
+    // ── NEXT WEEK ──
+    let nextWeekId=null, nextStart=null, nextEnd=null;
     if (thisIdx === -1){
-      // Pre-cycle → next is Week 1 (Jan 3)
-      nextWeekId = year.weeks[0];
+      nextWeekId = weeks[0] || 'week_1';
       nextStart  = cycleStart;
       nextEnd    = addDays(nextStart, 6);
     } else {
-      const nIdx = (thisIdx + 1) % year.cycleLength;
-      nextWeekId = year.weeks[nIdx];
+      const nIdx = (thisIdx + 1) % cycleLength;
+      nextWeekId = weeks[nIdx] || `week_${nIdx+1}`;
       nextStart  = addDays(cycleStart, nIdx * 7);
       nextEnd    = addDays(nextStart, 6);
     }
 
-    /* ── Render 3 cards ── */
-    // LAST
+    // ── Render 3 cards ──
     if (lastWeekId){
       weekCards.appendChild(buildCard({
         tagEn:'LAST WEEK', tagJp:'先週',
-        weekId: lastWeekId,
-        title:  labelFromWeekId(lastWeekId),
+        weekId:    lastWeekId,
+        title:     labelFromWeekId(lastWeekId),
         rangeText: fmtRange(lastStart, lastEnd)
       }));
     } else {
@@ -712,7 +730,6 @@
       }));
     }
 
-    // THIS
     weekCards.appendChild(buildCard({
       tagEn:'THIS WEEK', tagJp:'今週',
       weekId:    thisWeekId,
@@ -720,16 +737,15 @@
       rangeText: fmtRange(thisStart, thisEnd)
     }));
 
-    // NEXT
     weekCards.appendChild(buildCard({
       tagEn:'NEXT WEEK', tagJp:'来週',
-      weekId:    nextWeekId || '',
+      weekId:    nextWeekId||'',
       title:     nextWeekId ? labelFromWeekId(nextWeekId) : '—',
       rangeText: nextWeekId ? fmtRange(nextStart, nextEnd) : '—',
       hint:      nextWeekId ? 'TAP TO OPEN' : 'LOCKED'
     }));
 
-    /* ── Picker logic ── */
+    // ── Picker logic ──
     const picker      = document.getElementById('picker');
     const pickerTitle = document.getElementById('pickerTitle');
     const pickerDates = document.getElementById('pickerDates');
@@ -750,14 +766,14 @@
     }
 
     pickerClose.onclick = closePicker;
-    picker.addEventListener('click', e => { if (e.target === picker) closePicker(); });
+    picker.addEventListener('click', e => { if (e.target===picker) closePicker(); });
 
     weekCards.querySelectorAll('.weekCard').forEach(card => {
       card.addEventListener('click', () => {
         const wid   = card.dataset.weekId;
         if (!wid) return;
-        const dates = card.querySelector('.weekDates')?.textContent || '';
-        const tag   = card.querySelector('.weekTag')?.textContent || '';
+        const dates = card.querySelector('.weekDates')?.textContent||'';
+        const tag   = card.querySelector('.weekTag')?.textContent||'';
         if      (tag.includes('LAST WEEK')) openPicker('LAST WEEK','先週', dates, wid);
         else if (tag.includes('THIS WEEK')) openPicker('THIS WEEK','今週', dates, wid);
         else                                openPicker('NEXT WEEK','来週', dates, wid);
