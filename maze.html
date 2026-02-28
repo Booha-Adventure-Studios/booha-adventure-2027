@@ -1,1 +1,626 @@
 
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Booha Adventure 2027 — Maze</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bowlby+One&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --bg:#000;
+      --text:#fff;
+      --muted:rgba(255,255,255,.65);
+      --pink:#ff3bbd;
+      --pink2:#ff79d7;
+      --safe-top: env(safe-area-inset-top);
+      --safe-right: env(safe-area-inset-right);
+      --safe-bottom: env(safe-area-inset-bottom);
+      --safe-left: env(safe-area-inset-left);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; margin:0; background:var(--bg); color:var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+        "Noto Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    }
+
+    /* App root */
+    #app{ position:fixed; inset:0; background:#000; overflow:hidden; }
+
+    /* ── Scenes ── */
+    .scene{ position:absolute; inset:0; display:none; }
+    .scene.active{ display:block; }
+
+    /* ── Transition video scene ── */
+    #videoScene{ background:#000; }
+    #toMazeVideo{ width:100%; height:100%; object-fit:cover; background:#000; }
+
+    /* Tap-to-play fallback overlay (only if autoplay fails) */
+    #tapOverlay{
+      position:absolute; inset:0;
+      display:none;
+      align-items:center; justify-content:center;
+      padding: calc(24px + var(--safe-top)) calc(24px + var(--safe-right))
+               calc(24px + var(--safe-bottom)) calc(24px + var(--safe-left));
+      background: radial-gradient(ellipse at center, rgba(0,0,0,.55) 0%, rgba(0,0,0,.88) 70%, rgba(0,0,0,.95) 100%);
+      text-align:center;
+    }
+    #tapOverlay.show{ display:flex; }
+    .tapCard{
+      width:min(560px,100%);
+      border-radius:26px;
+      padding:18px 18px 16px;
+      background: rgba(255,255,255,.08);
+      backdrop-filter: blur(18px) saturate(150%);
+      -webkit-backdrop-filter: blur(18px) saturate(150%);
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.18),
+        0 20px 60px rgba(0,0,0,.7),
+        0 0 0 2px rgba(255,59,189,.30),
+        0 0 30px rgba(255,59,189,.25);
+    }
+    .tapTitle{ font-family:'Bowlby One', system-ui, sans-serif; letter-spacing:2px; font-size:22px; margin:0 0 8px; }
+    .tapSub{ margin:0 0 14px; color:var(--muted); line-height:1.35; }
+
+    .btn{
+      appearance:none; border:0;
+      border-radius:999px;
+      padding:14px 20px;
+      font-size:16px; font-weight:1000; letter-spacing:.6px;
+      cursor:pointer; color:#000;
+      background: linear-gradient(180deg, var(--pink2), var(--pink));
+      box-shadow:
+        0 10px 22px rgba(255,59,189,.28),
+        0 0 0 2px rgba(255,59,189,.15),
+        0 0 26px rgba(255,59,189,.35);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:active{ transform: scale(.98); }
+
+    /* ── Maze scene ── */
+    #mazeScene{ background:#000; }
+
+    /* Maze stage that holds the image */
+    #stage{
+      position:absolute; inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: calc(10px + var(--safe-top)) calc(10px + var(--safe-right))
+               calc(10px + var(--safe-bottom)) calc(10px + var(--safe-left));
+    }
+
+    /* We render maze as an <img> so we can map clicks to natural pixels */
+    #mazeImg{
+      width:100%; height:100%;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      user-select:none;
+      -webkit-user-drag:none;
+      pointer-events:none; /* clicks are handled on overlay */
+      filter: drop-shadow(0 18px 40px rgba(0,0,0,.6));
+    }
+
+    /* Click overlay that tracks exactly over the displayed image */
+    #hitLayer{
+      position:absolute;
+      /* sized and positioned in JS to match image rect */
+      left:0; top:0; width:0; height:0;
+      cursor: default;
+    }
+
+    /* Grid + crosshair (Bryan mode only) */
+    #grid{
+      position:absolute; inset:0;
+      display:none;
+      pointer-events:none;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,.12) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,.12) 1px, transparent 1px);
+      background-size: 80px 80px;
+      mix-blend-mode: screen;
+      opacity:.55;
+    }
+    #grid.show{ display:block; }
+
+    #crosshair{
+      position:absolute;
+      left:0; top:0;
+      width:0; height:0;
+      pointer-events:none;
+      display:none;
+    }
+    #crosshair.show{ display:block; }
+    .chLineH, .chLineV{
+      position:absolute;
+      background: rgba(255,255,255,.7);
+      box-shadow: 0 0 16px rgba(255,255,255,.25);
+    }
+    .chLineH{ height:1px; left:0; right:0; top:0; }
+    .chLineV{ width:1px; top:0; bottom:0; left:0; }
+
+    /* HUD */
+    #hud{
+      position:absolute;
+      left: calc(12px + var(--safe-left));
+      top:  calc(12px + var(--safe-top));
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      z-index:10;
+    }
+
+    .pill{
+      border-radius:999px;
+      padding:10px 14px;
+      font-weight:900;
+      letter-spacing:.4px;
+      background: rgba(0,0,0,.28);
+      border:1px solid rgba(255,255,255,.16);
+      backdrop-filter: blur(14px) saturate(140%);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.08),
+        0 14px 30px rgba(0,0,0,.35);
+      color: rgba(255,255,255,.92);
+      user-select:none;
+    }
+
+    #coordPill{ display:none; }
+    #coordPill.show{ display:block; }
+
+    .coordSmall{ font-size:12px; color:rgba(255,255,255,.7); font-weight:800; letter-spacing:1px; }
+    .coordBig{ font-size:14px; margin-top:4px; }
+
+    /* Bottom-left BRYAN button */
+    #bryanBtn{
+      position:absolute;
+      left: calc(12px + var(--safe-left));
+      bottom: calc(12px + var(--safe-bottom));
+      z-index:20;
+      border-radius:999px;
+      padding:10px 12px;
+      font-size:12px;
+      font-weight:1000;
+      letter-spacing:1.6px;
+      text-transform:uppercase;
+      color: rgba(255,255,255,.75);
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.14);
+      backdrop-filter: blur(10px) saturate(140%);
+      -webkit-backdrop-filter: blur(10px) saturate(140%);
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #bryanBtn.on{
+      color:#fff;
+      border-color: rgba(255,255,255,.22);
+      box-shadow:
+        0 0 0 2px rgba(255,59,189,.18),
+        0 0 26px rgba(255,59,189,.25);
+    }
+    #bryanBtn:active{ transform: scale(.99); }
+
+    /* Bottom-right back button */
+    #backBtn{
+      position:absolute;
+      right: calc(12px + var(--safe-right));
+      bottom: calc(12px + var(--safe-bottom));
+      z-index:20;
+      border-radius:999px;
+      padding:10px 14px;
+      font-size:12px;
+      font-weight:1000;
+      letter-spacing:1.2px;
+      color: rgba(255,255,255,.92);
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.14);
+      backdrop-filter: blur(10px) saturate(140%);
+      -webkit-backdrop-filter: blur(10px) saturate(140%);
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Random Booha ghost avatar */
+    #avatar{
+      position:absolute;
+      right: calc(12px + var(--safe-right));
+      top:   calc(12px + var(--safe-top));
+      width: 64px; height: 64px;
+      z-index:20;
+      pointer-events:none;
+      filter: drop-shadow(0 16px 30px rgba(0,0,0,.55));
+      opacity:.98;
+      transform-origin: 50% 60%;
+      animation: floaty 3.8s ease-in-out infinite;
+    }
+    @keyframes floaty{
+      0%  { transform: translateY(0px) rotate(var(--r)); }
+      50% { transform: translateY(-10px) rotate(calc(var(--r) + 2deg)); }
+      100%{ transform: translateY(0px) rotate(var(--r)); }
+    }
+
+    /* Fade layer */
+    #fade{
+      position:absolute; inset:0;
+      background:#000;
+      opacity:0;
+      pointer-events:none;
+      transition: opacity 520ms ease;
+      z-index:100;
+    }
+    #fade.on{ opacity:1; }
+
+    @media (prefers-reduced-motion: reduce){
+      #avatar{ animation:none; }
+      #fade{ transition:none; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Transition video -->
+  <section id="videoScene" class="scene active" aria-label="To the maze video">
+    <video id="toMazeVideo" preload="auto" playsinline webkit-playsinline muted>
+      <source src="assets/video/to-the-maze.mp4" type="video/mp4" />
+    </video>
+
+    <div id="tapOverlay" aria-hidden="true">
+      <div class="tapCard">
+        <h1 class="tapTitle">BOOHA MAZE</h1>
+        <p class="tapSub">Tap once to enter the maze.</p>
+        <button id="tapBtn" class="btn" type="button">ENTER</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Maze -->
+  <section id="mazeScene" class="scene" aria-label="Maze">
+    <img id="avatar" alt="Booha" />
+
+    <div id="hud">
+      <div class="pill">MAZE</div>
+      <div id="coordPill" class="pill">
+        <div class="coordSmall">COORDINATES</div>
+        <div class="coordBig" id="coordText">x: —  y: —</div>
+        <div class="coordSmall" style="margin-top:6px; opacity:.9;">click to copy</div>
+      </div>
+    </div>
+
+    <div id="stage">
+      <img id="mazeImg" src="assets/img/maze.png" alt="Maze" />
+      <div id="hitLayer" aria-hidden="true">
+        <div id="grid"></div>
+        <div id="crosshair">
+          <div class="chLineH"></div>
+          <div class="chLineV"></div>
+        </div>
+      </div>
+    </div>
+
+    <button id="bryanBtn" type="button" aria-label="Bryan mode">BRYAN</button>
+    <button id="backBtn" type="button" aria-label="Back">BACK</button>
+  </section>
+
+  <div id="fade" aria-hidden="true"></div>
+</div>
+
+<script>
+  // ─────────────────────────────────────────────────────────
+  // CONFIG (change these anytime)
+  // ─────────────────────────────────────────────────────────
+  const BRYAN_PASS = 'bryan'; // TODO: change this to your private password
+  const BRYAN_KEY  = 'booha_bryan_mode_unlocked_v1';
+
+  const GHOSTS = [
+    'assets/img/booha-ghost.png',
+    'assets/img/blue-boo.png',
+    'assets/img/green-boo.png',
+    'assets/img/pink-boo.png',
+    'assets/img/purple-boo.png'
+  ];
+
+  // ─────────────────────────────────────────────────────────
+  // Element refs
+  // ─────────────────────────────────────────────────────────
+  const videoScene  = document.getElementById('videoScene');
+  const mazeScene   = document.getElementById('mazeScene');
+  const toMazeVideo = document.getElementById('toMazeVideo');
+  const tapOverlay  = document.getElementById('tapOverlay');
+  const tapBtn      = document.getElementById('tapBtn');
+  const fade        = document.getElementById('fade');
+
+  const mazeImg     = document.getElementById('mazeImg');
+  const hitLayer    = document.getElementById('hitLayer');
+  const grid        = document.getElementById('grid');
+  const crosshair   = document.getElementById('crosshair');
+
+  const bryanBtn    = document.getElementById('bryanBtn');
+  const backBtn     = document.getElementById('backBtn');
+  const avatar      = document.getElementById('avatar');
+
+  const coordPill   = document.getElementById('coordPill');
+  const coordText   = document.getElementById('coordText');
+
+  // ─────────────────────────────────────────────────────────
+  // Helpers
+  // ─────────────────────────────────────────────────────────
+  function showScene(el){
+    [videoScene, mazeScene].forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+  }
+  function fadeToBlack(on=true){ fade.classList.toggle('on', !!on); }
+
+  function pickRandom(arr){
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  function setRandomAvatar(){
+    const src = pickRandom(GHOSTS);
+    avatar.src = src;
+    // tiny random rotation so it feels alive
+    const r = (Math.random()*10 - 5).toFixed(2) + 'deg';
+    avatar.style.setProperty('--r', r);
+  }
+
+  function isBryanUnlocked(){
+    try { return localStorage.getItem(BRYAN_KEY) === '1'; } catch(e){ return false; }
+  }
+  function setBryanUnlocked(on){
+    try { localStorage.setItem(BRYAN_KEY, on ? '1' : '0'); } catch(e){}
+  }
+
+  function applyBryanUI(){
+    const on = isBryanUnlocked();
+    bryanBtn.classList.toggle('on', on);
+    grid.classList.toggle('show', on);
+    coordPill.classList.toggle('show', on);
+    crosshair.classList.toggle('show', on);
+    hitLayer.style.cursor = on ? 'crosshair' : 'default';
+  }
+
+  // Map pointer inside hitLayer to image *natural* pixel coords
+  function getImageCoords(clientX, clientY){
+    const rect = hitLayer.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    const nx = clamp(x / rect.width, 0, 1);
+    const ny = clamp(y / rect.height, 0, 1);
+
+    const iw = mazeImg.naturalWidth  || 0;
+    const ih = mazeImg.naturalHeight || 0;
+
+    return {
+      x: Math.round(nx * iw),
+      y: Math.round(ny * ih),
+      nx, ny,
+      localX: x,
+      localY: y
+    };
+  }
+
+  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+  function positionHitLayerToImage(){
+    // The displayed <img> has object-fit:contain in #stage.
+    // We compute its actual drawn rect by reading its bounding rect.
+    const r = mazeImg.getBoundingClientRect();
+    const stageR = document.getElementById('stage').getBoundingClientRect();
+
+    // hitLayer should match image rect
+    hitLayer.style.left = (r.left - stageR.left) + 'px';
+    hitLayer.style.top  = (r.top  - stageR.top)  + 'px';
+    hitLayer.style.width  = r.width + 'px';
+    hitLayer.style.height = r.height + 'px';
+
+    // keep crosshair lines filling the layer
+    const h = crosshair.querySelector('.chLineH');
+    const v = crosshair.querySelector('.chLineV');
+    if (h){ h.style.top = '0px'; }
+    if (v){ v.style.left = '0px'; }
+  }
+
+  function setCrosshair(localX, localY){
+    // Crosshair is positioned by moving its container and drawing full lines.
+    crosshair.style.left = '0px';
+    crosshair.style.top  = '0px';
+
+    const h = crosshair.querySelector('.chLineH');
+    const v = crosshair.querySelector('.chLineV');
+    if (h) h.style.transform = `translateY(${localY}px)`;
+    if (v) v.style.transform = `translateX(${localX}px)`;
+  }
+
+  async function copyText(txt){
+    try {
+      await navigator.clipboard.writeText(txt);
+      return true;
+    } catch(e){
+      // fallback
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = txt;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        return true;
+      } catch(err){
+        return false;
+      }
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // Video → Maze flow
+  // ─────────────────────────────────────────────────────────
+  const FADE_MS = 520;
+  let going = false;
+
+  async function enterMaze(){
+    if (going) return;
+    going = true;
+
+    // fade and swap scenes
+    fadeToBlack(true);
+    setTimeout(() => {
+      showScene(mazeScene);
+      requestAnimationFrame(() => requestAnimationFrame(() => fadeToBlack(false)));
+      going = false;
+    }, FADE_MS);
+  }
+
+  async function tryAutoPlay(){
+    // Attempt autoplay (muted). If blocked, show tap overlay.
+    try {
+      toMazeVideo.currentTime = 0;
+    } catch(e){}
+
+    try {
+      await toMazeVideo.play();
+      tapOverlay.classList.remove('show');
+      tapOverlay.setAttribute('aria-hidden', 'true');
+    } catch(e){
+      tapOverlay.classList.add('show');
+      tapOverlay.setAttribute('aria-hidden', 'false');
+      return;
+    }
+  }
+
+  // If the video reaches near end, enter maze.
+  toMazeVideo.addEventListener('timeupdate', () => {
+    const d = toMazeVideo.duration;
+    if (!isFinite(d) || d <= 0) return;
+    if (d - toMazeVideo.currentTime <= 0.85) enterMaze();
+  });
+  toMazeVideo.addEventListener('ended', enterMaze);
+  toMazeVideo.addEventListener('error', enterMaze);
+
+  tapBtn.addEventListener('click', async () => {
+    tapOverlay.classList.remove('show');
+    tapOverlay.setAttribute('aria-hidden', 'true');
+    try {
+      await toMazeVideo.play();
+    } catch(e){
+      // If it STILL fails, just enter
+      enterMaze();
+    }
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) try { toMazeVideo.pause(); } catch(e){}
+  });
+
+  // Start immediately
+  setRandomAvatar();
+  tryAutoPlay();
+
+  // ─────────────────────────────────────────────────────────
+  // Maze image sizing + hit layer alignment
+  // ─────────────────────────────────────────────────────────
+  function onLayout(){
+    positionHitLayerToImage();
+  }
+
+  // Wait for maze image to load so naturalWidth/Height exists.
+  if (mazeImg.complete) {
+    setTimeout(onLayout, 0);
+  } else {
+    mazeImg.addEventListener('load', () => setTimeout(onLayout, 0));
+  }
+
+  window.addEventListener('resize', () => {
+    onLayout();
+  }, { passive:true });
+
+  // ─────────────────────────────────────────────────────────
+  // Bryan mode (password)
+  // ─────────────────────────────────────────────────────────
+  applyBryanUI();
+
+  bryanBtn.addEventListener('click', () => {
+    if (isBryanUnlocked()){
+      // toggle off
+      setBryanUnlocked(false);
+      applyBryanUI();
+      return;
+    }
+
+    const pw = prompt('Bryan mode password:');
+    if (pw === null) return;
+    if (String(pw).trim() === BRYAN_PASS){
+      setBryanUnlocked(true);
+      applyBryanUI();
+      alert('Bryan mode unlocked.');
+    } else {
+      alert('Nope.');
+    }
+  });
+
+  // ─────────────────────────────────────────────────────────
+  // Coordinate finder (Bryan mode only)
+  // ─────────────────────────────────────────────────────────
+  function updateCoordUI(clientX, clientY){
+    const on = isBryanUnlocked();
+    if (!on) return;
+
+    const c = getImageCoords(clientX, clientY);
+    coordText.textContent = `x: ${c.x}  y: ${c.y}`;
+    setCrosshair(c.localX, c.localY);
+  }
+
+  hitLayer.addEventListener('mousemove', (e) => {
+    updateCoordUI(e.clientX, e.clientY);
+  });
+
+  hitLayer.addEventListener('click', async (e) => {
+    if (!isBryanUnlocked()) return;
+    const c = getImageCoords(e.clientX, e.clientY);
+    const txt = `${c.x},${c.y}`;
+    coordText.textContent = `x: ${c.x}  y: ${c.y}`;
+    setCrosshair(c.localX, c.localY);
+    const ok = await copyText(txt);
+    if (ok) {
+      // tiny feedback by briefly flashing the pill
+      coordPill.style.transform = 'scale(1.01)';
+      setTimeout(() => coordPill.style.transform = '', 120);
+    }
+  });
+
+  // Allow clicking the pill itself to copy
+  coordPill.addEventListener('click', async () => {
+    if (!isBryanUnlocked()) return;
+    const txt = coordText.textContent
+      .replace('x:', '')
+      .replace('y:', '')
+      .trim()
+      .replace(/\s+/g,' ')
+      .replace('  ', ' ');
+    // convert "x: 123  y: 456" → "123,456"
+    const m = coordText.textContent.match(/x:\s*(\d+)\s*y:\s*(\d+)/);
+    const out = m ? `${m[1]},${m[2]}` : txt;
+    await copyText(out);
+  });
+
+  // ─────────────────────────────────────────────────────────
+  // Back button
+  // ─────────────────────────────────────────────────────────
+  backBtn.addEventListener('click', () => {
+    // Go back to index hub (simple). You can change to a specific hash later.
+    fadeToBlack(true);
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, FADE_MS);
+  });
+</script>
+</body>
+</html>
+
