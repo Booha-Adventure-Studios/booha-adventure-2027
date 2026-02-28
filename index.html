@@ -15,123 +15,142 @@
       --pink2:#ff79d7;
       --text:#ffffff;
       --muted:rgba(255,255,255,.7);
-      --safe-top: env(safe-area-inset-top);
-      --safe-right: env(safe-area-inset-right);
-      --safe-bottom: env(safe-area-inset-bottom);
-      --safe-left: env(safe-area-inset-left);
+      --safe-top:    env(safe-area-inset-top,    0px);
+      --safe-right:  env(safe-area-inset-right,  0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-left:   env(safe-area-inset-left,   0px);
     }
 
-    *{ box-sizing:border-box; }
-    html,body{
-      height:100%; margin:0;
-      background:var(--bg);
-      color:var(--text);
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
-        "Noto Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+        "Noto Sans","Hiragino Kaku Gothic ProN","Yu Gothic", sans-serif;
+      /* prevent iOS rubber-band showing white */
+      overscroll-behavior: none;
     }
 
-    /* ── App container ── */
-    #app{
-      position:fixed; inset:0;
-      background: var(--bg) url('assets/img/background-1.png') center center / cover no-repeat;
-      overflow:hidden;
+    /* ══════════════════════════════════════════
+       APP ROOT
+       position:fixed keeps background-1.png always
+       visible and fills the whole viewport on mobile.
+       overflow:hidden here; hub scrolls internally.
+    ══════════════════════════════════════════ */
+    #app {
+      position: fixed;
+      inset: 0;
+      background: var(--bg) url('assets/img/background-1.png') center/cover no-repeat;
+      overflow: hidden;
     }
 
-    /* Subtle dark vignette over the bg so text stays readable */
-    #app::before{
-      content:'';
-      position:absolute; inset:0;
+    /* Dark vignette over bg */
+    #app::before {
+      content: '';
+      position: absolute; inset: 0;
       background: radial-gradient(ellipse at center,
         rgba(0,0,0,.10) 0%,
         rgba(0,0,0,.48) 100%);
-      pointer-events:none;
-      z-index:0;
+      pointer-events: none;
+      z-index: 0;
     }
 
     /* ── Rotate overlay ── */
-    #rotateOverlay{
-      position:absolute; inset:0;
-      display:none;
-      align-items:center; justify-content:center;
-      padding: calc(24px + var(--safe-top)) calc(24px + var(--safe-right))
-               calc(24px + var(--safe-bottom)) calc(24px + var(--safe-left));
-      text-align:center;
-      background:rgba(0,0,0,.92);
-      z-index:50;
+    #rotateOverlay {
+      position: absolute; inset: 0;
+      display: none;
+      align-items: center; justify-content: center;
+      padding: 24px;
+      text-align: center;
+      background: rgba(0,0,0,.94);
+      z-index: 200;
     }
-    #rotateOverlay .card{
-      max-width:520px;
-      border:1px solid rgba(255,255,255,.18);
-      border-radius:22px;
-      padding:22px 18px;
+    #rotateOverlay .card {
+      max-width: 480px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 22px;
+      padding: 22px 18px;
     }
-    #rotateOverlay h2{ margin:0 0 8px; font-size:22px; letter-spacing:.5px; }
-    #rotateOverlay p{ margin:0; color:var(--muted); line-height:1.4; }
+    #rotateOverlay h2 { margin: 0 0 8px; font-size: clamp(18px,4vw,22px); }
+    #rotateOverlay p  { margin: 0; color: var(--muted); line-height: 1.4; font-size: clamp(13px,3.5vw,15px); }
 
-    /* ── Scenes ── */
-    .scene{ position:absolute; inset:0; display:none; z-index:1; background:transparent; }
-    .scene.active{ display:flex; }
-    /* Start + video = solid black */
-    #startScene{ background:#000; }
-    #videoScene{ background:#000; }
-    /* Hub = transparent so background-1.png shows through */
-    #hubScene{ background:transparent; }
+    /* ══════════════════════════════════════════
+       SCENES
+       All scenes fill #app absolutely.
+       Start and video are solid black.
+       Hub is transparent (bg image shows through)
+       and scrolls its own content vertically.
+    ══════════════════════════════════════════ */
+    .scene {
+      position: absolute; inset: 0;
+      display: none;
+      z-index: 1;
+    }
+    .scene.active { display: flex; }
 
-    /* ── START scene ── */
-    #startScene{
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:22px;
-      padding: calc(24px + var(--safe-top)) calc(24px + var(--safe-right))
-               calc(24px + var(--safe-bottom)) calc(24px + var(--safe-left));
-      text-align:center;
+    /* ── START SCENE ── */
+    #startScene {
+      background: #000;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(16px, 4vw, 26px);
+      padding:
+        calc(clamp(20px,5vw,28px) + var(--safe-top))
+        calc(clamp(20px,5vw,28px) + var(--safe-right))
+        calc(clamp(20px,5vw,28px) + var(--safe-bottom))
+        calc(clamp(20px,5vw,28px) + var(--safe-left));
+      text-align: center;
+      overflow: hidden;
     }
 
-    /* Ghost + sparkles */
-    .ghostOuter{
-      position:relative;
-      width: min(32vmin, 260px);
-      height: min(32vmin, 260px);
-      transform: translateZ(0);
+    /* Ghost + sparkles – shrinks on small screens */
+    .ghostOuter {
+      position: relative;
+      width:  clamp(130px, 30vmin, 250px);
+      height: clamp(130px, 30vmin, 250px);
+      flex-shrink: 0;
     }
 
-    .ghostWrap{
-      position:absolute; inset:0;
-      width:100%; height:100%;
-      display:flex; align-items:center; justify-content:center;
-      pointer-events:none;
+    .ghostWrap {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      pointer-events: none;
       animation: floaty 3.8s ease-in-out infinite;
-      filter: drop-shadow(0 14px 28px rgba(0,0,0,.75));
+      filter: drop-shadow(0 12px 24px rgba(0,0,0,.75));
       will-change: transform, opacity;
     }
 
-    .ghostWrap.flyAway{
-      animation:none;
+    .ghostWrap.flyAway {
+      animation: none;
       transition:
         transform 1800ms cubic-bezier(.15,.8,.25,1),
         opacity   1600ms ease 200ms;
       transform: translate3d(0,-85vh,0) scale(.7) rotate(-4deg);
-      opacity:0;
+      opacity: 0;
     }
 
-    @keyframes floaty{
-      0%  { transform: translateY(0px); }
-      50% { transform: translateY(-14px); }
-      100%{ transform: translateY(0px); }
+    @keyframes floaty {
+      0%   { transform: translateY(0px); }
+      50%  { transform: translateY(-12px); }
+      100% { transform: translateY(0px); }
     }
 
-    .sparkleField{
-      position:absolute;
-      inset:-60px;
-      pointer-events:none;
+    .sparkleField {
+      position: absolute;
+      inset: -50px;
+      pointer-events: none;
     }
 
-    .sp{
-      position:absolute;
-      border-radius:50%;
-      background:#fff;
-      opacity:0;
+    .sp {
+      position: absolute;
+      border-radius: 50%;
+      background: #fff;
+      opacity: 0;
       animation: sparkleLife var(--dur) ease-in-out var(--delay) infinite;
       width: var(--size); height: var(--size);
       top: var(--y); left: var(--x);
@@ -140,150 +159,142 @@
         0 0 10px 3px rgba(255,100,220,.6);
     }
 
-    @keyframes sparkleLife{
-      0%  { opacity:0;    transform: scale(.4) translateY(0); }
-      20% { opacity:1;    transform: scale(1)  translateY(-6px); }
-      60% { opacity:.85;  transform: scale(.9) translateY(-14px); }
-      100%{ opacity:0;    transform: scale(.3) translateY(-22px); }
+    @keyframes sparkleLife {
+      0%   { opacity: 0;    transform: scale(.4) translateY(0); }
+      20%  { opacity: 1;    transform: scale(1)  translateY(-6px); }
+      60%  { opacity: .85;  transform: scale(.9) translateY(-13px); }
+      100% { opacity: 0;    transform: scale(.3) translateY(-20px); }
     }
 
-    #boohaGhost{
-      width:100%; height:100%;
-      object-fit:contain;
-      user-select:none;
-      -webkit-user-drag:none;
+    #boohaGhost {
+      width: 100%; height: 100%;
+      object-fit: contain;
+      user-select: none;
+      -webkit-user-drag: none;
     }
 
-    .startText{ text-align:center; }
-    .startText .line1{ font-size:16px; letter-spacing:.2px; color:var(--muted); }
-    .startText .line2{ font-size:14px; color:rgba(255,255,255,.55); margin-top:6px; }
-
-    /* Start button — single pink glow (not rainbow, just the week cards) */
-    .btn{
-      appearance:none; border:0;
-      border-radius:999px;
-      padding:14px 22px;
-      font-size:18px; font-weight:900; letter-spacing:.6px;
-      cursor:pointer; color:#000;
-      background: linear-gradient(180deg, var(--pink2), var(--pink));
-      box-shadow:
-        0 10px 22px rgba(255,59,189,.28),
-        0 0 0 2px rgba(255,59,189,.15),
-        0 0 26px rgba(255,59,189,.35);
-      transform: translateZ(0);
-      -webkit-tap-highlight-color: transparent;
+    /* ── VIDEO SCENE ── */
+    #videoScene {
+      background: #000;
+      align-items: center; justify-content: center;
+      overflow: hidden;
     }
-    .btn:active{ transform: scale(.98); }
-
-    /* ── VIDEO scene ── */
-    #videoScene{ align-items:center; justify-content:center; background:#000; }
-    #introVideo{ width:100%; height:100%; object-fit:cover; background:#000; }
-
-    /* ── Fade layer ── */
-    #fade{
-      position:absolute; inset:0;
-      background:#000; opacity:0;
-      pointer-events:none;
-      transition: opacity 520ms ease;
-      z-index:40;
+    #introVideo {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      background: #000;
     }
-    #fade.on{ opacity:1; }
 
     /* ══════════════════════════════════════════
        HUB SCENE
+       Transparent so background-1.png shows.
+       Overrides display:flex → block so it can
+       scroll vertically on short screens.
     ══════════════════════════════════════════ */
-    #hubScene{
-      padding: calc(22px + var(--safe-top)) calc(22px + var(--safe-right))
-               calc(22px + var(--safe-bottom)) calc(22px + var(--safe-left));
-      align-items:center;
-      justify-content:center;
+    #hubScene {
+      background: transparent;
+      /* Allow scroll when content taller than viewport */
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      /* Override .scene.active flex with block */
+      display: none;
+    }
+    #hubScene.active {
+      display: block;
     }
 
-    .hub{
+    /* Wrapper centres hub and adds safe-area padding */
+    .hubScroll {
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding:
+        calc(clamp(16px,3.5vw,24px) + var(--safe-top))
+        calc(clamp(14px,3vw,22px)   + var(--safe-right))
+        calc(clamp(16px,3.5vw,24px) + var(--safe-bottom))
+        calc(clamp(14px,3vw,22px)   + var(--safe-left));
+    }
+
+    .hub {
       width: min(1000px, 100%);
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(12px, 2.5vw, 20px);
     }
 
     /* Hub title */
-    .hubHeading{
-      text-align:center;
+    .hubHeading {
+      text-align: center;
       font-family: 'Bowlby One', system-ui, sans-serif;
-      font-size: clamp(26px, 4vw, 52px);
-      font-weight:400; /* Bowlby One is already heavy */
-      letter-spacing:3px;
-      color:#fff;
+      font-size: clamp(22px, 5vw, 52px);
+      font-weight: 400;
+      letter-spacing: 3px;
+      color: #fff;
       text-shadow:
         0 0 32px rgba(255,140,255,.65),
         0 0 80px rgba(255,80,200,.3),
         0 2px 8px rgba(0,0,0,.9);
     }
 
-    /* 3-card row */
-    .hubRow{
-      display:grid;
+    /* 3-card row – collapses on narrow screens */
+    .hubRow {
+      display: grid;
       grid-template-columns: repeat(3, minmax(0,1fr));
-      gap:16px;
-      width:100%;
+      gap: clamp(8px, 2vw, 16px);
+      width: 100%;
     }
 
-    /* ── Glassy / frosted week card ── */
-    .weekCard{
-      position:relative;
-      border-radius:26px;
-      overflow:hidden;          /* clips shimmer pseudo-element */
-      padding:20px 18px 16px;
-      min-height:170px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      text-align:center;
-      cursor:pointer;
-      user-select:none;
+    /* ── Glassy week card ── */
+    .weekCard {
+      position: relative;
+      border-radius: clamp(18px,3vw,26px);
+      overflow: hidden;
+      padding: clamp(14px,2.5vw,20px) clamp(12px,2vw,18px) clamp(12px,2vw,16px);
+      min-height: clamp(120px,18vw,170px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
       -webkit-tap-highlight-color: transparent;
       transform: translateZ(0);
       transition: transform 220ms ease, box-shadow 220ms ease;
 
-      /* Frosted glass base */
       background: rgba(255,255,255,.09);
       backdrop-filter: blur(18px) saturate(160%);
       -webkit-backdrop-filter: blur(18px) saturate(160%);
 
-      /* Rainbow-cycling border via box-shadow — each card has its own hue offset */
       box-shadow:
         inset 0 0 0 1px rgba(255,255,255,.22),
         0 8px 32px rgba(0,0,0,.35),
         0 0 0 2px hsl(var(--hue,0deg) 90% 65% / .7),
         0 0 22px 4px hsl(var(--hue,0deg) 90% 65% / .35);
 
-      animation: rainbowHue var(--rainbow-speed, 5s) linear infinite;
-      animation-delay: var(--rainbow-offset, 0s);
+      animation: rainbowHue var(--rainbow-speed,5s) linear infinite;
+      animation-delay: var(--rainbow-offset,0s);
     }
 
-    /* Rainbow hue rotation on the CSS custom property */
     @property --hue {
       syntax: '<angle>';
       inherits: false;
       initial-value: 0deg;
     }
-
-    @keyframes rainbowHue{
-      from{ --hue: 0deg; }
-      to  { --hue: 360deg; }
+    @keyframes rainbowHue {
+      from { --hue: 0deg; }
+      to   { --hue: 360deg; }
     }
 
-    /* Each card offset so they're never the same color */
-    .weekCard:nth-child(1){ --rainbow-offset: 0s;    --rainbow-speed: 5s; }
-    .weekCard:nth-child(2){ --rainbow-offset: -1.67s; --rainbow-speed: 5s; }
-    .weekCard:nth-child(3){ --rainbow-offset: -3.33s; --rainbow-speed: 5s; }
+    .weekCard:nth-child(1) { --rainbow-offset: 0s;     --rainbow-speed: 5s; }
+    .weekCard:nth-child(2) { --rainbow-offset: -1.67s; --rainbow-speed: 5s; }
+    .weekCard:nth-child(3) { --rainbow-offset: -3.33s; --rainbow-speed: 5s; }
 
-    /* Shimmer sweep pseudo-element */
-    .weekCard::before{
-      content:'';
-      position:absolute;
-      inset:0;
+    .weekCard::before {
+      content: '';
+      position: absolute; inset: 0;
       background: linear-gradient(
         120deg,
         transparent 30%,
@@ -292,21 +303,21 @@
       );
       transform: translateX(-100%);
       animation: shimmerSweep 3.8s ease-in-out infinite;
-      animation-delay: var(--shimmer-offset, 0s);
-      pointer-events:none;
+      animation-delay: var(--shimmer-offset,0s);
+      pointer-events: none;
     }
-    .weekCard:nth-child(1)::before{ --shimmer-offset: 0s; }
-    .weekCard:nth-child(2)::before{ --shimmer-offset: 1.2s; }
-    .weekCard:nth-child(3)::before{ --shimmer-offset: 2.4s; }
+    .weekCard:nth-child(1)::before { --shimmer-offset: 0s; }
+    .weekCard:nth-child(2)::before { --shimmer-offset: 1.2s; }
+    .weekCard:nth-child(3)::before { --shimmer-offset: 2.4s; }
 
-    @keyframes shimmerSweep{
-      0%  { transform: translateX(-100%) skewX(-12deg); opacity:0; }
-      20% { opacity:1; }
-      60% { transform: translateX(200%)  skewX(-12deg); opacity:0; }
-      100%{ transform: translateX(200%)  skewX(-12deg); opacity:0; }
+    @keyframes shimmerSweep {
+      0%   { transform: translateX(-100%) skewX(-12deg); opacity: 0; }
+      20%  { opacity: 1; }
+      60%  { transform: translateX(200%)  skewX(-12deg); opacity: 0; }
+      100% { transform: translateX(200%)  skewX(-12deg); opacity: 0; }
     }
 
-    .weekCard:hover{
+    .weekCard:hover {
       transform: translateY(-4px) scale(1.02);
       box-shadow:
         inset 0 0 0 1px rgba(255,255,255,.32),
@@ -314,55 +325,95 @@
         0 0 0 2px hsl(var(--hue,0deg) 90% 70% / .9),
         0 0 36px 8px hsl(var(--hue,0deg) 90% 65% / .5);
     }
-    .weekCard:active{ transform: scale(.99); }
+    .weekCard:active { transform: scale(.99); }
 
-    /* Card internals — all centered */
-    .weekTag{
-      font-weight:1000; letter-spacing:1.5px; font-size:13px;
-      text-transform:uppercase;
+    .weekTag {
+      font-weight: 1000; letter-spacing: 1.5px;
+      font-size: clamp(10px,1.8vw,13px);
+      text-transform: uppercase;
       color: rgba(255,255,255,.6);
     }
-    .weekTag span{ color:rgba(255,255,255,.9); margin-left:4px; }
+    .weekTag span { color: rgba(255,255,255,.9); margin-left: 4px; }
 
-    .weekTitle{
-      font-size: clamp(16px, 2.2vw, 22px);
-      font-weight:1000; letter-spacing:.4px;
-      color:#fff;
+    .weekTitle {
+      font-size: clamp(14px, 2.5vw, 22px);
+      font-weight: 1000; letter-spacing: .4px;
+      color: #fff;
       text-shadow: 0 2px 12px rgba(0,0,0,.6);
-      margin-top:8px;
+      margin-top: 7px;
     }
 
-    .weekDates{
-      font-size:13px;
-      color:rgba(255,255,255,.65);
-      margin-top:5px;
-      line-height:1.4;
+    .weekDates {
+      font-size: clamp(10px, 1.6vw, 13px);
+      color: rgba(255,255,255,.65);
+      margin-top: 4px;
+      line-height: 1.4;
     }
 
-    .weekHint{
-      margin-top:14px;
-      font-size:11px;
-      letter-spacing:1.5px;
-      color:rgba(255,255,255,.45);
-      text-transform:uppercase;
+    .weekHint {
+      margin-top: 10px;
+      font-size: clamp(9px,1.3vw,11px);
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,.45);
+      text-transform: uppercase;
     }
 
-    /* Hub bottom */
-    .hubBottom{
-      display:flex;
-      justify-content:center;
-      padding-top:2px;
+    /* Hub bottom button */
+    .hubBottom {
+      display: flex;
+      justify-content: center;
+      padding-top: 4px;
     }
 
-    .btnSmall{ padding:12px 20px; font-size:15px; }
+    /* ── Shared button ── */
+    .btn {
+      appearance: none; border: 0;
+      border-radius: 999px;
+      padding: clamp(11px,2vw,14px) clamp(18px,3vw,22px);
+      font-size: clamp(14px,2.2vw,18px);
+      font-weight: 900; letter-spacing: .6px;
+      cursor: pointer; color: #000;
+      background: linear-gradient(180deg, var(--pink2), var(--pink));
+      box-shadow:
+        0 10px 22px rgba(255,59,189,.28),
+        0 0 0 2px rgba(255,59,189,.15),
+        0 0 26px rgba(255,59,189,.35);
+      transform: translateZ(0);
+      -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
+    }
+    .btn:active { transform: scale(.98); }
+    .btnSmall {
+      padding: clamp(9px,1.6vw,12px) clamp(14px,2.5vw,20px);
+      font-size: clamp(13px,1.8vw,15px);
+    }
 
-    /* ── Picker overlay ── */
-    .picker{
-      position:absolute; inset:0;
-      display:none;
-      align-items:center; justify-content:center;
-      padding: calc(18px + var(--safe-top)) calc(18px + var(--safe-right))
-               calc(18px + var(--safe-bottom)) calc(18px + var(--safe-left));
+    /* ── Fade layer ── */
+    #fade {
+      position: absolute; inset: 0;
+      background: #000; opacity: 0;
+      pointer-events: none;
+      transition: opacity 520ms ease;
+      z-index: 40;
+    }
+    #fade.on { opacity: 1; }
+
+    /* ══════════════════════════════════════════
+       PICKER OVERLAY
+    ══════════════════════════════════════════ */
+    .picker {
+      position: absolute; inset: 0;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      /* Scrolls if picker panel is taller than viewport on small phones */
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding:
+        calc(clamp(12px,2.5vw,18px) + var(--safe-top))
+        calc(clamp(12px,2.5vw,18px) + var(--safe-right))
+        calc(clamp(12px,2.5vw,18px) + var(--safe-bottom))
+        calc(clamp(12px,2.5vw,18px) + var(--safe-left));
       background:
         radial-gradient(ellipse at center,
           rgba(0,0,0,.55) 0%,
@@ -370,17 +421,18 @@
           rgba(0,0,0,.92) 100%);
       backdrop-filter: blur(10px) saturate(130%);
       -webkit-backdrop-filter: blur(10px) saturate(130%);
-      z-index:60;
+      z-index: 60;
     }
-    .picker.show{ display:flex; }
+    .picker.show { display: flex; }
 
-    /* Panel matches hub card aesthetic */
-    .pickerPanel{
-      position:relative;
-      width: min(920px,100%);
-      border-radius:30px;
-      overflow:hidden;
-      padding:18px 18px 16px;
+    .pickerPanel {
+      position: relative;
+      width: min(920px, 100%);
+      border-radius: clamp(20px,3vw,30px);
+      overflow: hidden;
+      padding: clamp(14px,2.5vw,18px);
+      /* Ensure panel doesn't get cut off – margin centres it vertically when possible */
+      margin: auto;
 
       background: rgba(255,255,255,.09);
       backdrop-filter: blur(22px) saturate(160%);
@@ -395,10 +447,9 @@
       animation: rainbowHue 5s linear infinite;
     }
 
-    /* Shimmer sweep across the panel */
-    .pickerPanel::before{
-      content:'';
-      position:absolute; inset:0;
+    .pickerPanel::before {
+      content: '';
+      position: absolute; inset: 0;
       background: linear-gradient(
         120deg,
         transparent 35%,
@@ -407,179 +458,221 @@
       );
       transform: translateX(-110%) skewX(-12deg);
       animation: shimmerSweep 4.2s ease-in-out infinite;
-      pointer-events:none;
+      pointer-events: none;
     }
 
-    .pickerTop{
-      display:flex; align-items:center;
-      justify-content:space-between; gap:10px;
-      position:relative; z-index:1;
+    .pickerTop {
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 10px;
+      position: relative; z-index: 1;
     }
 
-    .pickerTitle{
+    .pickerTitle {
       font-family: 'Bowlby One', system-ui, sans-serif;
-      font-size: clamp(18px, 2.4vw, 24px);
-      letter-spacing:2px;
-      text-align:center; flex:1;
+      font-size: clamp(14px, 2.8vw, 24px);
+      letter-spacing: 2px;
+      text-align: center; flex: 1;
       text-shadow:
         0 0 24px rgba(255,140,255,.55),
         0 2px 10px rgba(0,0,0,.85);
     }
 
-    .ghostBtn{
-      appearance:none;
-      border:1px solid rgba(255,255,255,.18);
+    .ghostBtn {
+      appearance: none;
+      border: 1px solid rgba(255,255,255,.18);
       background: rgba(0,0,0,.22);
-      color:rgba(255,255,255,.92);
-      border-radius:999px;
-      padding:10px 16px;
-      font-weight:1000; letter-spacing:.4px;
-      cursor:pointer;
+      color: rgba(255,255,255,.92);
+      border-radius: 999px;
+      padding: clamp(7px,1.2vw,10px) clamp(10px,1.8vw,16px);
+      font-size: clamp(11px,1.6vw,14px);
+      font-weight: 1000; letter-spacing: .4px;
+      cursor: pointer;
       -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
+      flex-shrink: 0;
       box-shadow:
         inset 0 0 0 1px rgba(255,255,255,.10),
         0 10px 22px rgba(0,0,0,.35);
     }
-    .ghostBtn:hover{ background: rgba(255,255,255,.10); }
-    .ghostBtn:active{ transform:scale(.99); }
+    .ghostBtn:hover  { background: rgba(255,255,255,.10); }
+    .ghostBtn:active { transform: scale(.99); }
 
-    .pickerSub{
-      margin-top:10px;
-      color:rgba(255,255,255,.72);
-      font-size:14px; text-align:center;
-      position:relative; z-index:1;
+    .pickerSub {
+      margin-top: 8px;
+      color: rgba(255,255,255,.72);
+      font-size: clamp(11px,1.8vw,14px);
+      text-align: center;
+      position: relative; z-index: 1;
     }
 
-    .pickerSub2{
-      margin-top:6px;
-      font-size:12px; letter-spacing:1.4px;
-      color:rgba(255,255,255,.45);
-      text-transform:uppercase; text-align:center;
-      position:relative; z-index:1;
+    .pickerSub2 {
+      margin-top: 5px;
+      font-size: clamp(9px,1.3vw,12px);
+      letter-spacing: 1.4px;
+      color: rgba(255,255,255,.45);
+      text-transform: uppercase; text-align: center;
+      position: relative; z-index: 1;
     }
 
-    .pickerGrid{
-      display:grid;
-      grid-template-columns: repeat(3,minmax(0,1fr));
-      gap:12px; margin-top:16px;
-      position:relative; z-index:1;
+    .pickerGrid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: clamp(8px,1.8vw,12px);
+      margin-top: clamp(10px,2vw,16px);
+      position: relative; z-index: 1;
     }
 
-    /* Tile redesign */
-    .pickTile{
-      appearance:none;
-      border:0;
-      border-radius:22px;
-      padding:18px 16px 16px;
-      cursor:pointer;
-      text-align:left;
-      color:#fff;
-
+    .pickTile {
+      appearance: none; border: 0;
+      border-radius: clamp(14px,2.5vw,22px);
+      padding: clamp(11px,1.8vw,18px) clamp(10px,1.6vw,16px) clamp(11px,1.8vw,16px);
+      cursor: pointer;
+      text-align: left;
+      color: #fff;
       background: rgba(0,0,0,.16);
       box-shadow:
         inset 0 0 0 1px rgba(255,255,255,.18),
         0 18px 30px rgba(0,0,0,.35),
-        0 0 0 2px hsl(var(--tileHue, 210deg) 90% 65% / .55),
-        0 0 26px 6px hsl(var(--tileHue, 210deg) 90% 65% / .22);
-
+        0 0 0 2px hsl(var(--tileHue,210deg) 90% 65% / .55),
+        0 0 26px 6px hsl(var(--tileHue,210deg) 90% 65% / .22);
       transition: transform 160ms ease, box-shadow 200ms ease, background 200ms ease;
       -webkit-tap-highlight-color: transparent;
     }
 
-    .pickTile:hover{
+    .pickTile:hover {
       transform: translateY(-3px);
       background: rgba(255,255,255,.08);
       box-shadow:
         inset 0 0 0 1px rgba(255,255,255,.28),
         0 24px 40px rgba(0,0,0,.45),
-        0 0 0 2px hsl(var(--tileHue, 210deg) 95% 70% / .75),
-        0 0 36px 10px hsl(var(--tileHue, 210deg) 90% 65% / .32);
+        0 0 0 2px hsl(var(--tileHue,210deg) 95% 70% / .75),
+        0 0 36px 10px hsl(var(--tileHue,210deg) 90% 65% / .32);
     }
-    .pickTile:active{ transform: translateY(-1px) scale(.99); }
+    .pickTile:active { transform: translateY(-1px) scale(.99); }
 
-    /* Each tile its own hue */
-    .pickTile[data-curr="preboo"]      { --tileHue: 315deg; }
-    .pickTile[data-curr="booriculum"]  { --tileHue: 190deg; }
-    .pickTile[data-curr="boocontinuum"]{ --tileHue: 120deg; }
+    .pickTile[data-curr="preboo"]       { --tileHue: 315deg; }
+    .pickTile[data-curr="booriculum"]   { --tileHue: 190deg; }
+    .pickTile[data-curr="boocontinuum"] { --tileHue: 120deg; }
 
-    /* Tile layout */
-    .tileTop{
-      display:flex;
-      align-items:center;
-      gap:12px;
+    .tileTop {
+      display: flex;
+      align-items: center;
+      gap: clamp(8px,1.5vw,12px);
     }
 
-    .tileIcon{
-      flex-shrink:0;
-      width:60px; height:60px;
-      border-radius:18px;
-      display:grid; place-items:center;
+    .tileIcon {
+      flex-shrink: 0;
+      width:  clamp(36px,5.5vw,60px);
+      height: clamp(36px,5.5vw,60px);
+      border-radius: clamp(10px,1.8vw,18px);
+      display: grid; place-items: center;
       background: rgba(255,255,255,.08);
       box-shadow:
         inset 0 0 0 1px rgba(255,255,255,.18),
         0 10px 20px rgba(0,0,0,.35);
     }
 
-    .tileIcon img{
-      width:70%; height:70%;
-      object-fit:contain;
-      pointer-events:none;
-      user-select:none;
-      -webkit-user-drag:none;
+    .tileIcon img {
+      width: 70%; height: 70%;
+      object-fit: contain;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-drag: none;
       filter:
         drop-shadow(0 0 10px rgba(255,255,255,.4))
         drop-shadow(0 0 20px rgba(255,255,255,.2));
       transition: transform 200ms ease;
     }
-    .pickTile:hover .tileIcon img{ transform: scale(1.10); }
+    .pickTile:hover .tileIcon img { transform: scale(1.10); }
 
-    .tileName{
-      font-size:18px; font-weight:1000;
-      letter-spacing:.3px; line-height:1.1;
+    .tileName {
+      font-size: clamp(13px,2vw,18px);
+      font-weight: 1000; letter-spacing: .3px; line-height: 1.1;
     }
 
-    .tileJp{
-      display:block;
-      margin-top:5px;
-      font-size:13px;
-      color:rgba(255,255,255,.70);
+    .tileJp {
+      display: block;
+      margin-top: 4px;
+      font-size: clamp(10px,1.4vw,13px);
+      color: rgba(255,255,255,.70);
     }
 
-    .tileHint{
-      margin-top:12px;
-      font-size:11px; letter-spacing:1.6px;
-      color:rgba(255,255,255,.45);
-      text-transform:uppercase;
+    .tileHint {
+      margin-top: clamp(6px,1.2vw,12px);
+      font-size: clamp(9px,1.1vw,11px);
+      letter-spacing: 1.6px;
+      color: rgba(255,255,255,.45);
+      text-transform: uppercase;
     }
 
-    .pickerNote{
-      margin-top:14px;
-      font-size:12px;
-      color:rgba(255,255,255,.50);
-      text-align:center;
-      position:relative; z-index:1;
+    .pickerNote {
+      margin-top: clamp(8px,1.5vw,14px);
+      font-size: clamp(10px,1.3vw,12px);
+      color: rgba(255,255,255,.50);
+      text-align: center;
+      position: relative; z-index: 1;
     }
 
-    /* ── Responsive ── */
-    @media (max-width:860px){
-      .hubRow{ grid-template-columns:1fr; }
-      .weekCard{ min-height:130px; }
-      .pickerGrid{ grid-template-columns:1fr; }
-      .tileName{ font-size:16px; }
-      .tileIcon{ width:50px; height:50px; }
+    /* ══════════════════════════════════════════
+       RESPONSIVE BREAKPOINTS
+    ══════════════════════════════════════════ */
+
+    /* Phones ≤ 600px — single column everything */
+    @media (max-width: 600px) {
+      .hubRow {
+        grid-template-columns: 1fr;
+      }
+      .weekCard {
+        min-height: 100px;
+        padding: 14px 16px 12px;
+      }
+      /* Picker tiles stack vertically, horizontal layout */
+      .pickerGrid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      .pickTile {
+        padding: 12px 14px;
+      }
+      .tileHint { display: none; } /* too cramped on phone */
+      .pickerSub2 { display: none; }
     }
 
-    @media (prefers-reduced-motion: reduce){
-      .ghostWrap{ animation:none; }
-      #fade{ transition:none; }
-      .weekCard{ animation:none; }
-      .weekCard::before{ animation:none; }
+    /* Mid tablets 601–860px — 2-col picker, 1-col hub */
+    @media (min-width: 601px) and (max-width: 860px) {
+      .hubRow {
+        grid-template-columns: 1fr;
+      }
+      .pickerGrid {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+      }
+    }
+
+    /* Short landscape phones (height ≤ 480px) */
+    @media (max-height: 480px) {
+      .ghostOuter {
+        width:  clamp(90px, 18vmin, 150px);
+        height: clamp(90px, 18vmin, 150px);
+      }
+      #startScene { gap: 12px; }
+      .hubHeading { font-size: clamp(16px, 4vw, 26px); letter-spacing: 2px; }
+      .weekCard   { min-height: 80px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ghostWrap         { animation: none; }
+      #fade              { transition: none; }
+      .weekCard          { animation: none; }
+      .weekCard::before  { animation: none; }
+      .pickerPanel       { animation: none; }
+      .pickerPanel::before { animation: none; }
     }
   </style>
 </head>
 <body>
 <div id="app">
 
+  <!-- Rotate nudge – only shown on very tiny portrait screens -->
   <div id="rotateOverlay" aria-hidden="true">
     <div class="card">
       <h2>Rotate to Landscape</h2>
@@ -595,7 +688,6 @@
         <img id="boohaGhost" src="assets/img/booha_ghost.png" alt="Booha" />
       </div>
     </div>
-
     <button id="startBtn" class="btn" type="button">スタート</button>
   </section>
 
@@ -608,15 +700,18 @@
 
   <!-- ── HUB ── -->
   <section id="hubScene" class="scene" aria-label="Week Hub">
-    <div class="hub">
-      <div class="hubHeading">BOOHA ADVENTURE</div>
+    <!-- hubScroll allows vertical scrolling on phones -->
+    <div class="hubScroll">
+      <div class="hub">
+        <div class="hubHeading">BOOHA ADVENTURE</div>
 
-      <div class="hubRow" id="weekCards">
-        <!-- injected by JS -->
-      </div>
+        <div class="hubRow" id="weekCards">
+          <!-- injected by JS -->
+        </div>
 
-      <div class="hubBottom">
-        <button id="mazeBtn" class="btn btnSmall" type="button">めいろへ（Maze）</button>
+        <div class="hubBottom">
+          <button id="mazeBtn" class="btn btnSmall" type="button">めいろへ（Maze）</button>
+        </div>
       </div>
     </div>
   </section>
@@ -625,7 +720,7 @@
   <div id="picker" class="picker" aria-hidden="true">
     <div class="pickerPanel" role="dialog" aria-modal="true" aria-label="Choose Curriculum">
       <div class="pickerTop">
-        <div style="width:70px"></div>
+        <div style="width:60px; flex-shrink:0;"></div>
         <div class="pickerTitle" id="pickerTitle">THIS WEEK（今週）</div>
         <button id="pickerClose" class="ghostBtn" type="button" aria-label="Back">戻る</button>
       </div>
@@ -634,7 +729,6 @@
       <div class="pickerSub2">Choose your curriculum</div>
 
       <div class="pickerGrid">
-
         <button class="pickTile" type="button" data-curr="preboo">
           <div class="tileTop">
             <div class="tileIcon">
@@ -673,7 +767,6 @@
           </div>
           <div class="tileHint">Tap to enter →</div>
         </button>
-
       </div>
 
       <div class="pickerNote">※ ここはプレースホルダーです（後でリンクします）</div>
@@ -699,16 +792,24 @@
   function showScene(el){
     [startScene, videoScene, hubScene].forEach(s => s.classList.remove('active'));
     el.classList.add('active');
+    // Scroll hub back to top every time it appears
+    if (el === hubScene){
+      hubScene.scrollTop = 0;
+    }
   }
   function fadeToBlack(on = true){
     fade.classList.toggle('on', !!on);
   }
 
-  /* ── Orientation overlay ── */
+  /* ── Orientation overlay ──
+     Only nudges on extremely small portrait screens (< 420px short side).
+     We fully support portrait on larger phones — just a gentle prompt on
+     tiny devices where 3 cards genuinely don't fit even stacked.
+  */
   function updateOrientationOverlay(){
-    const portrait = window.matchMedia('(orientation: portrait)').matches;
-    const small    = Math.min(window.innerWidth, window.innerHeight) < 700;
-    const show     = small && portrait;
+    const portrait  = window.matchMedia('(orientation: portrait)').matches;
+    const tinyShort = Math.min(window.innerWidth, window.innerHeight) < 360;
+    const show      = tinyShort && portrait;
     rotateOverlay.style.display = show ? 'flex' : 'none';
     rotateOverlay.setAttribute('aria-hidden', show ? 'false' : 'true');
   }
@@ -721,15 +822,15 @@
     const COUNT = 32;
     sparkleField.innerHTML = '';
     for (let i = 0; i < COUNT; i++){
-      const sp = document.createElement('div');
-      sp.className = 'sp';
-      const angle  = (i / COUNT) * Math.PI * 2;
-      const radius = 28 + Math.random() * 22;
-      const cx     = 50 + Math.cos(angle) * radius;
-      const cy     = 50 + Math.sin(angle) * radius;
-      const size   = 2 + Math.random() * 3;
-      const dur    = 1.4 + Math.random() * 2.0;
-      const delay  = -(Math.random() * dur);
+      const sp      = document.createElement('div');
+      sp.className  = 'sp';
+      const angle   = (i / COUNT) * Math.PI * 2;
+      const radius  = 28 + Math.random() * 22;
+      const cx      = 50 + Math.cos(angle) * radius;
+      const cy      = 50 + Math.sin(angle) * radius;
+      const size    = 2 + Math.random() * 3;
+      const dur     = 1.4 + Math.random() * 2.0;
+      const delay   = -(Math.random() * dur);
       sp.style.cssText = `
         --size:${size}px; --x:${cx}%; --y:${cy}%;
         --dur:${dur}s; --delay:${delay}s;
@@ -738,24 +839,14 @@
     }
   })();
 
-  /* ── Hardcoded week data (launch = January Week 1) ── */
-  /*
-    LAST WEEK  = December Week 4  (Dec 20 – Dec 26)
-    THIS WEEK  = January Week 1   (Jan 3  – Jan 9)
-    NEXT WEEK  = January Week 2   (Jan 10 – Jan 16)
-
-    The date math still runs so the hub stays accurate as real weeks pass,
-    but the special pre-cycle Dec Week 4 is always resolvable.
-  */
-
+  /* ── Date / week logic ── */
   const MONTH_NAME = {
-    jan:'January', feb:'February', mar:'March', apr:'April',
-    may:'May',     jun:'June',     jul:'July',  aug:'August',
+    jan:'January', feb:'February', mar:'March',     apr:'April',
+    may:'May',     jun:'June',     jul:'July',       aug:'August',
     sep:'September', oct:'October', nov:'November', dec:'December'
   };
 
-  // ── DEV DATE OVERRIDE ──
-  // Set to any date string to simulate that day. Set to null before launch.
+  // DEV DATE OVERRIDE — set to null before launch
   const DEV_DATE = '2027-01-03';
 
   function tokyoTodayYMD(){
@@ -774,11 +865,7 @@
   }
 
   function ymdToMs(y,m,d){ return Date.UTC(y,m-1,d); }
-
-  function parseYMD(str){
-    const [y,m,d] = str.split('-').map(Number);
-    return {y,m,d};
-  }
+  function parseYMD(str){ const [y,m,d]=str.split('-').map(Number); return {y,m,d}; }
 
   function addDays(ymd,n){
     const ms = ymdToMs(ymd.y,ymd.m,ymd.d) + n*86400000;
@@ -796,14 +883,10 @@
   function labelFromWeekId(id){
     if (!id) return '—';
     if (id === 'dec_w4_pre') return 'December Week 4';
-    // Structured IDs from year.json e.g. "2027_01_jan_w1"
     if (id.includes('_') && id.split('_').length >= 4){
       const p = id.split('_');
-      const mon = p[2];
-      const wn  = (p[3]||'w1').replace('w','');
-      return `${MONTH_NAME[mon]||mon} Week ${wn}`;
+      return `${MONTH_NAME[p[2]]||p[2]} Week ${(p[3]||'w1').replace('w','')}`;
     }
-    // Generic fallback e.g. "week_1" → "Week 1"
     if (id.startsWith('week_')) return `Week ${id.replace('week_','')}`;
     return id;
   }
@@ -823,7 +906,7 @@
     return div;
   }
 
-  // ── Picker: bound once, never duplicated ──
+  /* ── Picker (bound once) ── */
   const picker      = document.getElementById('picker');
   const pickerTitle = document.getElementById('pickerTitle');
   const pickerDates = document.getElementById('pickerDates');
@@ -837,6 +920,7 @@
     currentPickerWeekId = weekId;
     pickerTitle.textContent = `${tagEn}（${tagJp}）`;
     pickerDates.textContent = dates;
+    picker.scrollTop = 0;
     picker.classList.add('show');
     picker.setAttribute('aria-hidden','false');
   }
@@ -852,46 +936,40 @@
 
   document.querySelectorAll('.pickTile').forEach(btn => {
     btn.addEventListener('click', () => {
-      const curr = btn.dataset.curr;
-      alert(`PLACEHOLDER\nweek: ${currentPickerWeekId}\ncurriculum: ${curr}`);
+      alert(`PLACEHOLDER\nweek: ${currentPickerWeekId}\ncurriculum: ${btn.dataset.curr}`);
     });
   });
 
- if (mazeBtn){
-  mazeBtn.addEventListener('click', () => {
-    fadeToBlack(true);
-    setTimeout(() => {
-      window.location.href = 'maze.html';
-    }, 520); // match your FADE_MS
-  });
-}
+  if (mazeBtn){
+    mazeBtn.addEventListener('click', () => {
+      fadeToBlack(true);
+      setTimeout(() => { window.location.href = 'maze.html'; }, 520);
+    });
+  }
+
+  /* ── Render hub cards ── */
   async function renderHub(){
     const weekCards = document.getElementById('weekCards');
     weekCards.innerHTML = '';
 
-    // ── Try to load year.json; fall back to hardcoded Jan Week 1 launch data ──
     let year = null;
     try {
       const res = await fetch(`data/year.json?v=${Date.now()}`);
       if (res.ok) year = await res.json();
-    } catch(e){ /* no json available, use fallback */ }
+    } catch(e){}
 
-    // Cycle start = Jan 3 2027 (Sunday-based 48-week cycle)
     const CYCLE_START_STR = (year && year.cycleStart) || '2027-01-03';
     const cycleStart   = parseYMD(CYCLE_START_STR);
     const cycleStartMs = ymdToMs(cycleStart.y, cycleStart.m, cycleStart.d);
     const cycleLength  = (year && year.cycleLength) || 48;
     const weeks        = (year && year.weeks)       || [];
 
-    const today   = tokyoTodayYMD();
-    const todayMs = ymdToMs(today.y, today.m, today.d);
+    const today    = tokyoTodayYMD();
+    const todayMs  = ymdToMs(today.y, today.m, today.d);
     const diffDays = Math.floor((todayMs - cycleStartMs) / 86400000);
 
-    // ── THIS WEEK ──
     let thisIdx, thisWeekId, thisStart;
-
     if (diffDays < 0){
-      // Before cycle start → we're in December Week 4 (pre-launch)
       thisIdx    = -1;
       thisWeekId = (year && year.preStartWeek) || 'dec_w4_pre';
       thisStart  = addDays(cycleStart, -14);
@@ -902,42 +980,37 @@
     }
     const thisEnd = addDays(thisStart, 6);
 
-    // ── LAST WEEK ──
     let lastWeekId=null, lastStart=null, lastEnd=null;
     if (thisIdx === -1){
       lastWeekId = null;
     } else if (thisIdx === 0){
-      // January Week 1 is always first — last week is always December Week 4
       lastWeekId = 'dec_w4_pre';
       lastStart  = {y:2026, m:12, d:20};
       lastEnd    = {y:2026, m:12, d:26};
     } else {
-      const lIdx = (thisIdx - 1 + cycleLength) % cycleLength;
+      const lIdx = (thisIdx-1+cycleLength) % cycleLength;
       lastWeekId = weeks[lIdx] || `week_${lIdx+1}`;
-      lastStart  = addDays(cycleStart, lIdx * 7);
+      lastStart  = addDays(cycleStart, lIdx*7);
       lastEnd    = addDays(lastStart, 6);
     }
 
-    // ── NEXT WEEK ──
     let nextWeekId=null, nextStart=null, nextEnd=null;
     if (thisIdx === -1){
       nextWeekId = weeks[0] || 'week_1';
       nextStart  = cycleStart;
       nextEnd    = addDays(nextStart, 6);
     } else {
-      const nIdx = (thisIdx + 1) % cycleLength;
+      const nIdx = (thisIdx+1) % cycleLength;
       nextWeekId = weeks[nIdx] || `week_${nIdx+1}`;
-      nextStart  = addDays(cycleStart, nIdx * 7);
+      nextStart  = addDays(cycleStart, nIdx*7);
       nextEnd    = addDays(nextStart, 6);
     }
 
-    // ── Render 3 cards ──
     if (lastWeekId){
       weekCards.appendChild(buildCard({
         tagEn:'LAST WEEK', tagJp:'先週',
-        weekId:    lastWeekId,
-        title:     labelFromWeekId(lastWeekId),
-        rangeText: fmtRange(lastStart, lastEnd)
+        weekId:lastWeekId, title:labelFromWeekId(lastWeekId),
+        rangeText:fmtRange(lastStart, lastEnd)
       }));
     } else {
       weekCards.appendChild(buildCard({
@@ -948,20 +1021,18 @@
 
     weekCards.appendChild(buildCard({
       tagEn:'THIS WEEK', tagJp:'今週',
-      weekId:    thisWeekId,
-      title:     labelFromWeekId(thisWeekId),
-      rangeText: fmtRange(thisStart, thisEnd)
+      weekId:thisWeekId, title:labelFromWeekId(thisWeekId),
+      rangeText:fmtRange(thisStart, thisEnd)
     }));
 
     weekCards.appendChild(buildCard({
       tagEn:'NEXT WEEK', tagJp:'来週',
-      weekId:    nextWeekId||'',
-      title:     nextWeekId ? labelFromWeekId(nextWeekId) : '—',
-      rangeText: nextWeekId ? fmtRange(nextStart, nextEnd) : '—',
-      hint:      nextWeekId ? 'TAP TO OPEN' : 'LOCKED'
+      weekId:nextWeekId||'',
+      title:nextWeekId ? labelFromWeekId(nextWeekId) : '—',
+      rangeText:nextWeekId ? fmtRange(nextStart, nextEnd) : '—',
+      hint:nextWeekId ? 'TAP TO OPEN' : 'LOCKED'
     }));
 
-    // ── Wire card clicks (safe to re-run; cards are replaced each time) ──
     weekCards.querySelectorAll('.weekCard').forEach(card => {
       card.addEventListener('click', () => {
         const wid   = card.dataset.weekId;
@@ -976,26 +1047,23 @@
   }
 
   /* ── Start flow ── */
-  let started = false;
+  let started   = false;
+  let fadingOut = false;
 
   async function startIntro(){
     if (started) return;
     started = true;
-
     ghostWrap.classList.add('flyAway');
     fadeToBlack(true);
-
     await new Promise(r => setTimeout(r, 900));
-
     showScene(videoScene);
     try { introVideo.currentTime = 0; } catch(e){}
     setTimeout(() => fadeToBlack(false), 60);
-
     try {
       await introVideo.play();
     } catch(err){
       started   = false;
-      fadingOut = false;  // reset so goToHub can fire correctly later
+      fadingOut = false;
       ghostWrap.classList.remove('flyAway');
       showScene(startScene);
       fadeToBlack(false);
@@ -1005,9 +1073,8 @@
 
   startBtn.addEventListener('click', startIntro);
 
-  /* ── Video → Hub transition ── */
+  /* ── Video → Hub ── */
   const FADE_MS = 520;
-  let fadingOut = false;
 
   async function goToHub(){
     if (fadingOut) return;
@@ -1024,7 +1091,7 @@
   introVideo.addEventListener('timeupdate', () => {
     const d = introVideo.duration;
     if (!isFinite(d) || d <= 0) return;
-    if (d - introVideo.currentTime <= 0.85) goToHub();  // bumped from 0.65 for iOS
+    if (d - introVideo.currentTime <= 0.85) goToHub();
   });
   introVideo.addEventListener('ended', goToHub);
 
