@@ -857,8 +857,14 @@
     });
   });
 
-  if (mazeBtn) mazeBtn.addEventListener('click', () => alert('MAZE (placeholder)'));
-
+ if (mazeBtn){
+  mazeBtn.addEventListener('click', () => {
+    fadeToBlack(true);
+    setTimeout(() => {
+      window.location.href = 'maze.html';
+    }, 520); // match your FADE_MS
+  });
+}
   async function renderHub(){
     const weekCards = document.getElementById('weekCards');
     weekCards.innerHTML = '';
