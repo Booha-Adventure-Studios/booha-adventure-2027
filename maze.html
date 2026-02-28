@@ -227,6 +227,21 @@
     .chLineH{ height:1px; left:0; right:0; top:0; }
     .chLineV{ width:1px;  top:0; bottom:0; left:0; }
 
+    /* HUD title — Bowlby One, matches maze heading style */
+    .hudTitle{
+      font-family: 'Bowlby One', system-ui, sans-serif;
+      font-size: clamp(13px, 1.8vw, 18px);
+      letter-spacing: 2px;
+      line-height: 1.15;
+      color: #fff;
+      text-shadow:
+        0 0 22px rgba(255,140,255,.7),
+        0 0 60px rgba(255,80,200,.35),
+        0 2px 6px rgba(0,0,0,.9);
+      user-select: none;
+      pointer-events: none;
+    }
+
     /* HUD (top-left) */
     #hud{
       position:absolute;
@@ -303,24 +318,26 @@
     }
     #bryanBtn:active{ transform:scale(.99); }
 
-    /* Bottom-right BACK button */
+    /* Bottom-right BACK button — glowing pink, Japanese */
     #backBtn{
       position:absolute;
       right: calc(12px + var(--safe-right));
       bottom: calc(12px + var(--safe-bottom));
       z-index:20;
+      appearance:none; border:0;
       border-radius:999px;
-      padding:10px 14px;
-      font-size:12px; font-weight:1000; letter-spacing:1.2px;
-      color:rgba(255,255,255,.92);
-      background:rgba(0,0,0,.25);
-      border:1px solid rgba(255,255,255,.14);
-      backdrop-filter: blur(10px) saturate(140%);
-      -webkit-backdrop-filter: blur(10px) saturate(140%);
-      cursor:pointer;
+      padding:12px 20px;
+      font-size:15px; font-weight:1000; letter-spacing:.6px;
+      cursor:pointer; color:#000;
+      background: linear-gradient(180deg, var(--pink2), var(--pink));
+      box-shadow:
+        0 8px 20px rgba(255,59,189,.30),
+        0 0 0 2px rgba(255,59,189,.18),
+        0 0 28px rgba(255,59,189,.40);
       -webkit-tap-highlight-color: transparent;
+      transform: translateZ(0);
     }
-    #backBtn:active{ transform:scale(.99); }
+    #backBtn:active{ transform: scale(.98); }
 
     /* Shared button style */
     .btn{
@@ -360,7 +377,7 @@
 
   <!-- ── VIDEO SCENE (transition from index) ── -->
   <section id="videoScene" class="scene active" aria-label="To the maze video">
-    <video id="toMazeVideo" preload="auto" playsinline webkit-playsinline muted>
+    <video id="toMazeVideo" preload="auto" playsinline webkit-playsinline>
       <source src="assets/video/to-the-maze.mp4" type="video/mp4" />
     </video>
 
@@ -391,7 +408,7 @@
 
     <!-- HUD (top-left) -->
     <div id="hud">
-      <div class="pill">MAZE</div>
+      <div class="hudTitle">BOOHA<br>ADVENTURE</div>
       <div id="coordPill" class="pill">
         <div class="coordSmall">COORDINATES</div>
         <div class="coordBig" id="coordText">x: —  y: —</div>
@@ -406,7 +423,7 @@
     <button id="bryanBtn" type="button" aria-label="Bryan mode">BRYAN</button>
 
     <!-- Back button (bottom-right) -->
-    <button id="backBtn" type="button" aria-label="Back">BACK</button>
+    <button id="backBtn" type="button" aria-label="Back">もどる</button>
 
     <!-- ── START OVERLAY (shown until player taps START) ── -->
     <div id="startOverlay" aria-label="Start maze">
@@ -418,7 +435,7 @@
       <h1 class="startHeading">BOOHA MAZE</h1>
       <p class="startSub">めいろをはじめよう！</p>
 
-      <button id="mazeStartBtn" class="btn" type="button">START</button>
+      <button id="mazeStartBtn" class="btn" type="button">スタート</button>
     </div>
 
   </section>
@@ -432,7 +449,7 @@
   // ─────────────────────────────────────────────────────────
   // CONFIG
   // ─────────────────────────────────────────────────────────
-  const BRYAN_PASS = 'bryan'; // change to your private password
+  const BRYAN_PASS = 'him141amra803';
   const BRYAN_KEY  = 'booha_bryan_mode_unlocked_v1';
 
   const GHOSTS = [
@@ -662,10 +679,12 @@
     try { toMazeVideo.currentTime = 0; } catch(e){}
     try {
       await toMazeVideo.play();
+      // Autoplay with audio succeeded (desktop/some Android)
       tapOverlay.classList.remove('show');
       tapOverlay.setAttribute('aria-hidden','true');
     } catch(e){
-      // autoplay blocked — show tap overlay
+      // Blocked (iOS always blocks audio autoplay without gesture)
+      // Show tap overlay immediately — user taps ENTER to start video + audio
       tapOverlay.classList.add('show');
       tapOverlay.setAttribute('aria-hidden','false');
     }
