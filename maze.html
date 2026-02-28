@@ -386,7 +386,7 @@
     <!-- Shown only if autoplay is blocked -->
     <div id="tapOverlay" aria-hidden="true">
       <div class="tapCard">
-        <h1 class="tapTitle">ブーハーめいろ</h1>
+        <h1 class="tapTitle">ブーハのめいろ</h1>
         <p class="tapSub">タップしてめいろへ入ろう！</p>
         <button id="tapBtn" class="btn" type="button">はいる</button>
       </div>
@@ -452,7 +452,6 @@
   // CONFIG
   // ─────────────────────────────────────────────────────────
   const BRYAN_PASS = 'him141amra803';
-  const BRYAN_KEY  = 'booha_bryan_mode_unlocked_v1';
 
   const GHOSTS = [
     'assets/img/booha_ghost.png',
@@ -545,36 +544,75 @@
 
   // ─────────────────────────────────────────────────────────
   // Bryan mode
+  // Always starts LOCKED — password required every session.
+  // Dots are placed on click and cleared when mode is turned off.
   // ─────────────────────────────────────────────────────────
-  function isBryanUnlocked(){
-    try { return localStorage.getItem(BRYAN_KEY) === '1'; } catch(e){ return false; }
-  }
-  function setBryanUnlocked(on){
-    try { localStorage.setItem(BRYAN_KEY, on ? '1' : '0'); } catch(e){}
-  }
+  let bryanOn = false;  // session-only, never persisted
+
   function applyBryanUI(){
-    const on = isBryanUnlocked();
-    bryanBtn.classList.toggle('on', on);
-    grid.classList.toggle('show', on);
-    coordPill.classList.toggle('show', on);
-    crosshair.classList.toggle('show', on);
-    hitLayer.style.cursor = on ? 'crosshair' : 'default';
-    // Re-sync hit layer size whenever mode changes
-    if (on) requestAnimationFrame(() => positionHitLayer());
+    bryanBtn.classList.toggle('on', bryanOn);
+    grid.classList.toggle('show', bryanOn);
+    coordPill.classList.toggle('show', bryanOn);
+    crosshair.classList.toggle('show', bryanOn);
+    hitLayer.style.cursor = bryanOn ? 'crosshair' : 'default';
+    if (bryanOn) requestAnimationFrame(() => positionHitLayer());
+  }
+
+  // Container for click dots — lives inside hitLayer so coords align
+  const dotLayer = document.createElement('div');
+  dotLayer.style.cssText = 'position:absolute;inset:0;pointer-events:none;';
+  hitLayer.appendChild(dotLayer);
+
+  function placeDot(localX, localY, imgX, imgY){
+    const dot = document.createElement('div');
+    dot.style.cssText = `
+      position:absolute;
+      left:${localX}px; top:${localY}px;
+      width:10px; height:10px;
+      border-radius:50%;
+      background: #ff3bbd;
+      box-shadow: 0 0 0 2px #fff, 0 0 10px rgba(255,59,189,.8);
+      transform: translate(-50%,-50%);
+      pointer-events:none;
+    `;
+
+    // Label showing coords
+    const label = document.createElement('div');
+    label.textContent = `${imgX},${imgY}`;
+    label.style.cssText = `
+      position:absolute;
+      left:10px; top:-8px;
+      font-size:11px; font-weight:900;
+      letter-spacing:.5px;
+      color:#fff;
+      background: rgba(0,0,0,.72);
+      padding:2px 5px;
+      border-radius:4px;
+      white-space:nowrap;
+      pointer-events:none;
+    `;
+    dot.appendChild(label);
+    dotLayer.appendChild(dot);
+  }
+
+  function clearDots(){
+    dotLayer.innerHTML = '';
   }
 
   bryanBtn.addEventListener('click', () => {
-    if (isBryanUnlocked()){
-      setBryanUnlocked(false);
+    if (bryanOn){
+      // Turn off — lock, clear dots, reset UI
+      bryanOn = false;
+      clearDots();
+      coordText.textContent = 'x: —  y: —';
       applyBryanUI();
       return;
     }
     const pw = prompt('Bryan mode password:');
     if (pw === null) return;
     if (String(pw).trim() === BRYAN_PASS){
-      setBryanUnlocked(true);
+      bryanOn = true;
       applyBryanUI();
-      alert('Bryan mode unlocked.');
     } else {
       alert('Nope.');
     }
@@ -631,18 +669,23 @@
   }
 
   hitLayer.addEventListener('mousemove', e => {
-    if (!isBryanUnlocked()) return;
+    if (!bryanOn) return;
     const c = getImageCoords(e.clientX, e.clientY);
     coordText.textContent = `x: ${c.x}  y: ${c.y}`;
     setCrosshair(c.localX, c.localY);
   });
 
   hitLayer.addEventListener('click', async e => {
-    if (!isBryanUnlocked()) return;
+    if (!bryanOn) return;
     const c   = getImageCoords(e.clientX, e.clientY);
     const txt = `${c.x},${c.y}`;
     coordText.textContent = `x: ${c.x}  y: ${c.y}`;
     setCrosshair(c.localX, c.localY);
+
+    // Place a persistent pink dot at the click point
+    placeDot(c.localX, c.localY, c.x, c.y);
+
+    // Copy to clipboard
     const ok = await copyText(txt);
     if (ok){
       coordPill.style.transform = 'scale(1.02)';
@@ -651,7 +694,7 @@
   });
 
   coordPill.addEventListener('click', async () => {
-    if (!isBryanUnlocked()) return;
+    if (!bryanOn) return;
     const m   = coordText.textContent.match(/x:\s*(\d+)\s*y:\s*(\d+)/);
     const out = m ? `${m[1]},${m[2]}` : coordText.textContent;
     await copyText(out);
@@ -767,7 +810,7 @@
   // Init
   // ─────────────────────────────────────────────────────────
   assignRandomGhost();   // pick ghost for both overlay + avatar
-  applyBryanUI();        // restore Bryan mode state from localStorage
+  // Bryan mode always starts LOCKED — do NOT call applyBryanUI() here
   tryAutoPlay();         // kick off the intro video
 </script>
 </body>
