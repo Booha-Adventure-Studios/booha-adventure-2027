@@ -197,6 +197,8 @@
       position:absolute;
       left:0; top:0; width:0; height:0;
       cursor:default;
+      z-index:5;
+      pointer-events:auto;
     }
 
     /* Grid + crosshair (Bryan mode) */
@@ -384,9 +386,9 @@
     <!-- Shown only if autoplay is blocked -->
     <div id="tapOverlay" aria-hidden="true">
       <div class="tapCard">
-        <h1 class="tapTitle">BOOHA MAZE</h1>
-        <p class="tapSub">Tap to enter the maze.</p>
-        <button id="tapBtn" class="btn" type="button">ENTER</button>
+        <h1 class="tapTitle">ブーハーめいろ</h1>
+        <p class="tapSub">タップしてめいろへ入ろう！</p>
+        <button id="tapBtn" class="btn" type="button">はいる</button>
       </div>
     </div>
   </section>
@@ -453,7 +455,7 @@
   const BRYAN_KEY  = 'booha_bryan_mode_unlocked_v1';
 
   const GHOSTS = [
-    'assets/img/booha-ghost.png',
+    'assets/img/booha_ghost.png',
     'assets/img/blue-boo.png',
     'assets/img/green-boo.png',
     'assets/img/pink-boo.png',
@@ -557,6 +559,8 @@
     coordPill.classList.toggle('show', on);
     crosshair.classList.toggle('show', on);
     hitLayer.style.cursor = on ? 'crosshair' : 'default';
+    // Re-sync hit layer size whenever mode changes
+    if (on) requestAnimationFrame(() => positionHitLayer());
   }
 
   bryanBtn.addEventListener('click', () => {
@@ -670,8 +674,14 @@
     fadeToBlack(true);
     setTimeout(() => {
       showScene(mazeScene);
-      requestAnimationFrame(() => requestAnimationFrame(() => fadeToBlack(false)));
-      going = false;
+      // Re-position hit layer NOW that maze scene is visible and image has a rendered size
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          positionHitLayer();
+          fadeToBlack(false);
+          going = false;
+        });
+      });
     }, FADE_MS);
   }
 
