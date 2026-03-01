@@ -1,6 +1,5 @@
-
 <!doctype html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -36,7 +35,55 @@
     .scene.active{ display:block; }
 
     /* ══════════════════════════════
-       VIDEO SCENE (intro transition)
+       ROTATE OVERLAY
+       Shown on portrait mobile only — always on top
+    ══════════════════════════════ */
+    #rotateOverlay{
+      position:fixed; inset:0;
+      display:none;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:20px;
+      background:#000;
+      z-index:9999;
+      text-align:center;
+      padding:32px;
+    }
+    #rotateOverlay.show{ display:flex; }
+
+    .rotateIcon{
+      font-size:68px;
+      display:block;
+      animation: rotateHint 2.2s ease-in-out infinite;
+      transform-origin: center center;
+    }
+    @keyframes rotateHint{
+      0%  { transform: rotate(0deg); }
+      35% { transform: rotate(-90deg); }
+      65% { transform: rotate(-90deg); }
+      100%{ transform: rotate(0deg); }
+    }
+
+    .rotateTitle{
+      font-family:'Bowlby One', system-ui, sans-serif;
+      font-size:clamp(20px,5vw,28px);
+      letter-spacing:2px;
+      color:#fff;
+      text-shadow:
+        0 0 30px rgba(255,140,255,.7),
+        0 0 60px rgba(255,80,200,.35);
+      margin:0;
+    }
+    .rotateSub{
+      font-size:15px;
+      color:rgba(255,255,255,.6);
+      margin:0;
+      line-height:1.6;
+    }
+
+    /* ══════════════════════════════
+       VIDEO SCENE
     ══════════════════════════════ */
     #videoScene{ background:#000; }
 
@@ -46,48 +93,12 @@
       background:#000;
     }
 
-    /* Tap-to-play fallback (only shows if autoplay is blocked) */
-    #tapOverlay{
-      position:absolute; inset:0;
-      display:none;
-      align-items:center; justify-content:center;
-      padding: calc(24px + var(--safe-top)) calc(24px + var(--safe-right))
-               calc(24px + var(--safe-bottom)) calc(24px + var(--safe-left));
-      background: radial-gradient(ellipse at center,
-        rgba(0,0,0,.55) 0%,
-        rgba(0,0,0,.88) 70%,
-        rgba(0,0,0,.95) 100%);
-      text-align:center;
-      z-index:5;
-    }
-    #tapOverlay.show{ display:flex; }
-
-    .tapCard{
-      width:min(560px,100%);
-      border-radius:26px;
-      padding:22px 18px 18px;
-      background: rgba(255,255,255,.08);
-      backdrop-filter: blur(18px) saturate(150%);
-      -webkit-backdrop-filter: blur(18px) saturate(150%);
-      box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,.18),
-        0 20px 60px rgba(0,0,0,.7),
-        0 0 0 2px rgba(255,59,189,.30),
-        0 0 30px rgba(255,59,189,.25);
-    }
-    .tapTitle{
-      font-family:'Bowlby One', system-ui, sans-serif;
-      letter-spacing:2px; font-size:22px;
-      margin:0 0 8px;
-    }
-    .tapSub{ margin:0 0 16px; color:var(--muted); line-height:1.35; }
-
     /* ══════════════════════════════
        MAZE SCENE
     ══════════════════════════════ */
     #mazeScene{ background:#000; }
 
-    /* ── Start overlay (shown on top of maze until player taps START) ── */
+    /* ── Start overlay ── */
     #startOverlay{
       position:absolute; inset:0;
       display:flex;
@@ -112,7 +123,6 @@
       pointer-events:none;
     }
 
-    /* Ghost on start overlay */
     #startGhost{
       width: min(28vmin, 220px);
       height: min(28vmin, 220px);
@@ -145,10 +155,8 @@
       margin:0;
     }
 
-    /* Sparkle field for start overlay ghost */
     .startSparkleField{
       position:absolute;
-      /* centred on the ghost — ghost is ~220px, field bleeds 60px past */
       width: calc(min(28vmin, 220px) + 120px);
       height: calc(min(28vmin, 220px) + 120px);
       pointer-events:none;
@@ -172,14 +180,17 @@
       100%{ opacity:0;   transform: scale(.3) translateY(-22px); }
     }
 
-    /* Maze image stage */
+    /* ── Maze stage — fills full screen in landscape ── */
     #stage{
-      position:absolute; inset:0;
+      position:absolute;
+      top:    calc(0px + var(--safe-top));
+      right:  calc(0px + var(--safe-right));
+      bottom: calc(0px + var(--safe-bottom));
+      left:   calc(0px + var(--safe-left));
       display:flex;
       align-items:center;
       justify-content:center;
-      padding: calc(10px + var(--safe-top)) calc(10px + var(--safe-right))
-               calc(10px + var(--safe-bottom)) calc(10px + var(--safe-left));
+      padding:8px;
     }
 
     #mazeImg{
@@ -192,7 +203,7 @@
       filter: drop-shadow(0 18px 40px rgba(0,0,0,.6));
     }
 
-    /* Hit layer — sized/positioned in JS to match image rect */
+    /* Hit layer */
     #hitLayer{
       position:absolute;
       left:0; top:0; width:0; height:0;
@@ -229,7 +240,7 @@
     .chLineH{ height:1px; left:0; right:0; top:0; }
     .chLineV{ width:1px;  top:0; bottom:0; left:0; }
 
-    /* HUD title — Bowlby One, matches maze heading style */
+    /* HUD title */
     .hudTitle{
       font-family: 'Bowlby One', system-ui, sans-serif;
       font-size: clamp(13px, 1.8vw, 18px);
@@ -320,7 +331,7 @@
     }
     #bryanBtn:active{ transform:scale(.99); }
 
-    /* Bottom-right BACK button — glowing pink, Japanese */
+    /* Bottom-right BACK button */
     #backBtn{
       position:absolute;
       right: calc(12px + var(--safe-right));
@@ -370,6 +381,7 @@
 
     @media (prefers-reduced-motion: reduce){
       #avatar, #startGhost{ animation:none; }
+      .rotateIcon{ animation:none; transform: rotate(-90deg); }
       #fade{ transition:none; }
     }
   </style>
@@ -377,28 +389,37 @@
 <body>
 <div id="app">
 
-  <!-- ── VIDEO SCENE (transition from index) ── -->
-  <section id="videoScene" class="scene active" aria-label="To the maze video">
-    <video id="toMazeVideo" preload="auto" playsinline webkit-playsinline>
+  <!-- ── ROTATE OVERLAY (portrait on mobile) ── -->
+  <div id="rotateOverlay" role="alert" aria-live="polite">
+    <span class="rotateIcon">📱</span>
+    <h1 class="rotateTitle">よこむきにしてね！</h1>
+    <p class="rotateSub">めいろをあそぶには<br>スマホをよこにむけてください。</p>
+  </div>
+
+  <!-- ── VIDEO SCENE ── -->
+  <section id="videoScene" class="scene active" aria-label="めいろへのどうが">
+    <!--
+      muted  = guaranteed autoplay on iOS & Android without any tap gate
+      preload="auto" = buffer entire file before play for smooth start
+      playsinline = play inline on iOS, no forced fullscreen
+    -->
+    <video
+      id="toMazeVideo"
+      preload="auto"
+      muted
+      playsinline
+      webkit-playsinline
+    >
       <source src="assets/video/to-the-maze.mp4" type="video/mp4" />
     </video>
-
-    <!-- Shown only if autoplay is blocked -->
-    <div id="tapOverlay" aria-hidden="true">
-      <div class="tapCard">
-        <h1 class="tapTitle">ブーハのめいろ</h1>
-        <p class="tapSub">タップしてめいろへ入ろう！</p>
-        <button id="tapBtn" class="btn" type="button">はいる</button>
-      </div>
-    </div>
   </section>
 
   <!-- ── MAZE SCENE ── -->
-  <section id="mazeScene" class="scene" aria-label="Maze">
+  <section id="mazeScene" class="scene" aria-label="めいろ">
 
     <!-- Maze image -->
     <div id="stage">
-      <img id="mazeImg" src="assets/img/maze.png" alt="Maze" />
+      <img id="mazeImg" src="assets/img/maze.png" alt="めいろ" />
       <div id="hitLayer" aria-hidden="true">
         <div id="grid"></div>
         <div id="crosshair">
@@ -418,23 +439,22 @@
       </div>
     </div>
 
-    <!-- Floating ghost avatar (top-right, visible after start) -->
-    <img id="avatar" alt="Booha" />
+    <!-- Floating ghost avatar (top-right) -->
+    <img id="avatar" alt="ブーハー" />
 
-    <!-- Bryan mode toggle (bottom-left) -->
+    <!-- Bryan mode toggle (bottom-left) — kept in English -->
     <button id="bryanBtn" type="button" aria-label="Bryan mode">BRYAN</button>
 
     <!-- Back button (bottom-right) -->
-    <button id="backBtn" type="button" aria-label="Back">もどる</button>
+    <button id="backBtn" type="button" aria-label="もどる">もどる</button>
 
-    <!-- ── START OVERLAY (shown until player taps START) ── -->
-    <div id="startOverlay" aria-label="Start maze">
-      <!-- sparkles behind ghost -->
+    <!-- ── START OVERLAY ── -->
+    <div id="startOverlay" aria-label="めいろスタート">
       <div class="startSparkleField" id="startSparkleField" aria-hidden="true"></div>
 
-      <img id="startGhost" alt="Booha" />
+      <img id="startGhost" alt="ブーハー" />
 
-      <h1 class="startHeading">BOOHA MAZE</h1>
+      <h1 class="startHeading">ブーハー めいろ</h1>
       <p class="startSub">めいろをはじめよう！</p>
 
       <button id="mazeStartBtn" class="btn" type="button">スタート</button>
@@ -467,8 +487,7 @@
   const videoScene    = document.getElementById('videoScene');
   const mazeScene     = document.getElementById('mazeScene');
   const toMazeVideo   = document.getElementById('toMazeVideo');
-  const tapOverlay    = document.getElementById('tapOverlay');
-  const tapBtn        = document.getElementById('tapBtn');
+  const rotateOverlay = document.getElementById('rotateOverlay');
   const fade          = document.getElementById('fade');
 
   const mazeImg       = document.getElementById('mazeImg');
@@ -491,6 +510,26 @@
   const bgMusic       = document.getElementById('bgMusic');
 
   // ─────────────────────────────────────────────────────────
+  // Rotate / landscape detection
+  // Only enforced on actual mobile/touch devices.
+  // ─────────────────────────────────────────────────────────
+  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+                || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.userAgent));
+
+  function checkOrientation(){
+    if (!isMobile){ rotateOverlay.classList.remove('show'); return; }
+    const portrait = window.innerHeight > window.innerWidth;
+    rotateOverlay.classList.toggle('show', portrait);
+  }
+
+  window.addEventListener('resize', checkOrientation, { passive: true });
+  window.addEventListener('orientationchange', () => {
+    // Small delay so browser reports correct new dimensions
+    setTimeout(checkOrientation, 150);
+  }, { passive: true });
+  checkOrientation();
+
+  // ─────────────────────────────────────────────────────────
   // Helpers
   // ─────────────────────────────────────────────────────────
   function showScene(el){
@@ -498,7 +537,7 @@
     el.classList.add('active');
   }
 
-  function fadeToBlack(on=true){
+  function fadeToBlack(on = true){
     fade.classList.toggle('on', !!on);
   }
 
@@ -506,8 +545,6 @@
     return arr[Math.floor(Math.random() * arr.length)];
   }
 
-  // Pick a random ghost and apply it to both the start overlay
-  // ghost and the floating HUD avatar
   function assignRandomGhost(){
     const src = pickRandom(GHOSTS);
     startGhost.src = src;
@@ -525,7 +562,7 @@
     const COUNT = 28;
     startSparkles.innerHTML = '';
     for (let i = 0; i < COUNT; i++){
-      const sp = document.createElement('div');
+      const sp     = document.createElement('div');
       sp.className = 'sp';
       const angle  = (i / COUNT) * Math.PI * 2;
       const radius = 30 + Math.random() * 20;
@@ -543,11 +580,9 @@
   })();
 
   // ─────────────────────────────────────────────────────────
-  // Bryan mode
-  // Always starts LOCKED — password required every session.
-  // Dots are placed on click and cleared when mode is turned off.
+  // Bryan mode — always locked per session, kept in English
   // ─────────────────────────────────────────────────────────
-  let bryanOn = false;  // session-only, never persisted
+  let bryanOn = false;
 
   function applyBryanUI(){
     bryanBtn.classList.toggle('on', bryanOn);
@@ -558,7 +593,6 @@
     if (bryanOn) requestAnimationFrame(() => positionHitLayer());
   }
 
-  // Container for click dots — lives inside hitLayer so coords align
   const dotLayer = document.createElement('div');
   dotLayer.style.cssText = 'position:absolute;inset:0;pointer-events:none;';
   hitLayer.appendChild(dotLayer);
@@ -575,8 +609,6 @@
       transform: translate(-50%,-50%);
       pointer-events:none;
     `;
-
-    // Label showing coords
     const label = document.createElement('div');
     label.textContent = `${imgX},${imgY}`;
     label.style.cssText = `
@@ -595,13 +627,10 @@
     dotLayer.appendChild(dot);
   }
 
-  function clearDots(){
-    dotLayer.innerHTML = '';
-  }
+  function clearDots(){ dotLayer.innerHTML = ''; }
 
   bryanBtn.addEventListener('click', () => {
     if (bryanOn){
-      // Turn off — lock, clear dots, reset UI
       bryanOn = false;
       clearDots();
       coordText.textContent = 'x: —  y: —';
@@ -621,7 +650,7 @@
   // ─────────────────────────────────────────────────────────
   // Hit layer / coordinate finder
   // ─────────────────────────────────────────────────────────
-  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
   function positionHitLayer(){
     const r      = mazeImg.getBoundingClientRect();
@@ -634,10 +663,10 @@
 
   function getImageCoords(clientX, clientY){
     const rect = hitLayer.getBoundingClientRect();
-    const x  = clientX - rect.left;
-    const y  = clientY - rect.top;
-    const nx = clamp(x / rect.width,  0, 1);
-    const ny = clamp(y / rect.height, 0, 1);
+    const x    = clientX - rect.left;
+    const y    = clientY - rect.top;
+    const nx   = clamp(x / rect.width,  0, 1);
+    const ny   = clamp(y / rect.height, 0, 1);
     return {
       x: Math.round(nx * (mazeImg.naturalWidth  || 0)),
       y: Math.round(ny * (mazeImg.naturalHeight || 0)),
@@ -659,7 +688,7 @@
     } catch(e){
       try {
         const ta = document.createElement('textarea');
-        ta.value = txt; ta.style.position='fixed'; ta.style.left='-9999px';
+        ta.value = txt; ta.style.position = 'fixed'; ta.style.left = '-9999px';
         document.body.appendChild(ta); ta.focus(); ta.select();
         document.execCommand('copy');
         document.body.removeChild(ta);
@@ -681,11 +710,7 @@
     const txt = `${c.x},${c.y}`;
     coordText.textContent = `x: ${c.x}  y: ${c.y}`;
     setCrosshair(c.localX, c.localY);
-
-    // Place a persistent pink dot at the click point
     placeDot(c.localX, c.localY, c.x, c.y);
-
-    // Copy to clipboard
     const ok = await copyText(txt);
     if (ok){
       coordPill.style.transform = 'scale(1.02)';
@@ -700,13 +725,13 @@
     await copyText(out);
   });
 
-  window.addEventListener('resize', positionHitLayer, { passive:true });
-
+  window.addEventListener('resize', positionHitLayer, { passive: true });
   if (mazeImg.complete){ setTimeout(positionHitLayer, 0); }
   else { mazeImg.addEventListener('load', () => setTimeout(positionHitLayer, 0)); }
 
   // ─────────────────────────────────────────────────────────
-  // Video → Maze scene transition
+  // Video → Maze transition
+  // Video is muted → autoplay always succeeds on mobile, no tap gate needed.
   // ─────────────────────────────────────────────────────────
   const FADE_MS = 520;
   let going = false;
@@ -717,7 +742,6 @@
     fadeToBlack(true);
     setTimeout(() => {
       showScene(mazeScene);
-      // Re-position hit layer NOW that maze scene is visible and image has a rendered size
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           positionHitLayer();
@@ -728,49 +752,23 @@
     }, FADE_MS);
   }
 
-  async function tryAutoPlay(){
-    try { toMazeVideo.currentTime = 0; } catch(e){}
-    try {
-      await toMazeVideo.play();
-      // Autoplay with audio succeeded (desktop/some Android)
-      tapOverlay.classList.remove('show');
-      tapOverlay.setAttribute('aria-hidden','true');
-    } catch(e){
-      // Blocked (iOS always blocks audio autoplay without gesture)
-      // Show tap overlay immediately — user taps ENTER to start video + audio
-      tapOverlay.classList.add('show');
-      tapOverlay.setAttribute('aria-hidden','false');
-    }
-  }
-
   toMazeVideo.addEventListener('timeupdate', () => {
     const d = toMazeVideo.duration;
     if (!isFinite(d) || d <= 0) return;
     if (d - toMazeVideo.currentTime <= 0.85) enterMazeScene();
   });
   toMazeVideo.addEventListener('ended', enterMazeScene);
-  toMazeVideo.addEventListener('error', enterMazeScene);
+  toMazeVideo.addEventListener('error', enterMazeScene);  // graceful fallback
 
-  tapBtn.addEventListener('click', async () => {
-    tapOverlay.classList.remove('show');
-    tapOverlay.setAttribute('aria-hidden','true');
+  // Muted autoplay is universally allowed — no tap overlay needed
+  async function tryAutoPlay(){
+    try { toMazeVideo.currentTime = 0; } catch(e){}
     try { await toMazeVideo.play(); }
-    catch(e){ enterMazeScene(); }
-  });
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden){
-      try { toMazeVideo.pause(); } catch(e){}
-      try { bgMusic.pause(); }     catch(e){}
-    } else {
-      // Resume music only if maze has started
-      if (mazeStarted) try { bgMusic.play(); } catch(e){}
-    }
-  });
+    catch(e){ enterMazeScene(); }  // skip video if somehow still blocked
+  }
 
   // ─────────────────────────────────────────────────────────
-  // START OVERLAY — shown when maze scene first appears
-  // Player taps START → overlay fades out, music begins
+  // START OVERLAY
   // ─────────────────────────────────────────────────────────
   let mazeStarted = false;
 
@@ -778,40 +776,46 @@
     if (mazeStarted) return;
     mazeStarted = true;
 
-    // Fade out overlay
     startOverlay.classList.add('hidden');
 
-    // Start looping background music (user gesture required — this is it)
+    // Music requires a user gesture — the スタート tap is it
     try {
       bgMusic.volume = 0.65;
       await bgMusic.play();
     } catch(e){ console.warn('Music blocked:', e); }
 
-    // Remove overlay from DOM after transition ends (keeps it clean)
     startOverlay.addEventListener('transitionend', () => {
       startOverlay.remove();
     }, { once: true });
   });
 
   // ─────────────────────────────────────────────────────────
-  // Back button → return to index hub
+  // Back button
   // ─────────────────────────────────────────────────────────
   backBtn.addEventListener('click', () => {
-    // Stop music gracefully
     try { bgMusic.pause(); bgMusic.currentTime = 0; } catch(e){}
-
     fadeToBlack(true);
-    setTimeout(() => {
-      window.location.href = 'index.html';
-    }, FADE_MS);
+    setTimeout(() => { window.location.href = 'index.html'; }, FADE_MS);
+  });
+
+  // ─────────────────────────────────────────────────────────
+  // Visibility change — pause / resume
+  // ─────────────────────────────────────────────────────────
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden){
+      try { toMazeVideo.pause(); } catch(e){}
+      try { bgMusic.pause(); }     catch(e){}
+    } else {
+      if (!mazeStarted) try { toMazeVideo.play(); } catch(e){}
+      if (mazeStarted)  try { bgMusic.play(); }     catch(e){}
+    }
   });
 
   // ─────────────────────────────────────────────────────────
   // Init
   // ─────────────────────────────────────────────────────────
-  assignRandomGhost();   // pick ghost for both overlay + avatar
-  // Bryan mode always starts LOCKED — do NOT call applyBryanUI() here
-  tryAutoPlay();         // kick off the intro video
+  assignRandomGhost();
+  tryAutoPlay();
 </script>
 </body>
 </html>
