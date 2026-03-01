@@ -182,7 +182,6 @@
         0 0 16px 5px rgba(255,100,220,.75);
     }
     #startGhost{
-      /* Scales with the shorter viewport dimension — good in landscape */
       width:  clamp(100px, 28vmin, 200px);
       height: clamp(100px, 28vmin, 200px);
       object-fit:contain; user-select:none; -webkit-user-drag:none;
@@ -200,11 +199,7 @@
     ════════════════════════════════ */
     #mazeScene{ position:absolute; inset:0; background:#000; }
 
-    /*
-      STAGE fills the entire screen — no bottom reserve.
-      The floating back button overlays the corner but never
-      obscures the maze centre where gameplay happens.
-    */
+    /* Stage always fills visible area */
     #stage{
       position:absolute;
       top:    env(safe-area-inset-top,    0px);
@@ -212,21 +207,24 @@
       bottom: env(safe-area-inset-bottom, 0px);
       left:   env(safe-area-inset-left,   0px);
       display:flex; align-items:center; justify-content:center;
-
       padding:0;
     }
 
     #mazeImg{
-      /* contain = full maze always visible, no cropping */
       display:block;
       width:100%; height:100%;
       max-width:100%; max-height:100%;
-      object-fit:contain;
+      object-fit:contain; /* desktop default */
       user-select:none; -webkit-user-drag:none;
       pointer-events:none;
     }
 
-    /* Hit layer — JS positions it to match rendered maze rect */
+    /* MOBILE: fill the whole screen (no black bars) */
+    @media (pointer:coarse){
+      #mazeImg{ object-fit:cover; }
+    }
+
+    /* Hit layer — JS positions it to match the STAGE (not just the image element) */
     #hitLayer{
       position:absolute; left:0; top:0; width:0; height:0;
       cursor:default; z-index:5; pointer-events:auto;
@@ -279,11 +277,11 @@
     .coordSmall{ font-size:12px; color:rgba(255,255,255,.7); font-weight:800; letter-spacing:1px; }
     .coordBig  { font-size:14px; margin-top:4px; }
 
-    /* ── Floating ghost avatar (desktop top-right) ── */
+    /* ── Floating ghost avatar (ALWAYS — you wanted it in the corner) ── */
     #avatar{
       position:absolute;
       right:calc(10px + var(--safe-right)); top:calc(10px + var(--safe-top));
-      width:48px; height:48px; z-index:10; pointer-events:none;
+      width:44px; height:44px; z-index:10; pointer-events:none;
       filter:drop-shadow(0 8px 16px rgba(0,0,0,.55));
       opacity:.95; transform-origin:50% 60%;
       animation:floaty 3.8s ease-in-out infinite;
@@ -294,7 +292,7 @@
       100%{ transform:translateY(0px)  rotate(var(--r,0deg)); }
     }
 
-    /* ── BRYAN button (desktop bottom-left) ── */
+    /* ── BRYAN button (desktop only) ── */
     #bryanBtn{
       position:absolute;
       left:calc(10px + var(--safe-left)); bottom:calc(10px + var(--safe-bottom));
@@ -312,52 +310,35 @@
     }
     #bryanBtn:active{ transform:scale(.96); }
 
-    /*
-      ── BACK BUTTON ──
-      On mobile: small, semi-transparent, bottom-right corner, doesn't obscure maze.
-      On desktop: slightly larger.
-    */
+    /* ── BACK BUTTON (desktop only) ── */
     #backBtn{
       position:absolute;
       right:  calc(10px + var(--safe-right));
       bottom: calc(10px + var(--safe-bottom));
       z-index:20;
       appearance:none; border:0; border-radius:999px;
-      /* mobile-first sizing */
-      padding:7px 14px;
-      font-size:12px; font-weight:1000; letter-spacing:.5px;
+      padding:9px 18px;
+      font-size:14px; font-weight:1000; letter-spacing:.5px;
       cursor:pointer; color:#000;
       background:linear-gradient(180deg,var(--pink2),var(--pink));
       box-shadow:
         0 5px 14px rgba(255,59,189,.28),
         0 0 0 2px rgba(255,59,189,.15),
         0 0 18px rgba(255,59,189,.32);
-      /* semi-transparent on mobile so it feels lighter on the maze */
-      opacity:0.82;
       -webkit-tap-highlight-color:transparent; transform:translateZ(0);
-      transition:opacity 200ms;
     }
-    #backBtn:hover { opacity:1; }
-    #backBtn:active{ transform:scale(.96); opacity:1; }
+    #backBtn:active{ transform:scale(.96); }
 
-    /* Desktop: a bit bigger */
-    @media (min-width:900px) and (pointer:fine){
-      #backBtn{ padding:9px 18px; font-size:14px; opacity:1; }
-      #bryanBtn{ padding:8px 12px; font-size:10px; color:rgba(255,255,255,.6); }
-      #avatar{ width:56px; height:56px; }
-    }
-
-    /* On touch/mobile: hide HUD title & Bryan, keep back button */
+    /* TOUCH/MOBILE: hide HUD, BRYAN, BACK (you asked for this) */
     @media (pointer:coarse){
-      .hudTitle{ display:none; }
-      #bryanBtn{ display:none; }
       #hud{ display:none; }
+      #bryanBtn{ display:none; }
+      #backBtn{ display:none; }
     }
 
-    /* Hide BRYAN + HUD during transition (video + overlay 2) */
+    /* Hide chrome during transition (video + overlay 2) */
     #app.inTransition #bryanBtn,
     #app.inTransition #hud,
-    #app.inTransition #avatar,
     #app.inTransition #backBtn{ display:none !important; }
 
     /* ── FADE ── */
@@ -436,13 +417,13 @@
       </div>
     </div>
 
-    <!-- Ghost avatar floating top-right (desktop) -->
+    <!-- Ghost stays in the corner (mobile + desktop) -->
     <img id="avatar" alt="ブーハー" />
 
     <!-- Bryan mode (desktop only) -->
     <button id="bryanBtn" type="button" aria-label="Bryan mode">BRYAN</button>
 
-    <!-- Back — always visible, small on mobile -->
+    <!-- Back (desktop only) -->
     <button id="backBtn" type="button" aria-label="もどる">もどる</button>
   </section>
 
@@ -483,9 +464,7 @@
   const coordText       = document.getElementById('coordText');
   const FADE_MS         = 520;
 
-  // ── Orientation — CSS media query handles it; JS is backup only ──
-  // The @media (orientation:portrait) rule already shows #rotateOverlay.
-  // This JS adds a .show class for belt-and-suspenders on older webviews.
+  // ── Orientation (CSS does the real work; JS is backup) ──
   function checkOrientation(){
     const portrait    = window.innerHeight > window.innerWidth;
     const smallScreen = window.innerWidth < 1024;
@@ -498,7 +477,7 @@
   }
   checkOrientation();
 
-  // ── Helpers ───────────────────────────────────────────────
+  // ── Helpers ──
   function fadeToBlack(on){ fade.classList.toggle('on', !!on); }
   function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
@@ -510,7 +489,7 @@
     startGhost.style.setProperty('--r', r);
   }
 
-  // ── Sparkle builder ───────────────────────────────────────
+  // ── Sparkles ──
   function buildSparkles(container, count=24, wide=false){
     container.innerHTML='';
     for(let i=0; i<count; i++){
@@ -529,25 +508,51 @@
   buildSparkles(confirmSparkles, 24);
   buildSparkles(startSparkles, 36, true);
 
-  // ── Hit layer positioning ─────────────────────────────────
-  // Always uses contain coordinates — no cover offset needed.
+  // ── Fit math (works for BOTH contain + cover) ──
+  function getFitInfo(){
+    const stage = document.getElementById('stage');
+    const rect = stage.getBoundingClientRect();
+    const iw = mazeImg.naturalWidth  || 0;
+    const ih = mazeImg.naturalHeight || 0;
+    const fit = (getComputedStyle(mazeImg).objectFit || 'contain').trim();
+
+    if(!iw || !ih || rect.width <= 0 || rect.height <= 0){
+      return { rect, iw, ih, scale:1, offX:0, offY:0, fit };
+    }
+
+    const sContain = Math.min(rect.width/iw, rect.height/ih);
+    const sCover   = Math.max(rect.width/iw, rect.height/ih);
+    const scale = (fit === 'cover') ? sCover : sContain;
+
+    const drawW = iw * scale;
+    const drawH = ih * scale;
+
+    // where the drawn image sits inside the stage
+    const offX = (rect.width  - drawW) / 2;
+    const offY = (rect.height - drawH) / 2;
+
+    return { rect, iw, ih, scale, offX, offY, fit };
+  }
+
+  // ── Hit layer positioning ──
+  // Hit layer matches STAGE (not mazeImg box), because object-fit draws inside.
   function positionHitLayer(){
-    const r = mazeImg.getBoundingClientRect();
-    const s = document.getElementById('stage').getBoundingClientRect();
-    hitLayer.style.left   = (r.left - s.left)+'px';
-    hitLayer.style.top    = (r.top  - s.top )+'px';
+    const r = document.getElementById('stage').getBoundingClientRect();
+    hitLayer.style.left   = '0px';
+    hitLayer.style.top    = '0px';
     hitLayer.style.width  = r.width +'px';
     hitLayer.style.height = r.height+'px';
   }
-  function positionSoon(){
-    requestAnimationFrame(()=>requestAnimationFrame(positionHitLayer));
-  }
+  function positionSoon(){ requestAnimationFrame(()=>requestAnimationFrame(positionHitLayer)); }
   window.addEventListener('resize', positionSoon, {passive:true});
   window.addEventListener('orientationchange', ()=>setTimeout(positionSoon,200), {passive:true});
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize', positionSoon, {passive:true});
+  }
   if(mazeImg.complete) setTimeout(positionSoon, 0);
   else mazeImg.addEventListener('load', ()=>setTimeout(positionSoon, 0));
 
-  // ── Overlay 1 ─────────────────────────────────────────────
+  // ── Overlay 1 ──
   returnBtn.addEventListener('click', ()=>{
     fadeToBlack(true);
     setTimeout(()=>{ window.location.href='index.html'; }, FADE_MS);
@@ -560,7 +565,7 @@
     overlay1.classList.add('hidden');
     overlay1.addEventListener('transitionend', ()=>overlay1.classList.add('gone'), {once:true});
 
-    // Hide maze chrome while video plays
+    // hide any maze chrome while the video plays
     app.classList.add('inTransition');
 
     videoWrap.classList.add('show');
@@ -568,15 +573,14 @@
     try{ await toMazeVideo.play(); }catch(e){ showOverlay2(); }
   });
 
-  // ── Video → Overlay 2 ────────────────────────────────────
+  // ── Video → Overlay 2 ──
   let overlay2Shown = false;
   function showOverlay2(){
     if(overlay2Shown) return; overlay2Shown = true;
     try{ toMazeVideo.pause(); }catch(e){}
-    try{ toMazeVideo.currentTime = 0; }catch(e){}
     videoWrap.classList.remove('show');
     overlay2.classList.add('show');
-    app.classList.add('inTransition'); // still pre-maze
+    app.classList.add('inTransition');
     positionSoon();
   }
   toMazeVideo.addEventListener('ended', showOverlay2);
@@ -587,7 +591,7 @@
     if(d - toMazeVideo.currentTime <= 0.5) showOverlay2();
   });
 
-  // ── Overlay 2 → maze start ───────────────────────────────
+  // ── Overlay 2 → maze start ──
   let mazeStarted = false;
   mazeStartBtn.addEventListener('click', async ()=>{
     if(mazeStarted) return; mazeStarted = true;
@@ -595,7 +599,7 @@
     overlay2.classList.add('hidden');
     overlay2.addEventListener('transitionend', ()=>overlay2.remove(), {once:true});
 
-    // Reveal maze chrome
+    // show chrome again (desktop only; mobile is hidden by CSS)
     app.classList.remove('inTransition');
 
     // sneaky.mp3 — gesture unlocks audio
@@ -605,14 +609,14 @@
     positionSoon();
   });
 
-  // ── Back button (always visible) ─────────────────────────
+  // ── Back button (desktop only) ──
   backBtn.addEventListener('click', ()=>{
     try{ bgMusic.pause(); bgMusic.currentTime=0; }catch(e){}
     fadeToBlack(true);
     setTimeout(()=>{ window.location.href='index.html'; }, FADE_MS);
   });
 
-  // ── Visibility ────────────────────────────────────────────
+  // ── Visibility ──
   document.addEventListener('visibilitychange', ()=>{
     if(document.hidden){
       try{ toMazeVideo.pause(); }catch(e){}
@@ -623,7 +627,7 @@
     }
   });
 
-  // ── Bryan mode (desktop only) ────────────────────────────
+  // ── Bryan mode (desktop only) ──
   let bryanOn = false;
   function applyBryanUI(){
     bryanBtn.classList.toggle('on', bryanOn);
@@ -631,8 +635,8 @@
     coordPill.classList.toggle('show', bryanOn);
     crosshair.classList.toggle('show', bryanOn);
     hitLayer.style.cursor = bryanOn ? 'crosshair' : 'default';
-    if(bryanOn) requestAnimationFrame(positionHitLayer);
   }
+
   const dotLayer = document.createElement('div');
   dotLayer.style.cssText = 'position:absolute;inset:0;pointer-events:none;';
   hitLayer.appendChild(dotLayer);
@@ -669,16 +673,25 @@
     String(pw).trim()===BRYAN_PASS ? (bryanOn=true, applyBryanUI()) : alert('Nope.');
   });
 
-  // ── Coordinate finder (contain only — no cover math) ─────
+  // ── Coordinate finder (works for contain + cover) ──
   function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
 
-  function getImageCoords(cx,cy){
-    const rect = hitLayer.getBoundingClientRect();
-    const lx = cx - rect.left;
-    const ly = cy - rect.top;
-    const x  = Math.round(clamp(lx/rect.width,  0,1) * (mazeImg.naturalWidth  ||0));
-    const y  = Math.round(clamp(ly/rect.height, 0,1) * (mazeImg.naturalHeight ||0));
-    return { x, y, localX:lx, localY:ly };
+  function getImageCoords(clientX, clientY){
+    const hi = hitLayer.getBoundingClientRect();
+    const info = getFitInfo();
+
+    // local within stage (hitLayer)
+    const lxStage = clientX - hi.left;
+    const lyStage = clientY - hi.top;
+
+    // translate into image-space with object-fit offset
+    const ix = (lxStage - info.offX) / info.scale;
+    const iy = (lyStage - info.offY) / info.scale;
+
+    const x = Math.round(clamp(ix, 0, info.iw));
+    const y = Math.round(clamp(iy, 0, info.ih));
+
+    return { x, y, localX: lxStage, localY: lyStage };
   }
 
   function setCrosshair(lx,ly){
@@ -709,7 +722,7 @@
 
   hitLayer.addEventListener('click', async e=>{
     if(!bryanOn) return;
-    const c  = getImageCoords(e.clientX, e.clientY);
+    const c = getImageCoords(e.clientX, e.clientY);
     coordText.textContent = `x: ${c.x}  y: ${c.y}`;
     setCrosshair(c.localX, c.localY);
     placeDot(c.localX, c.localY, c.x, c.y);
@@ -726,7 +739,7 @@
     await copyText(m ? `${m[1]},${m[2]}` : coordText.textContent);
   });
 
-  // ── Init ──────────────────────────────────────────────────
+  // ── Init ──
   assignRandomGhost();
   positionSoon();
 </script>
