@@ -96,10 +96,42 @@
     /* ── OVERLAY 2 ── */
     #overlay2{ z-index:45; display:none; }
     #overlay2.show{ display:flex; }
-    #startGhost{ width:min(28vmin,200px); height:min(28vmin,200px); object-fit:contain;
+
+    /* Ghost-as-button */
+    .ghostBtnWrap{
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      -webkit-tap-highlight-color:transparent;
+      background:none; border:none; padding:0;
+    }
+    .ghostBtnWrap:active #startGhost{
+      transform: scale(.9) translateY(-4px);
+      filter:drop-shadow(0 0 40px rgba(255,100,220,1)) drop-shadow(0 14px 30px rgba(0,0,0,.7));
+    }
+    .ghostSparkleField{
+      position:absolute;
+      inset:-70px;
+      pointer-events:none;
+      z-index:0;
+    }
+    /* larger sparkles for the ghost */
+    .ghostSparkleField .sp{
+      box-shadow:
+        0 0 6px 2px rgba(255,255,255,.95),
+        0 0 16px 5px rgba(255,100,220,.75);
+    }
+    #startGhost{
+      width:min(38vmin,250px); height:min(38vmin,250px); object-fit:contain;
       user-select:none; -webkit-user-drag:none;
-      filter:drop-shadow(0 0 22px rgba(255,100,220,.55)) drop-shadow(0 14px 30px rgba(0,0,0,.7));
-      animation:floaty 3.6s ease-in-out infinite; transform-origin:50% 60%; }
+      filter:drop-shadow(0 0 26px rgba(255,100,220,.6)) drop-shadow(0 14px 30px rgba(0,0,0,.7));
+      animation:floaty 3.6s ease-in-out infinite;
+      transform-origin:50% 60%;
+      transition: transform 120ms ease, filter 120ms ease;
+      position:relative; z-index:1;
+    }
 
     /* ── MAZE ── */
     #mazeScene{ position:absolute; inset:0; background:#000; display:block; }
@@ -186,13 +218,12 @@
 
   <!-- OVERLAY 1 — confirmation -->
   <div id="overlay1" class="overlay" aria-label="めいろへいく？">
-    <h1 class="overlayHeading">ブーハー めいろ</h1>
-    <p class="overlaySub">めいろにはいりますか？</p>
+    <h1 class="overlayHeading">ブーハーめいろにいく？</h1>
     <div class="btnRow">
-      <button id="returnBtn" class="btnBlue" type="button">もどる</button>
+      <button id="returnBtn" class="btnBlue" type="button">いかない</button>
       <div class="sparkleWrap">
         <div class="sparkleField" id="confirmSparkles" aria-hidden="true"></div>
-        <button id="continueBtn" class="btnPink" type="button">つづける</button>
+        <button id="continueBtn" class="btnPink" type="button">いく！</button>
       </div>
     </div>
   </div>
@@ -206,13 +237,12 @@
 
   <!-- OVERLAY 2 — ghost + start -->
   <div id="overlay2" class="overlay" aria-label="スタート">
-    <img id="startGhost" alt="ブーハー" />
     <h1 class="overlayHeading">ブーハー めいろ</h1>
-    <p class="overlaySub">ブーハーがまっているよ！</p>
-    <div class="sparkleWrap">
-      <div class="sparkleField" id="startSparkles" aria-hidden="true"></div>
-      <button id="mazeStartBtn" class="btnPink" type="button">スタート</button>
-    </div>
+    <p class="overlaySub">ブーハーをタッチしてはじめよう！</p>
+    <button id="mazeStartBtn" class="ghostBtnWrap" type="button" aria-label="スタート">
+      <div class="ghostSparkleField" id="startSparkles" aria-hidden="true"></div>
+      <img id="startGhost" alt="ブーハー" />
+    </button>
   </div>
 
   <!-- MAZE SCENE -->
@@ -299,20 +329,22 @@
   }
 
   // ── Sparkles ──
-  function buildSparkles(container, count=24){
+  function buildSparkles(container, count=24, wide=false){
     container.innerHTML='';
     for(let i=0;i<count;i++){
       const sp=document.createElement('div'); sp.className='sp';
       const angle=(i/count)*Math.PI*2;
-      const radius=28+Math.random()*18;
+      const radius= wide ? (35+Math.random()*28) : (28+Math.random()*18);
       const cx=50+Math.cos(angle)*radius, cy=50+Math.sin(angle)*radius;
-      const size=2+Math.random()*3, dur=1.3+Math.random()*1.8, delay=-(Math.random()*dur);
+      const size= wide ? (3+Math.random()*4) : (2+Math.random()*3);
+      const dur=1.3+Math.random()*1.8, delay=-(Math.random()*dur);
       sp.style.cssText=`--size:${size}px;--x:${cx}%;--y:${cy}%;--dur:${dur}s;--delay:${delay}s;`;
       container.appendChild(sp);
     }
   }
-  buildSparkles(confirmSparkles);
-  buildSparkles(startSparkles);
+  buildSparkles(confirmSparkles, 24);
+  // Ghost sparkle field is bigger — more sparkles, wider spread
+  buildSparkles(startSparkles, 36, true);
 
   // ── Overlay 1 ──
   returnBtn.addEventListener('click', ()=>{
