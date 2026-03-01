@@ -34,6 +34,10 @@
       background:#000; z-index:9999; text-align:center; padding:32px;
     }
     #rotateOverlay.show{ display:flex; }
+    /* CSS-only portrait: works in ALL webviews including Messenger */
+    @media screen and (orientation:portrait) and (max-width:1023px){
+      #rotateOverlay{ display:flex !important; }
+    }
     .rotateIcon{ font-size:68px; display:block; transform-origin:center;
       animation:rotateHint 2.2s ease-in-out infinite; }
     @keyframes rotateHint{
@@ -203,13 +207,13 @@
     */
     #stage{
       position:absolute;
-      top:    var(--safe-top,   0px);
-      right:  var(--safe-right, 0px);
-      bottom: var(--safe-bottom,0px);
-      left:   var(--safe-left,  0px);
+      top:    env(safe-area-inset-top,    0px);
+      right:  env(safe-area-inset-right,  0px);
+      bottom: env(safe-area-inset-bottom, 0px);
+      left:   env(safe-area-inset-left,   0px);
       display:flex; align-items:center; justify-content:center;
-      /* tiny pad so the maze never literally touches the notch */
-      padding:4px;
+
+      padding:0;
     }
 
     #mazeImg{
@@ -479,19 +483,16 @@
   const coordText       = document.getElementById('coordText');
   const FADE_MS         = 520;
 
-  // ── Orientation / rotate overlay ──────────────────────────
-  // Pure viewport check — no userAgent sniffing.
-  // Works in all browsers, webviews, and in-app browsers (Messenger, LINE, etc.)
-  // Only show rotate prompt when the screen is narrower than it is tall
-  // AND the screen is small enough to be a phone/tablet (not a tall desktop window).
+  // ── Orientation — CSS media query handles it; JS is backup only ──
+  // The @media (orientation:portrait) rule already shows #rotateOverlay.
+  // This JS adds a .show class for belt-and-suspenders on older webviews.
   function checkOrientation(){
-    const portrait  = window.innerHeight > window.innerWidth;
-    const smallScreen = window.innerWidth < 1024; // ignore tall narrow desktop windows
+    const portrait    = window.innerHeight > window.innerWidth;
+    const smallScreen = window.innerWidth < 1024;
     rotateOverlay.classList.toggle('show', portrait && smallScreen);
   }
   window.addEventListener('resize', checkOrientation, {passive:true});
   window.addEventListener('orientationchange', ()=>setTimeout(checkOrientation,150), {passive:true});
-  // Also fire on visualViewport changes (handles keyboard pop-up etc.)
   if(window.visualViewport){
     window.visualViewport.addEventListener('resize', checkOrientation, {passive:true});
   }
