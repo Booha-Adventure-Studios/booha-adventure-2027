@@ -480,16 +480,21 @@
   const FADE_MS         = 520;
 
   // ── Orientation / rotate overlay ──────────────────────────
-  // Only enforce on actual mobile handsets — not touch laptops
-  const isMobileUA = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-                  || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.userAgent));
-
+  // Pure viewport check — no userAgent sniffing.
+  // Works in all browsers, webviews, and in-app browsers (Messenger, LINE, etc.)
+  // Only show rotate prompt when the screen is narrower than it is tall
+  // AND the screen is small enough to be a phone/tablet (not a tall desktop window).
   function checkOrientation(){
-    if(!isMobileUA){ rotateOverlay.classList.remove('show'); return; }
-    rotateOverlay.classList.toggle('show', window.innerHeight > window.innerWidth);
+    const portrait  = window.innerHeight > window.innerWidth;
+    const smallScreen = window.innerWidth < 1024; // ignore tall narrow desktop windows
+    rotateOverlay.classList.toggle('show', portrait && smallScreen);
   }
   window.addEventListener('resize', checkOrientation, {passive:true});
   window.addEventListener('orientationchange', ()=>setTimeout(checkOrientation,150), {passive:true});
+  // Also fire on visualViewport changes (handles keyboard pop-up etc.)
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize', checkOrientation, {passive:true});
+  }
   checkOrientation();
 
   // ── Helpers ───────────────────────────────────────────────
