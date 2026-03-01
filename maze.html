@@ -12,119 +12,165 @@
     :root{
       --pink:#ff3bbd; --pink2:#ff79d7;
       --blue:#3bc8ff; --blue2:#79dfff;
-      --safe-top: env(safe-area-inset-top);
-      --safe-right: env(safe-area-inset-right);
+      --safe-top:    env(safe-area-inset-top);
+      --safe-right:  env(safe-area-inset-right);
       --safe-bottom: env(safe-area-inset-bottom);
-      --safe-left: env(safe-area-inset-left);
-
-      /* Space reserved for bottom HUD buttons (BRYAN + もどる). */
-      --bottom-ui: 52px;
+      --safe-left:   env(safe-area-inset-left);
     }
 
     *{ box-sizing:border-box; }
     html,body{ height:100%; margin:0; background:#000; color:#fff;
-      font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,
         "Noto Sans","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif; }
-
     #app{ position:fixed; inset:0; background:#000; overflow:hidden; }
 
-    /* ── ROTATE ── */
-    #rotateOverlay{ position:fixed; inset:0; display:none; flex-direction:column;
-      align-items:center; justify-content:center; gap:20px; background:#000;
-      z-index:9999; text-align:center; padding:32px; }
+    /* ════════════════════════════════
+       ROTATE OVERLAY
+    ════════════════════════════════ */
+    #rotateOverlay{
+      position:fixed; inset:0;
+      display:none; flex-direction:column;
+      align-items:center; justify-content:center; gap:20px;
+      background:#000; z-index:9999; text-align:center; padding:32px;
+    }
     #rotateOverlay.show{ display:flex; }
     .rotateIcon{ font-size:68px; display:block; transform-origin:center;
       animation:rotateHint 2.2s ease-in-out infinite; }
     @keyframes rotateHint{
-      0%{ transform:rotate(0deg); } 35%{ transform:rotate(-90deg); }
-      65%{ transform:rotate(-90deg); } 100%{ transform:rotate(0deg); } }
-    .rotateTitle{ font-family:'Bowlby One',sans-serif; font-size:clamp(20px,5vw,28px);
-      letter-spacing:2px; color:#fff; margin:0;
+      0%  { transform:rotate(0deg); }
+      35% { transform:rotate(-90deg); }
+      65% { transform:rotate(-90deg); }
+      100%{ transform:rotate(0deg); }
+    }
+    .rotateTitle{ font-family:'Bowlby One',sans-serif;
+      font-size:clamp(20px,5vw,28px); letter-spacing:2px; color:#fff; margin:0;
       text-shadow:0 0 30px rgba(255,140,255,.7),0 0 60px rgba(255,80,200,.35); }
     .rotateSub{ font-size:15px; color:rgba(255,255,255,.6); margin:0; line-height:1.6; }
 
-    /* ── SHARED OVERLAY ── */
-    .overlay{ position:absolute; inset:0; display:flex; flex-direction:column;
-      align-items:center; justify-content:center; gap:clamp(16px,4vmin,32px);
-      padding: calc(24px + var(--safe-top)) calc(24px + var(--safe-right))
-               calc(24px + var(--safe-bottom)) calc(24px + var(--safe-left));
+    /* ════════════════════════════════
+       SHARED OVERLAY BASE
+    ════════════════════════════════ */
+    .overlay{
+      position:absolute; inset:0;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      gap:clamp(14px,3.5vmin,30px);
+      padding:
+        calc(28px + var(--safe-top))
+        calc(28px + var(--safe-right))
+        calc(28px + var(--safe-bottom))
+        calc(28px + var(--safe-left));
       background:radial-gradient(ellipse at center,
-        rgba(0,0,0,.50) 0%,rgba(0,0,0,.82) 60%,rgba(0,0,0,.96) 100%);
+        rgba(0,0,0,.50) 0%,rgba(0,0,0,.84) 62%,rgba(0,0,0,.97) 100%);
       backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
-      text-align:center; z-index:40; transition:opacity 550ms ease; }
+      text-align:center; z-index:40;
+      transition:opacity 550ms ease;
+    }
     .overlay.hidden{ opacity:0; pointer-events:none; }
-    .overlay.gone{ display:none; }
-    .overlayHeading{ font-family:'Bowlby One',sans-serif;
-      font-size:clamp(22px,5vw,48px); letter-spacing:2px; margin:0; color:#fff;
-      text-shadow:0 0 32px rgba(255,140,255,.7),0 0 80px rgba(255,80,200,.35),
+    .overlay.gone  { display:none; }
+
+    .overlayHeading{
+      font-family:'Bowlby One',sans-serif;
+      font-size:clamp(20px,4.5vw,46px);
+      letter-spacing:2px; margin:0; color:#fff; line-height:1.2;
+      text-shadow:
+        0 0 32px rgba(255,140,255,.7),
+        0 0 80px rgba(255,80,200,.35),
         0 2px 8px rgba(0,0,0,.9);
-      line-height:1.2; }
-    .btnRow{ display:flex; gap:16px; flex-wrap:wrap; justify-content:center; align-items:center; }
+    }
+    .btnRow{
+      display:flex; gap:clamp(10px,3vmin,20px);
+      flex-wrap:wrap; justify-content:center; align-items:center;
+    }
 
-    /* ── BUTTONS ── */
-    .btnPink{ appearance:none; border:0; border-radius:999px;
-      padding:clamp(12px,2.5vmin,16px) clamp(22px,5vmin,32px);
-      font-size:clamp(16px,4vmin,20px); font-weight:1000; letter-spacing:.6px;
+    /* ════════════════════════════════
+       OVERLAY BUTTONS
+    ════════════════════════════════ */
+    .btnPink, .btnBlue{
+      appearance:none; border:0; border-radius:999px;
+      padding:clamp(11px,2.5vmin,15px) clamp(20px,5vmin,30px);
+      font-size:clamp(15px,3.8vmin,20px); font-weight:1000; letter-spacing:.5px;
       cursor:pointer; color:#000;
+      -webkit-tap-highlight-color:transparent; transform:translateZ(0);
+      min-width:80px;
+    }
+    .btnPink{
       background:linear-gradient(180deg,var(--pink2),var(--pink));
-      box-shadow:0 10px 22px rgba(255,59,189,.30),0 0 0 2px rgba(255,59,189,.18),
-        0 0 28px rgba(255,59,189,.40);
-      -webkit-tap-highlight-color:transparent; transform:translateZ(0); }
-    .btnPink:active{ transform:scale(.97); }
-    .btnBlue{ appearance:none; border:0; border-radius:999px;
-      padding:clamp(12px,2.5vmin,16px) clamp(22px,5vmin,32px);
-      font-size:clamp(16px,4vmin,20px); font-weight:1000; letter-spacing:.6px;
-      cursor:pointer; color:#000;
+      box-shadow:
+        0 8px 20px rgba(255,59,189,.28),
+        0 0 0 2px rgba(255,59,189,.18),
+        0 0 26px rgba(255,59,189,.38);
+    }
+    .btnPink:active{ transform:scale(.96); }
+    .btnBlue{
       background:linear-gradient(180deg,var(--blue2),var(--blue));
-      box-shadow:0 10px 22px rgba(59,200,255,.30),0 0 0 2px rgba(59,200,255,.18),
-        0 0 28px rgba(59,200,255,.40);
-      -webkit-tap-highlight-color:transparent; transform:translateZ(0); }
-    .btnBlue:active{ transform:scale(.97); }
+      box-shadow:
+        0 8px 20px rgba(59,200,255,.28),
+        0 0 0 2px rgba(59,200,255,.18),
+        0 0 26px rgba(59,200,255,.38);
+    }
+    .btnBlue:active{ transform:scale(.96); }
 
-    /* ── SPARKLES ── */
-    .sparkleWrap{ position:relative; display:inline-flex; align-items:center; justify-content:center; }
+    /* ════════════════════════════════
+       SPARKLES
+    ════════════════════════════════ */
+    .sparkleWrap{
+      position:relative; display:inline-flex;
+      align-items:center; justify-content:center;
+    }
     .sparkleField{ position:absolute; inset:-50px; pointer-events:none; }
-    .sp{ position:absolute; border-radius:50%; background:#fff; opacity:0;
+    .sp{
+      position:absolute; border-radius:50%; background:#fff; opacity:0;
       animation:sparkleLife var(--dur) ease-in-out var(--delay) infinite;
       width:var(--size); height:var(--size); top:var(--y); left:var(--x);
-      box-shadow:0 0 4px 1px rgba(255,255,255,.9),0 0 10px 3px rgba(255,100,220,.6); }
+      box-shadow:
+        0 0 4px 1px rgba(255,255,255,.9),
+        0 0 10px 3px rgba(255,100,220,.6);
+    }
     @keyframes sparkleLife{
-      0%{ opacity:0; transform:scale(.4) translateY(0); }
-      20%{ opacity:1; transform:scale(1) translateY(-6px); }
-      60%{ opacity:.85; transform:scale(.9) translateY(-14px); }
-      100%{ opacity:0; transform:scale(.3) translateY(-22px); } }
+      0%  { opacity:0;   transform:scale(.4) translateY(0); }
+      20% { opacity:1;   transform:scale(1)  translateY(-6px); }
+      60% { opacity:.85; transform:scale(.9) translateY(-14px); }
+      100%{ opacity:0;   transform:scale(.3) translateY(-22px); }
+    }
 
-    /* ── OVERLAY 1 ── */
+    /* ════════════════════════════════
+       OVERLAY 1 — confirmation
+    ════════════════════════════════ */
     #overlay1{ z-index:50; }
 
-    /* ── VIDEO ── */
-    #videoWrap{ position:absolute; inset:0; display:none; background:#000; z-index:20; }
+    /* ════════════════════════════════
+       TRANSITION VIDEO
+    ════════════════════════════════ */
+    #videoWrap{
+      position:absolute; inset:0;
+      display:none; background:#000; z-index:20;
+    }
     #videoWrap.show{ display:block; }
     #toMazeVideo{ width:100%; height:100%; object-fit:cover; background:#000; }
 
-    /* ── OVERLAY 2 ── */
+    /* ════════════════════════════════
+       OVERLAY 2 — ghost start
+    ════════════════════════════════ */
     #overlay2{ z-index:45; display:none; }
     #overlay2.show{ display:flex; }
 
-    /* Ghost-as-button */
+    /* Ghost is the button */
     .ghostBtnWrap{
       position:relative;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      -webkit-tap-highlight-color:transparent;
+      display:inline-flex; align-items:center; justify-content:center;
       background:none; border:none; padding:0;
+      cursor:pointer; -webkit-tap-highlight-color:transparent;
     }
     .ghostBtnWrap:active #startGhost{
-      transform: scale(.9) translateY(-4px);
-      filter:drop-shadow(0 0 40px rgba(255,100,220,1)) drop-shadow(0 14px 30px rgba(0,0,0,.7));
+      transform:scale(.88) translateY(-5px);
+      filter:
+        drop-shadow(0 0 44px rgba(255,100,220,1))
+        drop-shadow(0 14px 30px rgba(0,0,0,.7));
     }
     .ghostSparkleField{
-      position:absolute;
-      inset:-70px;
-      pointer-events:none;
-      z-index:0;
+      position:absolute; inset:-70px;
+      pointer-events:none; z-index:0;
     }
     .ghostSparkleField .sp{
       box-shadow:
@@ -132,133 +178,189 @@
         0 0 16px 5px rgba(255,100,220,.75);
     }
     #startGhost{
-      width:min(32vmin,220px); height:min(32vmin,220px); object-fit:contain;
-      user-select:none; -webkit-user-drag:none;
-      filter:drop-shadow(0 0 26px rgba(255,100,220,.6)) drop-shadow(0 14px 30px rgba(0,0,0,.7));
+      /* Scales with the shorter viewport dimension — good in landscape */
+      width:  clamp(100px, 28vmin, 200px);
+      height: clamp(100px, 28vmin, 200px);
+      object-fit:contain; user-select:none; -webkit-user-drag:none;
+      filter:
+        drop-shadow(0 0 26px rgba(255,100,220,.6))
+        drop-shadow(0 14px 30px rgba(0,0,0,.7));
       animation:floaty 3.6s ease-in-out infinite;
       transform-origin:50% 60%;
-      transition: transform 120ms ease, filter 120ms ease;
+      transition:transform 120ms ease, filter 120ms ease;
       position:relative; z-index:1;
     }
 
-    /* ── MAZE ── */
-    #mazeScene{ position:absolute; inset:0; background:#000; display:block; }
+    /* ════════════════════════════════
+       MAZE SCENE
+    ════════════════════════════════ */
+    #mazeScene{ position:absolute; inset:0; background:#000; }
 
     /*
-      FIT ACROSS ALL MOBILES
-      We make a predictable “play area” (stage) that accounts for:
-      - safe-area insets (notch/home indicator)
-      - bottom UI buttons (BRYAN + もどる)
-
-      Then we size/position hitLayer to the *actual rendered* maze image rect.
+      STAGE fills the entire screen — no bottom reserve.
+      The floating back button overlays the corner but never
+      obscures the maze centre where gameplay happens.
     */
     #stage{
       position:absolute;
-      top:    calc(0px + var(--safe-top));
-      right:  calc(0px + var(--safe-right));
-      bottom: calc(var(--bottom-ui) + var(--safe-bottom));
-      left:   calc(0px + var(--safe-left));
-
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: 6px;
+      top:    var(--safe-top,   0px);
+      right:  var(--safe-right, 0px);
+      bottom: var(--safe-bottom,0px);
+      left:   var(--safe-left,  0px);
+      display:flex; align-items:center; justify-content:center;
+      /* tiny pad so the maze never literally touches the notch */
+      padding:4px;
     }
 
     #mazeImg{
+      /* contain = full maze always visible, no cropping */
       display:block;
-      width:100%;
-      height:100%;
-      max-width:100%;
-      max-height:100%;
+      width:100%; height:100%;
+      max-width:100%; max-height:100%;
       object-fit:contain;
-      user-select:none;
-      -webkit-user-drag:none;
+      user-select:none; -webkit-user-drag:none;
       pointer-events:none;
     }
 
-    /* Hit layer is positioned by JS to match mazeImg’s rendered box */
-    #hitLayer{ position:absolute; left:0; top:0; width:0; height:0;
-      cursor:default; z-index:5; pointer-events:auto; }
-
-    /* Dev helpers */
-    #grid{ position:absolute; inset:0; display:none; pointer-events:none;
-      background-image:linear-gradient(to right,rgba(255,255,255,.12) 1px,transparent 1px),
-        linear-gradient(to bottom,rgba(255,255,255,.12) 1px,transparent 1px);
-      background-size:80px 80px; mix-blend-mode:screen; opacity:.55; }
-    #grid.show{ display:block; }
-
-    #crosshair{ position:absolute; inset:0; pointer-events:none; display:none; }
-    #crosshair.show{ display:block; }
-    .chLineH,.chLineV{ position:absolute; background:rgba(255,255,255,.7);
-      box-shadow:0 0 16px rgba(255,255,255,.25); }
-    .chLineH{ height:1px; left:0; right:0; top:0; }
-    .chLineV{ width:1px; top:0; bottom:0; left:0; }
-
-    /* HUD */
-    .hudTitle{ font-family:'Bowlby One',sans-serif; font-size:clamp(13px,1.8vw,18px);
-      letter-spacing:2px; line-height:1.15; color:#fff;
-      text-shadow:0 0 22px rgba(255,140,255,.7),0 0 60px rgba(255,80,200,.35),0 2px 6px rgba(0,0,0,.9);
-      user-select:none; pointer-events:none; }
-    #hud{ position:absolute; left:calc(12px + var(--safe-left)); top:calc(12px + var(--safe-top));
-      display:flex; gap:10px; align-items:flex-start; z-index:10; }
-    .pill{ border-radius:999px; padding:10px 14px; font-weight:900; letter-spacing:.4px;
-      background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.16);
-      backdrop-filter:blur(14px) saturate(140%); -webkit-backdrop-filter:blur(14px) saturate(140%);
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),0 14px 30px rgba(0,0,0,.35);
-      color:rgba(255,255,255,.92); user-select:none; }
-    #coordPill{ display:none; } #coordPill.show{ display:block; }
-    .coordSmall{ font-size:12px; color:rgba(255,255,255,.7); font-weight:800; letter-spacing:1px; }
-    .coordBig{ font-size:14px; margin-top:4px; }
-    @media (max-width:600px){ .hudTitle{ display:none; } }
-
-    #avatar{ position:absolute; right:calc(8px + var(--safe-right)); top:calc(8px + var(--safe-top));
-      width:44px; height:44px; z-index:10; pointer-events:none;
-      filter:drop-shadow(0 8px 16px rgba(0,0,0,.55)); opacity:.98; transform-origin:50% 60%;
-      animation:floaty 3.8s ease-in-out infinite; }
-
-    @keyframes floaty{
-      0%{ transform:translateY(0px) rotate(var(--r,0deg)); }
-      50%{ transform:translateY(-8px) rotate(calc(var(--r,0deg) + 2deg)); }
-      100%{ transform:translateY(0px) rotate(var(--r,0deg)); } }
-
-    /* Bottom controls */
-    #bryanBtn{ position:absolute; left:calc(8px + var(--safe-left)); bottom:calc(8px + var(--safe-bottom));
-      z-index:20; border-radius:999px; padding:6px 10px; font-size:9px; font-weight:1000;
-      letter-spacing:1.4px; text-transform:uppercase; color:rgba(255,255,255,.5);
-      background:rgba(0,0,0,.30); border:1px solid rgba(255,255,255,.10);
-      backdrop-filter:blur(10px) saturate(140%); -webkit-backdrop-filter:blur(10px) saturate(140%);
-      cursor:pointer; -webkit-tap-highlight-color:transparent; }
-    #bryanBtn.on{ color:#fff; border-color:rgba(255,255,255,.22);
-      box-shadow:0 0 0 2px rgba(255,59,189,.18),0 0 18px rgba(255,59,189,.25); }
-    #bryanBtn:active{ transform:scale(.97); }
-
-    #backBtn{ position:absolute; right:calc(8px + var(--safe-right)); bottom:calc(8px + var(--safe-bottom));
-      z-index:20; appearance:none; border:0; border-radius:999px; padding:8px 16px;
-      font-size:13px; font-weight:1000; letter-spacing:.5px; cursor:pointer; color:#000;
-      background:linear-gradient(180deg,var(--pink2),var(--pink));
-      box-shadow:0 6px 14px rgba(255,59,189,.30),0 0 0 2px rgba(255,59,189,.18),0 0 20px rgba(255,59,189,.35);
-      -webkit-tap-highlight-color:transparent; transform:translateZ(0); }
-    #backBtn:active{ transform:scale(.97); }
-
-    /*
-      IMPORTANT FIX:
-      Hide BRYAN + BACK during the transition video.
-      The video is z-index:20; buttons are also z-index:20.
-      So they can overlap depending on DOM order.
-
-      We toggle .inTransition on #app while video is showing.
-    */
-    #app.inTransition #bryanBtn,
-    #app.inTransition #backBtn,
-    #app.inTransition #hud,
-    #app.inTransition #avatar{
-      display:none !important;
+    /* Hit layer — JS positions it to match rendered maze rect */
+    #hitLayer{
+      position:absolute; left:0; top:0; width:0; height:0;
+      cursor:default; z-index:5; pointer-events:auto;
     }
 
+    /* Dev grid + crosshair (Bryan mode) */
+    #grid{
+      position:absolute; inset:0; display:none; pointer-events:none;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,.12) 1px, transparent 1px),
+        linear-gradient(to bottom,rgba(255,255,255,.12) 1px, transparent 1px);
+      background-size:80px 80px; mix-blend-mode:screen; opacity:.55;
+    }
+    #grid.show{ display:block; }
+    #crosshair{ position:absolute; inset:0; pointer-events:none; display:none; }
+    #crosshair.show{ display:block; }
+    .chLineH,.chLineV{
+      position:absolute; background:rgba(255,255,255,.7);
+      box-shadow:0 0 16px rgba(255,255,255,.25);
+    }
+    .chLineH{ height:1px; left:0; right:0; top:0; }
+    .chLineV{ width:1px;  top:0; bottom:0; left:0; }
+
+    /* ── HUD (desktop only) ── */
+    .hudTitle{
+      font-family:'Bowlby One',sans-serif; font-size:clamp(13px,1.8vw,18px);
+      letter-spacing:2px; line-height:1.15; color:#fff;
+      text-shadow:
+        0 0 22px rgba(255,140,255,.7),
+        0 0 60px rgba(255,80,200,.35),
+        0 2px 6px rgba(0,0,0,.9);
+      user-select:none; pointer-events:none;
+    }
+    #hud{
+      position:absolute;
+      left:calc(12px + var(--safe-left)); top:calc(12px + var(--safe-top));
+      display:flex; gap:10px; align-items:flex-start; z-index:10;
+    }
+    .pill{
+      border-radius:999px; padding:10px 14px; font-weight:900; letter-spacing:.4px;
+      background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.16);
+      backdrop-filter:blur(14px) saturate(140%);
+      -webkit-backdrop-filter:blur(14px) saturate(140%);
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.08),
+        0 14px 30px rgba(0,0,0,.35);
+      color:rgba(255,255,255,.92); user-select:none;
+    }
+    #coordPill{ display:none; } #coordPill.show{ display:block; }
+    .coordSmall{ font-size:12px; color:rgba(255,255,255,.7); font-weight:800; letter-spacing:1px; }
+    .coordBig  { font-size:14px; margin-top:4px; }
+
+    /* ── Floating ghost avatar (desktop top-right) ── */
+    #avatar{
+      position:absolute;
+      right:calc(10px + var(--safe-right)); top:calc(10px + var(--safe-top));
+      width:48px; height:48px; z-index:10; pointer-events:none;
+      filter:drop-shadow(0 8px 16px rgba(0,0,0,.55));
+      opacity:.95; transform-origin:50% 60%;
+      animation:floaty 3.8s ease-in-out infinite;
+    }
+    @keyframes floaty{
+      0%  { transform:translateY(0px)  rotate(var(--r,0deg)); }
+      50% { transform:translateY(-8px) rotate(calc(var(--r,0deg) + 2deg)); }
+      100%{ transform:translateY(0px)  rotate(var(--r,0deg)); }
+    }
+
+    /* ── BRYAN button (desktop bottom-left) ── */
+    #bryanBtn{
+      position:absolute;
+      left:calc(10px + var(--safe-left)); bottom:calc(10px + var(--safe-bottom));
+      z-index:20; border-radius:999px;
+      padding:6px 10px; font-size:9px; font-weight:1000; letter-spacing:1.4px;
+      text-transform:uppercase; color:rgba(255,255,255,.45);
+      background:rgba(0,0,0,.30); border:1px solid rgba(255,255,255,.10);
+      backdrop-filter:blur(10px) saturate(140%);
+      -webkit-backdrop-filter:blur(10px) saturate(140%);
+      cursor:pointer; -webkit-tap-highlight-color:transparent;
+    }
+    #bryanBtn.on{
+      color:#fff; border-color:rgba(255,255,255,.22);
+      box-shadow:0 0 0 2px rgba(255,59,189,.18),0 0 18px rgba(255,59,189,.25);
+    }
+    #bryanBtn:active{ transform:scale(.96); }
+
+    /*
+      ── BACK BUTTON ──
+      On mobile: small, semi-transparent, bottom-right corner, doesn't obscure maze.
+      On desktop: slightly larger.
+    */
+    #backBtn{
+      position:absolute;
+      right:  calc(10px + var(--safe-right));
+      bottom: calc(10px + var(--safe-bottom));
+      z-index:20;
+      appearance:none; border:0; border-radius:999px;
+      /* mobile-first sizing */
+      padding:7px 14px;
+      font-size:12px; font-weight:1000; letter-spacing:.5px;
+      cursor:pointer; color:#000;
+      background:linear-gradient(180deg,var(--pink2),var(--pink));
+      box-shadow:
+        0 5px 14px rgba(255,59,189,.28),
+        0 0 0 2px rgba(255,59,189,.15),
+        0 0 18px rgba(255,59,189,.32);
+      /* semi-transparent on mobile so it feels lighter on the maze */
+      opacity:0.82;
+      -webkit-tap-highlight-color:transparent; transform:translateZ(0);
+      transition:opacity 200ms;
+    }
+    #backBtn:hover { opacity:1; }
+    #backBtn:active{ transform:scale(.96); opacity:1; }
+
+    /* Desktop: a bit bigger */
+    @media (min-width:900px) and (pointer:fine){
+      #backBtn{ padding:9px 18px; font-size:14px; opacity:1; }
+      #bryanBtn{ padding:8px 12px; font-size:10px; color:rgba(255,255,255,.6); }
+      #avatar{ width:56px; height:56px; }
+    }
+
+    /* On touch/mobile: hide HUD title & Bryan, keep back button */
+    @media (pointer:coarse){
+      .hudTitle{ display:none; }
+      #bryanBtn{ display:none; }
+      #hud{ display:none; }
+    }
+
+    /* Hide BRYAN + HUD during transition (video + overlay 2) */
+    #app.inTransition #bryanBtn,
+    #app.inTransition #hud,
+    #app.inTransition #avatar,
+    #app.inTransition #backBtn{ display:none !important; }
+
     /* ── FADE ── */
-    #fade{ position:fixed; inset:0; background:#000; opacity:0;
-      pointer-events:none; transition:opacity 520ms ease; z-index:200; }
+    #fade{
+      position:fixed; inset:0; background:#000; opacity:0;
+      pointer-events:none; transition:opacity 520ms ease; z-index:200;
+    }
     #fade.on{ opacity:1; }
 
     @media (prefers-reduced-motion:reduce){
@@ -291,14 +393,14 @@
     </div>
   </div>
 
-  <!-- VIDEO WRAP -->
+  <!-- TRANSITION VIDEO -->
   <div id="videoWrap" aria-hidden="true">
     <video id="toMazeVideo" preload="auto" playsinline webkit-playsinline>
       <source src="assets/video/to-the-maze.mp4" type="video/mp4" />
     </video>
   </div>
 
-  <!-- OVERLAY 2 — ghost + start -->
+  <!-- OVERLAY 2 — ghost start -->
   <div id="overlay2" class="overlay" aria-label="スタート">
     <h1 class="overlayHeading">ブーハーをタッチしてはじめよう！</h1>
     <button id="mazeStartBtn" class="ghostBtnWrap" type="button" aria-label="スタート">
@@ -319,6 +421,8 @@
         </div>
       </div>
     </div>
+
+    <!-- Desktop HUD (hidden on touch devices) -->
     <div id="hud">
       <div class="hudTitle">BOOHA<br>ADVENTURE</div>
       <div id="coordPill" class="pill">
@@ -327,9 +431,15 @@
         <div class="coordSmall" style="margin-top:6px;opacity:.9;">click to copy</div>
       </div>
     </div>
+
+    <!-- Ghost avatar floating top-right (desktop) -->
     <img id="avatar" alt="ブーハー" />
+
+    <!-- Bryan mode (desktop only) -->
     <button id="bryanBtn" type="button" aria-label="Bryan mode">BRYAN</button>
-    <button id="backBtn"  type="button" aria-label="もどる">もどる</button>
+
+    <!-- Back — always visible, small on mobile -->
+    <button id="backBtn" type="button" aria-label="もどる">もどる</button>
   </section>
 
   <div id="fade" aria-hidden="true"></div>
@@ -344,262 +454,275 @@
     'assets/img/green-boo.png','assets/img/pink-boo.png','assets/img/purple-boo.png'
   ];
 
-  const app            = document.getElementById('app');
-  const rotateOverlay  = document.getElementById('rotateOverlay');
-  const overlay1       = document.getElementById('overlay1');
-  const overlay2       = document.getElementById('overlay2');
-  const videoWrap      = document.getElementById('videoWrap');
-  const toMazeVideo    = document.getElementById('toMazeVideo');
-  const returnBtn      = document.getElementById('returnBtn');
-  const continueBtn    = document.getElementById('continueBtn');
-  const mazeStartBtn   = document.getElementById('mazeStartBtn');
-  const startGhost     = document.getElementById('startGhost');
-  const confirmSparkles= document.getElementById('confirmSparkles');
-  const startSparkles  = document.getElementById('startSparkles');
-  const fade           = document.getElementById('fade');
-  const bgMusic        = document.getElementById('bgMusic');
-  const avatar         = document.getElementById('avatar');
-  const mazeImg        = document.getElementById('mazeImg');
-  const hitLayer       = document.getElementById('hitLayer');
-  const grid           = document.getElementById('grid');
-  const crosshair      = document.getElementById('crosshair');
-  const bryanBtn       = document.getElementById('bryanBtn');
-  const backBtn        = document.getElementById('backBtn');
-  const coordPill      = document.getElementById('coordPill');
-  const coordText      = document.getElementById('coordText');
-  const FADE_MS        = 520;
+  const app             = document.getElementById('app');
+  const rotateOverlay   = document.getElementById('rotateOverlay');
+  const overlay1        = document.getElementById('overlay1');
+  const overlay2        = document.getElementById('overlay2');
+  const videoWrap       = document.getElementById('videoWrap');
+  const toMazeVideo     = document.getElementById('toMazeVideo');
+  const returnBtn       = document.getElementById('returnBtn');
+  const continueBtn     = document.getElementById('continueBtn');
+  const mazeStartBtn    = document.getElementById('mazeStartBtn');
+  const startGhost      = document.getElementById('startGhost');
+  const confirmSparkles = document.getElementById('confirmSparkles');
+  const startSparkles   = document.getElementById('startSparkles');
+  const fade            = document.getElementById('fade');
+  const bgMusic         = document.getElementById('bgMusic');
+  const avatar          = document.getElementById('avatar');
+  const mazeImg         = document.getElementById('mazeImg');
+  const hitLayer        = document.getElementById('hitLayer');
+  const grid            = document.getElementById('grid');
+  const crosshair       = document.getElementById('crosshair');
+  const bryanBtn        = document.getElementById('bryanBtn');
+  const backBtn         = document.getElementById('backBtn');
+  const coordPill       = document.getElementById('coordPill');
+  const coordText       = document.getElementById('coordText');
+  const FADE_MS         = 520;
 
-  // ── Rotate detection ──
-  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-                || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.userAgent));
+  // ── Orientation / rotate overlay ──────────────────────────
+  // Only enforce on actual mobile handsets — not touch laptops
+  const isMobileUA = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+                  || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.userAgent));
+
   function checkOrientation(){
-    if(!isMobile){ rotateOverlay.classList.remove('show'); return; }
+    if(!isMobileUA){ rotateOverlay.classList.remove('show'); return; }
     rotateOverlay.classList.toggle('show', window.innerHeight > window.innerWidth);
   }
   window.addEventListener('resize', checkOrientation, {passive:true});
   window.addEventListener('orientationchange', ()=>setTimeout(checkOrientation,150), {passive:true});
   checkOrientation();
 
-  // ── Helpers ──
+  // ── Helpers ───────────────────────────────────────────────
   function fadeToBlack(on){ fade.classList.toggle('on', !!on); }
   function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
   function assignRandomGhost(){
     const src = pickRandom(GHOSTS);
     startGhost.src = avatar.src = src;
     const r = (Math.random()*10-5).toFixed(2)+'deg';
-    avatar.style.setProperty('--r',r);
-    startGhost.style.setProperty('--r',r);
+    avatar.style.setProperty('--r', r);
+    startGhost.style.setProperty('--r', r);
   }
 
-  // ── Sparkles ──
+  // ── Sparkle builder ───────────────────────────────────────
   function buildSparkles(container, count=24, wide=false){
     container.innerHTML='';
-    for(let i=0;i<count;i++){
-      const sp=document.createElement('div'); sp.className='sp';
-      const angle=(i/count)*Math.PI*2;
-      const radius= wide ? (35+Math.random()*28) : (28+Math.random()*18);
-      const cx=50+Math.cos(angle)*radius, cy=50+Math.sin(angle)*radius;
-      const size= wide ? (3+Math.random()*4) : (2+Math.random()*3);
-      const dur=1.3+Math.random()*1.8, delay=-(Math.random()*dur);
-      sp.style.cssText=`--size:${size}px;--x:${cx}%;--y:${cy}%;--dur:${dur}s;--delay:${delay}s;`;
+    for(let i=0; i<count; i++){
+      const sp = document.createElement('div'); sp.className='sp';
+      const angle  = (i/count)*Math.PI*2;
+      const radius = wide ? 35+Math.random()*28 : 28+Math.random()*18;
+      const cx = 50+Math.cos(angle)*radius;
+      const cy = 50+Math.sin(angle)*radius;
+      const size  = wide ? 3+Math.random()*4 : 2+Math.random()*3;
+      const dur   = 1.3+Math.random()*1.8;
+      const delay = -(Math.random()*dur);
+      sp.style.cssText = `--size:${size}px;--x:${cx}%;--y:${cy}%;--dur:${dur}s;--delay:${delay}s;`;
       container.appendChild(sp);
     }
   }
   buildSparkles(confirmSparkles, 24);
   buildSparkles(startSparkles, 36, true);
 
-  // ── Fit / hitLayer positioning (mobile-safe) ──
+  // ── Hit layer positioning ─────────────────────────────────
+  // Always uses contain coordinates — no cover offset needed.
   function positionHitLayer(){
     const r = mazeImg.getBoundingClientRect();
     const s = document.getElementById('stage').getBoundingClientRect();
-    hitLayer.style.left   = (r.left - s.left) + 'px';
-    hitLayer.style.top    = (r.top  - s.top)  + 'px';
-    hitLayer.style.width  = r.width + 'px';
-    hitLayer.style.height = r.height+ 'px';
+    hitLayer.style.left   = (r.left - s.left)+'px';
+    hitLayer.style.top    = (r.top  - s.top )+'px';
+    hitLayer.style.width  = r.width +'px';
+    hitLayer.style.height = r.height+'px';
   }
-
-  // Extra reliability: recompute after layout settles
-  function positionHitLayerSoon(){
+  function positionSoon(){
     requestAnimationFrame(()=>requestAnimationFrame(positionHitLayer));
   }
-  window.addEventListener('resize', positionHitLayerSoon, {passive:true});
-  window.addEventListener('orientationchange', ()=>setTimeout(positionHitLayerSoon, 200), {passive:true});
-  if (mazeImg.complete) setTimeout(positionHitLayerSoon, 0);
-  else mazeImg.addEventListener('load', ()=>setTimeout(positionHitLayerSoon, 0));
+  window.addEventListener('resize', positionSoon, {passive:true});
+  window.addEventListener('orientationchange', ()=>setTimeout(positionSoon,200), {passive:true});
+  if(mazeImg.complete) setTimeout(positionSoon, 0);
+  else mazeImg.addEventListener('load', ()=>setTimeout(positionSoon, 0));
 
-  // ── Overlay 1 ──
+  // ── Overlay 1 ─────────────────────────────────────────────
   returnBtn.addEventListener('click', ()=>{
     fadeToBlack(true);
     setTimeout(()=>{ window.location.href='index.html'; }, FADE_MS);
   });
 
-  let videoPlayed=false;
+  let videoPlayed = false;
   continueBtn.addEventListener('click', async ()=>{
-    if(videoPlayed) return; videoPlayed=true;
+    if(videoPlayed) return; videoPlayed = true;
 
-    // Dismiss overlay 1
     overlay1.classList.add('hidden');
     overlay1.addEventListener('transitionend', ()=>overlay1.classList.add('gone'), {once:true});
 
-    // IMPORTANT: hide BRYAN/BACK/HUD while transition video plays
+    // Hide maze chrome while video plays
     app.classList.add('inTransition');
 
-    // Show and play video WITH audio (gesture just happened — browser allows it)
     videoWrap.classList.add('show');
-    try{ toMazeVideo.currentTime=0; }catch(e){}
-    try{ await toMazeVideo.play(); }
-    catch(e){ showOverlay2(); }
+    try{ toMazeVideo.currentTime = 0; }catch(e){}
+    try{ await toMazeVideo.play(); }catch(e){ showOverlay2(); }
   });
 
-  // ── Video → Overlay 2 ──
-  let overlay2Shown=false;
+  // ── Video → Overlay 2 ────────────────────────────────────
+  let overlay2Shown = false;
   function showOverlay2(){
-    if(overlay2Shown) return; overlay2Shown=true;
-
-    // Stop video cleanly (Safari sometimes keeps the audio session alive)
+    if(overlay2Shown) return; overlay2Shown = true;
     try{ toMazeVideo.pause(); }catch(e){}
     try{ toMazeVideo.currentTime = 0; }catch(e){}
-
     videoWrap.classList.remove('show');
     overlay2.classList.add('show');
-
-    // We still hide BRYAN/BACK here (Overlay 2 is still “pre-maze”)
-    app.classList.add('inTransition');
-
-    // Make sure hitLayer matches the visible maze in case orientation changed during video
-    positionHitLayerSoon();
+    app.classList.add('inTransition'); // still pre-maze
+    positionSoon();
   }
   toMazeVideo.addEventListener('ended', showOverlay2);
   toMazeVideo.addEventListener('error', showOverlay2);
   toMazeVideo.addEventListener('timeupdate', ()=>{
-    const d=toMazeVideo.duration;
-    if(!isFinite(d)||d<=0) return;
-    if(d-toMazeVideo.currentTime<=0.5) showOverlay2();
+    const d = toMazeVideo.duration;
+    if(!isFinite(d) || d<=0) return;
+    if(d - toMazeVideo.currentTime <= 0.5) showOverlay2();
   });
 
-  // ── Overlay 2 → Start ──
-  let mazeStarted=false;
+  // ── Overlay 2 → maze start ───────────────────────────────
+  let mazeStarted = false;
   mazeStartBtn.addEventListener('click', async ()=>{
-    if(mazeStarted) return; mazeStarted=true;
+    if(mazeStarted) return; mazeStarted = true;
 
     overlay2.classList.add('hidden');
     overlay2.addEventListener('transitionend', ()=>overlay2.remove(), {once:true});
 
-    // NOW we are “in the maze” — show BRYAN/BACK/HUD again
+    // Reveal maze chrome
     app.classList.remove('inTransition');
 
-    // sneaky.mp3 starts looping — user gesture unlocks audio
+    // sneaky.mp3 — gesture unlocks audio
     try{ bgMusic.volume=0.65; await bgMusic.play(); }
-    catch(e){ console.warn('Music blocked:',e); }
+    catch(e){ console.warn('Music blocked:', e); }
 
-    // Final safety: ensure hitLayer matches (some devices resize after media playback)
-    positionHitLayerSoon();
+    positionSoon();
   });
 
-  // ── Back button (in-maze) ──
+  // ── Back button (always visible) ─────────────────────────
   backBtn.addEventListener('click', ()=>{
     try{ bgMusic.pause(); bgMusic.currentTime=0; }catch(e){}
     fadeToBlack(true);
     setTimeout(()=>{ window.location.href='index.html'; }, FADE_MS);
   });
 
-  // ── Visibility ──
+  // ── Visibility ────────────────────────────────────────────
   document.addEventListener('visibilitychange', ()=>{
     if(document.hidden){
       try{ toMazeVideo.pause(); }catch(e){}
       try{ bgMusic.pause(); }catch(e){}
     } else {
-      // Only resume video if we’re still in the video phase
-      if(videoPlayed && !overlay2Shown){
-        try{ toMazeVideo.play(); }catch(e){}
-      }
-      if(mazeStarted){
-        try{ bgMusic.play(); }catch(e){}
-      }
+      if(videoPlayed && !overlay2Shown) try{ toMazeVideo.play(); }catch(e){}
+      if(mazeStarted)                   try{ bgMusic.play(); }catch(e){}
     }
   });
 
-  // ── Bryan mode ──
-  let bryanOn=false;
+  // ── Bryan mode (desktop only) ────────────────────────────
+  let bryanOn = false;
   function applyBryanUI(){
-    bryanBtn.classList.toggle('on',bryanOn);
-    grid.classList.toggle('show',bryanOn);
-    coordPill.classList.toggle('show',bryanOn);
-    crosshair.classList.toggle('show',bryanOn);
-    hitLayer.style.cursor=bryanOn?'crosshair':'default';
+    bryanBtn.classList.toggle('on', bryanOn);
+    grid.classList.toggle('show', bryanOn);
+    coordPill.classList.toggle('show', bryanOn);
+    crosshair.classList.toggle('show', bryanOn);
+    hitLayer.style.cursor = bryanOn ? 'crosshair' : 'default';
     if(bryanOn) requestAnimationFrame(positionHitLayer);
   }
-  const dotLayer=document.createElement('div');
-  dotLayer.style.cssText='position:absolute;inset:0;pointer-events:none;';
+  const dotLayer = document.createElement('div');
+  dotLayer.style.cssText = 'position:absolute;inset:0;pointer-events:none;';
   hitLayer.appendChild(dotLayer);
+
   function placeDot(lx,ly,ix,iy){
-    const dot=document.createElement('div');
-    dot.style.cssText=`position:absolute;left:${lx}px;top:${ly}px;width:10px;height:10px;
-      border-radius:50%;background:#ff3bbd;
+    const dot = document.createElement('div');
+    dot.style.cssText = `
+      position:absolute; left:${lx}px; top:${ly}px;
+      width:10px; height:10px; border-radius:50%;
+      background:#ff3bbd;
       box-shadow:0 0 0 2px #fff,0 0 10px rgba(255,59,189,.8);
-      transform:translate(-50%,-50%);pointer-events:none;`;
-    const label=document.createElement('div');
-    label.textContent=`${ix},${iy}`;
-    label.style.cssText=`position:absolute;left:10px;top:-8px;font-size:11px;font-weight:900;
-      letter-spacing:.5px;color:#fff;background:rgba(0,0,0,.72);
-      padding:2px 5px;border-radius:4px;white-space:nowrap;pointer-events:none;`;
-    dot.appendChild(label); dotLayer.appendChild(dot);
+      transform:translate(-50%,-50%); pointer-events:none;`;
+    const label = document.createElement('div');
+    label.textContent = `${ix},${iy}`;
+    label.style.cssText = `
+      position:absolute; left:10px; top:-8px;
+      font-size:11px; font-weight:900; letter-spacing:.5px;
+      color:#fff; background:rgba(0,0,0,.72);
+      padding:2px 5px; border-radius:4px;
+      white-space:nowrap; pointer-events:none;`;
+    dot.appendChild(label);
+    dotLayer.appendChild(dot);
   }
   function clearDots(){ dotLayer.innerHTML=''; }
+
   bryanBtn.addEventListener('click', ()=>{
-    if(bryanOn){ bryanOn=false; clearDots(); coordText.textContent='x: —  y: —'; applyBryanUI(); return; }
-    const pw=prompt('Bryan mode password:');
+    if(bryanOn){
+      bryanOn=false; clearDots();
+      coordText.textContent='x: —  y: —';
+      applyBryanUI(); return;
+    }
+    const pw = prompt('Bryan mode password:');
     if(pw===null) return;
     String(pw).trim()===BRYAN_PASS ? (bryanOn=true, applyBryanUI()) : alert('Nope.');
   });
 
-  // ── Hit layer / coords ──
+  // ── Coordinate finder (contain only — no cover math) ─────
   function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+
   function getImageCoords(cx,cy){
-    const rect=hitLayer.getBoundingClientRect();
-    const x=cx-rect.left, y=cy-rect.top;
-    return{ x:Math.round(clamp(x/rect.width,0,1)*(mazeImg.naturalWidth||0)),
-      y:Math.round(clamp(y/rect.height,0,1)*(mazeImg.naturalHeight||0)), localX:x, localY:y };
+    const rect = hitLayer.getBoundingClientRect();
+    const lx = cx - rect.left;
+    const ly = cy - rect.top;
+    const x  = Math.round(clamp(lx/rect.width,  0,1) * (mazeImg.naturalWidth  ||0));
+    const y  = Math.round(clamp(ly/rect.height, 0,1) * (mazeImg.naturalHeight ||0));
+    return { x, y, localX:lx, localY:ly };
   }
+
   function setCrosshair(lx,ly){
-    const h=crosshair.querySelector('.chLineH'), v=crosshair.querySelector('.chLineV');
+    const h = crosshair.querySelector('.chLineH');
+    const v = crosshair.querySelector('.chLineV');
     if(h) h.style.transform=`translateY(${ly}px)`;
     if(v) v.style.transform=`translateX(${lx}px)`;
   }
+
   async function copyText(txt){
     try{ await navigator.clipboard.writeText(txt); return true; }
-    catch(e){ try{
-      const ta=document.createElement('textarea');
-      ta.value=txt; ta.style.cssText='position:fixed;left:-9999px';
-      document.body.appendChild(ta); ta.focus(); ta.select();
-      document.execCommand('copy'); document.body.removeChild(ta); return true;
-    }catch(err){ return false; } }
+    catch(e){
+      try{
+        const ta = document.createElement('textarea');
+        ta.value=txt; ta.style.cssText='position:fixed;left:-9999px';
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta); return true;
+      }catch(err){ return false; }
+    }
   }
+
   hitLayer.addEventListener('mousemove', e=>{
     if(!bryanOn) return;
-    const c=getImageCoords(e.clientX,e.clientY);
-    coordText.textContent=`x: ${c.x}  y: ${c.y}`;
-    setCrosshair(c.localX,c.localY);
-  });
-  hitLayer.addEventListener('click', async e=>{
-    if(!bryanOn) return;
-    const c=getImageCoords(e.clientX,e.clientY);
-    coordText.textContent=`x: ${c.x}  y: ${c.y}`;
-    setCrosshair(c.localX,c.localY);
-    placeDot(c.localX,c.localY,c.x,c.y);
-    const ok=await copyText(`${c.x},${c.y}`);
-    if(ok){ coordPill.style.transform='scale(1.02)'; setTimeout(()=>coordPill.style.transform='',120); }
-  });
-  coordPill.addEventListener('click', async ()=>{
-    if(!bryanOn) return;
-    const m=coordText.textContent.match(/x:\s*(\d+)\s*y:\s*(\d+)/);
-    await copyText(m?`${m[1]},${m[2]}`:coordText.textContent);
+    const c = getImageCoords(e.clientX, e.clientY);
+    coordText.textContent = `x: ${c.x}  y: ${c.y}`;
+    setCrosshair(c.localX, c.localY);
   });
 
-  // ── Init ──
+  hitLayer.addEventListener('click', async e=>{
+    if(!bryanOn) return;
+    const c  = getImageCoords(e.clientX, e.clientY);
+    coordText.textContent = `x: ${c.x}  y: ${c.y}`;
+    setCrosshair(c.localX, c.localY);
+    placeDot(c.localX, c.localY, c.x, c.y);
+    const ok = await copyText(`${c.x},${c.y}`);
+    if(ok){
+      coordPill.style.transform='scale(1.02)';
+      setTimeout(()=>coordPill.style.transform='', 120);
+    }
+  });
+
+  coordPill.addEventListener('click', async ()=>{
+    if(!bryanOn) return;
+    const m = coordText.textContent.match(/x:\s*(\d+)\s*y:\s*(\d+)/);
+    await copyText(m ? `${m[1]},${m[2]}` : coordText.textContent);
+  });
+
+  // ── Init ──────────────────────────────────────────────────
   assignRandomGhost();
-  positionHitLayerSoon();
+  positionSoon();
 </script>
 </body>
 </html>
-
