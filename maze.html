@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Booha Adventure 2027 — Maze</title>
+  <title>Booha Adventure 2026 — Maze</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bowlby+One&display=swap" rel="stylesheet" />
@@ -171,15 +171,16 @@
     #coordPill{ display:none; } #coordPill.show{ display:block; }
     .coordSmall{ font-size:12px; color:rgba(255,255,255,.7); font-weight:800; letter-spacing:1px; }
     .coordBig{ font-size:14px; margin-top:4px; }
-    /* Bryan tip text */
+
+    /* Bryan tip banner */
     #bryanTip{
       position:absolute; left:50%; top:calc(10px + var(--safe-top));
       transform:translateX(-50%);
       z-index:10; display:none;
       background:rgba(0,0,0,.72); border:1px solid rgba(255,59,189,.3);
       border-radius:12px; padding:8px 16px;
-      font-size:12px; font-weight:700; letter-spacing:.5px;
-      color:rgba(255,255,255,.75); text-align:center; line-height:1.5;
+      font-size:12px; font-weight:700; letter-spacing:.3px;
+      color:rgba(255,255,255,.7); text-align:center; line-height:1.6;
       backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
       pointer-events:none; white-space:nowrap;
     }
@@ -216,56 +217,61 @@
     @media (pointer:coarse){ .hudTitle{ display:none; } #bryanBtn{ display:none; } #hud{ display:none; } }
     #app.inTransition #bryanBtn,#app.inTransition #hud,#app.inTransition #backBtn{ display:none !important; }
 
-    /* ══ CHECKPOINT POPUP — always screen-centered ══ */
+    /* ══ SCRIM ══ */
+    #cpScrim{
+      position:fixed; inset:0; z-index:55;
+      background:rgba(0,0,0,.48);
+      backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
+      display:none;
+    }
+    #cpScrim.show{ display:block; }
+
+    /* ══ POPUP — always screen-centered ══ */
     #cpPopup{
-      /* Fixed positioning + centering via transform */
       position:fixed;
       left:50%; top:50%;
       transform:translate(-50%,-50%);
       z-index:60;
-      min-width:260px; max-width:340px; width:min(88vw, 340px);
-      background:linear-gradient(150deg,rgba(8,3,26,.97) 0%,rgba(3,8,32,.97) 100%);
+      min-width:260px; max-width:340px; width:min(88vw,340px);
+      background:linear-gradient(150deg,rgba(8,3,26,.98) 0%,rgba(3,8,34,.98) 100%);
       border-radius:24px; padding:22px 24px 20px;
       backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px);
       text-align:center;
-      border:1px solid rgba(255,255,255,.11);
+      border:1px solid rgba(255,255,255,.12);
       box-shadow:0 0 0 1px rgba(255,255,255,.05),0 32px 90px rgba(0,0,0,.85),
-        0 0 80px rgba(160,60,255,.14), inset 0 1px 0 rgba(255,255,255,.09);
+        0 0 80px rgba(160,60,255,.14), inset 0 1px 0 rgba(255,255,255,.10);
       display:none; pointer-events:auto;
     }
-    /* Backdrop scrim behind the popup */
-    #cpScrim{
-      position:fixed; inset:0; z-index:55;
-      background:rgba(0,0,0,.45);
-      backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px);
-      display:none;
-    }
-    #cpScrim.show{ display:block; }
     #cpPopup.show{
       display:block;
-      animation:popIn 320ms cubic-bezier(.34,1.46,.64,1) both;
+      animation:popIn 300ms cubic-bezier(.34,1.46,.64,1) both;
     }
     @keyframes popIn{
       from{ opacity:0; transform:translate(-50%,-50%) scale(.80); }
       to  { opacity:1; transform:translate(-50%,-50%) scale(1); }
     }
     #cpPopupBar{
-      height:3px; border-radius:999px; margin:0 auto 16px;
-      width:55%; opacity:.92;
+      height:3px; border-radius:999px; margin:0 auto 16px; width:55%; opacity:.92;
     }
-    #cpPopup .cp-date{
+
+    /* Japanese popup text */
+    .cp-week-label{
       font-family:'Bowlby One',sans-serif;
-      font-size:clamp(9px,1.6vw,12px);
-      letter-spacing:1.8px; text-transform:uppercase;
-      color:rgba(255,255,255,.4); margin:0 0 5px;
+      font-size:clamp(9px,1.5vw,11px); letter-spacing:2px; text-transform:uppercase;
+      color:rgba(255,255,255,.38); margin:0 0 3px;
     }
     #cpPopupTitle{
-      font-family:'Bowlby One',sans-serif; font-size:clamp(17px,2.8vw,24px);
-      letter-spacing:1px; margin:0 0 18px; color:#fff; line-height:1.2;
+      font-family:'Bowlby One',sans-serif; font-size:clamp(18px,3vw,26px);
+      letter-spacing:.5px; margin:0 0 4px; color:#fff; line-height:1.2;
     }
+    #cpPopupDate{
+      font-size:clamp(11px,1.8vw,14px); font-weight:700;
+      color:rgba(255,255,255,.55); margin:0 0 18px; letter-spacing:.3px;
+    }
+
+    /* Icon buttons */
     .cp-icons{
-      display:flex; justify-content:center; gap:clamp(10px,3vw,18px);
-      margin-bottom:18px;
+      display:flex; justify-content:center; gap:clamp(10px,3vw,18px); margin-bottom:18px;
     }
     .cp-icon-btn{
       display:flex; flex-direction:column; align-items:center; gap:7px;
@@ -274,13 +280,13 @@
     }
     .cp-icon-btn:active{ transform:scale(.90); }
     .cp-icon-img{
-      width:clamp(52px,12vw,72px); height:clamp(52px,12vw,72px);
+      width:clamp(52px,12vw,70px); height:clamp(52px,12vw,70px);
       object-fit:contain; border-radius:16px;
       background:rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.13);
+      border:1px solid rgba(255,255,255,.14);
       padding:7px;
       box-shadow:0 4px 20px rgba(0,0,0,.55),0 0 28px rgba(180,100,255,.10);
-      transition:box-shadow 140ms ease, border-color 140ms ease, transform 140ms ease;
+      transition:box-shadow 140ms ease,border-color 140ms ease,transform 140ms ease;
     }
     .cp-icon-btn:hover .cp-icon-img{
       border-color:rgba(255,255,255,.30);
@@ -288,9 +294,9 @@
       transform:translateY(-2px);
     }
     .cp-icon-label{
-      font-size:clamp(8px,1.4vw,10px); font-weight:900; letter-spacing:.9px;
-      text-transform:uppercase; color:rgba(255,255,255,.50);
-      line-height:1.2; text-align:center; max-width:72px;
+      font-size:clamp(8px,1.4vw,10px); font-weight:900; letter-spacing:.7px;
+      text-transform:uppercase; color:rgba(255,255,255,.48);
+      line-height:1.25; text-align:center; max-width:76px;
     }
     #cpCloseBtn{
       appearance:none; border:0; border-radius:999px;
@@ -335,7 +341,7 @@
     </div>
   </div>
 
-  <!-- TRANSITION VIDEO -->
+  <!-- VIDEO -->
   <div id="videoWrap" aria-hidden="true">
     <video id="toMazeVideo" preload="auto" playsinline webkit-playsinline>
       <source src="assets/video/to-the-maze.mp4" type="video/mp4" />
@@ -351,7 +357,7 @@
     </button>
   </div>
 
-  <!-- MAZE SCENE -->
+  <!-- MAZE -->
   <section id="mazeScene" aria-label="めいろ">
     <div id="stage">
       <img id="mazeImg" src="assets/img/maze.png" alt="めいろ" />
@@ -359,46 +365,45 @@
       <div id="grid"></div>
     </div>
 
-    <!-- HUD (desktop only) -->
     <div id="hud">
       <div class="hudTitle">BOOHA<br>ADVENTURE</div>
       <div id="coordPill" class="pill">
-        <div class="coordSmall">IMAGE COORDINATES</div>
+        <div class="coordSmall">画像座標 (1600×900)</div>
         <div class="coordBig" id="coordText">x: —  y: —</div>
-        <div class="coordSmall" style="margin-top:6px;opacity:.9;">click to copy</div>
+        <div class="coordSmall" style="margin-top:6px;opacity:.85;">クリックでコピー</div>
       </div>
     </div>
 
-    <!-- Bryan tip shown top-center when Bryan is on -->
     <div id="bryanTip">
-      Use a <strong>1600 × 900</strong> browser window for exact coordinates.<br>
-      Move mouse → read coords → click to copy.
+      座標は <strong>画像サイズ 1600×900</strong> で固定されています。<br>
+      マウスを動かして座標を確認し、クリックでコピーできます。
     </div>
 
     <button id="bryanBtn" type="button" aria-label="Bryan mode">BRYAN</button>
     <button id="backBtn" type="button" aria-label="もどる">もどる</button>
   </section>
 
-  <!-- Scrim behind popup -->
+  <!-- SCRIM -->
   <div id="cpScrim"></div>
 
-  <!-- Checkpoint popup — always screen-centered -->
-  <div id="cpPopup" role="dialog" aria-modal="true">
+  <!-- POPUP — fixed, always centered -->
+  <div id="cpPopup" role="dialog" aria-modal="true" aria-labelledby="cpPopupTitle">
     <div id="cpPopupBar"></div>
-    <p class="cp-date" id="cpPopupDate">This Week</p>
-    <h2 id="cpPopupTitle">Week —</h2>
+    <p class="cp-week-label">今週のブーハー</p>
+    <h2 id="cpPopupTitle">第 — 週</h2>
+    <p id="cpPopupDate">— 〜 —</p>
     <div class="cp-icons">
-      <button class="cp-icon-btn" id="iconPreBoo" type="button" aria-label="Pre-boo">
-        <img class="cp-icon-img" src="assets/img/pre-boo.png" alt="Pre-boo" />
-        <span class="cp-icon-label">Pre-boo</span>
+      <button class="cp-icon-btn" id="iconPreBoo" type="button" aria-label="プレブー">
+        <img class="cp-icon-img" src="assets/img/pre-boo.png" alt="プレブー" />
+        <span class="cp-icon-label">プレブー</span>
       </button>
-      <button class="cp-icon-btn" id="iconBooTree" type="button" aria-label="Boo-riculum">
-        <img class="cp-icon-img" src="assets/img/boo-tree.png" alt="Boo-riculum" />
-        <span class="cp-icon-label">Boo-riculum</span>
+      <button class="cp-icon-btn" id="iconBooTree" type="button" aria-label="ブーカリキュラム">
+        <img class="cp-icon-img" src="assets/img/boo-tree.png" alt="ブーカリキュラム" />
+        <span class="cp-icon-label">ブーカリ<br>キュラム</span>
       </button>
-      <button class="cp-icon-btn" id="iconContTree" type="button" aria-label="Boo-continuum">
-        <img class="cp-icon-img" src="assets/img/cont-tree.png" alt="Boo-continuum" />
-        <span class="cp-icon-label">Boo-continuum</span>
+      <button class="cp-icon-btn" id="iconContTree" type="button" aria-label="ブーコンティニュアム">
+        <img class="cp-icon-img" src="assets/img/cont-tree.png" alt="ブーコンティニュアム" />
+        <span class="cp-icon-label">ブーコン<br>ティニュアム</span>
       </button>
     </div>
     <button id="cpCloseBtn" type="button">とじる ✕</button>
@@ -414,10 +419,10 @@
 //  CONFIG
 // ─────────────────────────────────────────────────────────
 const BRYAN_PASS      = 'him141amra803';
-const IMG_W           = 1600;   // native image width  — coordinates are in this space
-const IMG_H           = 900;    // native image height
+const IMG_W           = 1600;
+const IMG_H           = 900;
 const OPEN_WEEKS      = [8, 9, 10];
-const CURRENT_WEEK    = 10;
+const CURRENT_WEEK    = 9;        // Week 9 = 1 Mar – 7 Mar 2026 (current)
 const GHOST_TRAVEL_MS = 3800;
 const INTRO_GLOW_MS   = 2600;
 const INTRO_TRAVEL_MS = 3200;
@@ -427,62 +432,117 @@ const GHOSTS = [
   'assets/img/green-boo.png','assets/img/pink-boo.png','assets/img/purple-boo.png'
 ];
 
-// 48 week date labels  (Week 1 = 6 Jan 2025)
+// ── 2026 week dates in Japanese ──────────────────────────
+// Week 1 = 4 Jan 2026.  Cross-month weeks show both months.
 const WEEK_DATES = [
-  "6 Jan – 12 Jan","13 Jan – 19 Jan","20 Jan – 26 Jan","27 Jan – 2 Feb",
-  "3 Feb – 9 Feb","10 Feb – 16 Feb","17 Feb – 23 Feb","24 Feb – 2 Mar",
-  "3 Mar – 9 Mar","10 Mar – 16 Mar","17 Mar – 23 Mar","24 Mar – 30 Mar",
-  "31 Mar – 6 Apr","7 Apr – 13 Apr","14 Apr – 20 Apr","21 Apr – 27 Apr",
-  "28 Apr – 4 May","5 May – 11 May","12 May – 18 May","19 May – 25 May",
-  "26 May – 1 Jun","2 Jun – 8 Jun","9 Jun – 15 Jun","16 Jun – 22 Jun",
-  "23 Jun – 29 Jun","30 Jun – 6 Jul","7 Jul – 13 Jul","14 Jul – 20 Jul",
-  "21 Jul – 27 Jul","28 Jul – 3 Aug","4 Aug – 10 Aug","11 Aug – 17 Aug",
-  "18 Aug – 24 Aug","25 Aug – 31 Aug","1 Sep – 7 Sep","8 Sep – 14 Sep",
-  "15 Sep – 21 Sep","22 Sep – 28 Sep","29 Sep – 5 Oct","6 Oct – 12 Oct",
-  "13 Oct – 19 Oct","20 Oct – 26 Oct","27 Oct – 2 Nov","3 Nov – 9 Nov",
-  "10 Nov – 16 Nov","17 Nov – 23 Nov","24 Nov – 30 Nov","1 Dec – 7 Dec"
+  "4\u00a01\u6708\u301c10\u00a01\u6708",   // W1  4 Jan – 10 Jan
+  "11\u00a01\u6708\u301c17\u00a01\u6708",  // W2
+  "18\u00a01\u6708\u301c24\u00a01\u6708",  // W3
+  "25\u00a01\u6708\u301c31\u00a01\u6708",  // W4
+  "1\u00a02\u6708\u301c7\u00a02\u6708",    // W5
+  "8\u00a02\u6708\u301c14\u00a02\u6708",   // W6
+  "15\u00a02\u6708\u301c21\u00a02\u6708",  // W7
+  "22\u00a02\u6708\u301c28\u00a02\u6708",  // W8
+  "1\u00a03\u6708\u301c7\u00a03\u6708",    // W9  ← current
+  "8\u00a03\u6708\u301c14\u00a03\u6708",   // W10
+  "15\u00a03\u6708\u301c21\u00a03\u6708",  // W11
+  "22\u00a03\u6708\u301c28\u00a03\u6708",  // W12
+  "29\u00a03\u6708\u301c4\u00a04\u6708",   // W13
+  "5\u00a04\u6708\u301c11\u00a04\u6708",   // W14
+  "12\u00a04\u6708\u301c18\u00a04\u6708",  // W15
+  "19\u00a04\u6708\u301c25\u00a04\u6708",  // W16
+  "26\u00a04\u6708\u301c2\u00a05\u6708",   // W17
+  "3\u00a05\u6708\u301c9\u00a05\u6708",    // W18
+  "10\u00a05\u6708\u301c16\u00a05\u6708",  // W19
+  "17\u00a05\u6708\u301c23\u00a05\u6708",  // W20
+  "24\u00a05\u6708\u301c30\u00a05\u6708",  // W21
+  "31\u00a05\u6708\u301c6\u00a06\u6708",   // W22
+  "7\u00a06\u6708\u301c13\u00a06\u6708",   // W23
+  "14\u00a06\u6708\u301c20\u00a06\u6708",  // W24
+  "21\u00a06\u6708\u301c27\u00a06\u6708",  // W25
+  "28\u00a06\u6708\u301c4\u00a07\u6708",   // W26
+  "5\u00a07\u6708\u301c11\u00a07\u6708",   // W27
+  "12\u00a07\u6708\u301c18\u00a07\u6708",  // W28
+  "19\u00a07\u6708\u301c25\u00a07\u6708",  // W29
+  "26\u00a07\u6708\u301c1\u00a08\u6708",   // W30
+  "2\u00a08\u6708\u301c8\u00a08\u6708",    // W31
+  "9\u00a08\u6708\u301c15\u00a08\u6708",   // W32
+  "16\u00a08\u6708\u301c22\u00a08\u6708",  // W33
+  "23\u00a08\u6708\u301c29\u00a08\u6708",  // W34
+  "30\u00a08\u6708\u301c5\u00a09\u6708",   // W35
+  "6\u00a09\u6708\u301c12\u00a09\u6708",   // W36
+  "13\u00a09\u6708\u301c19\u00a09\u6708",  // W37
+  "20\u00a09\u6708\u301c26\u00a09\u6708",  // W38
+  "27\u00a09\u6708\u301c3\u00a010\u6708",  // W39
+  "4\u00a010\u6708\u301c10\u00a010\u6708", // W40
+  "11\u00a010\u6708\u301c17\u00a010\u6708",// W41
+  "18\u00a010\u6708\u301c24\u00a010\u6708",// W42
+  "25\u00a010\u6708\u301c31\u00a010\u6708",// W43
+  "1\u00a011\u6708\u301c7\u00a011\u6708",  // W44
+  "8\u00a011\u6708\u301c14\u00a011\u6708", // W45
+  "15\u00a011\u6708\u301c21\u00a011\u6708",// W46
+  "22\u00a011\u6708\u301c28\u00a011\u6708",// W47
+  "29\u00a011\u6708\u301c5\u00a012\u6708"  // W48
 ];
 
-// Each month: [primary colour, secondary colour]
+// ── Calendar-month index per week (0=Jan … 10=Nov) ──────
+// Derived from actual start-date month of each week in 2026
+// [W1…W48]  Jan=0,Feb=1,Mar=2,Apr=3,May=4,Jun=5,Jul=6,Aug=7,Sep=8,Oct=9,Nov=10
+const WEEK_MONTH = [
+  0,0,0,0,   // W1-4   Jan
+  1,1,1,1,   // W5-8   Feb
+  2,2,2,2,2, // W9-13  Mar (5 weeks)
+  3,3,3,3,   // W14-17 Apr
+  4,4,4,4,4, // W18-22 May (5 weeks)
+  5,5,5,5,   // W23-26 Jun
+  6,6,6,6,   // W27-30 Jul
+  7,7,7,7,7, // W31-35 Aug (5 weeks)
+  8,8,8,8,   // W36-39 Sep
+  9,9,9,9,   // W40-43 Oct
+  10,10,10,10,10 // W44-48 Nov (5 weeks)
+];
+
+// Each calendar month: [primary, secondary]
 const MONTH_COLORS = [
-  ['#ff3bbd','#ff79d7'], // Jan
-  ['#ff6b3b','#ffaa5e'], // Feb
-  ['#ffd700','#fff176'], // Mar
-  ['#3bff8a','#b2ffda'], // Apr
-  ['#3bc8ff','#a8edff'], // May
-  ['#3b6fff','#90aaff'], // Jun
-  ['#a03bff','#d49aff'], // Jul
-  ['#ff3b6f','#ff85a1'], // Aug
-  ['#ff9f3b','#ffd08a'], // Sep
-  ['#3bffee','#a8fff8'], // Oct
-  ['#c8ff3b','#e8ffaa'], // Nov
-  ['#ff3b3b','#ff8f8f']  // Dec
+  ['#ff3bbd','#ff79d7'], // 0 Jan — hot pink / soft pink
+  ['#ff6b3b','#ffaa5e'], // 1 Feb — orange / peach
+  ['#3bc8ff','#a8edff'], // 2 Mar — cyan / ice
+  ['#3bff8a','#b2ffda'], // 3 Apr — green / mint
+  ['#ffd700','#fff176'], // 4 May — gold / yellow
+  ['#3b6fff','#90aaff'], // 5 Jun — blue / periwinkle
+  ['#a03bff','#d49aff'], // 6 Jul — purple / lavender
+  ['#ff9f3b','#ffd08a'], // 7 Aug — amber / honey
+  ['#3bffee','#a8fff8'], // 8 Sep — teal / aqua
+  ['#c8ff3b','#e8ffaa'], // 9 Oct — lime / chartreuse
+  ['#ff3b6f','#ff85a1'], // 10 Nov — rose / blush
 ];
 
-// ── Checkpoints — coords in IMAGE SPACE (1600×900) ──────
-// These never change regardless of window size.
+// ── Checkpoints — image-space coords (1600×900), fixed forever ──
 const CHECKPOINTS = [
-  {w: 1, ix: 512, iy:355},{w: 2, ix:1319, iy:458},{w: 3, ix:1219, iy:332},
+  {w: 1, ix: 493, iy:350},{w: 2, ix:1319, iy:458},{w: 3, ix:1156, iy:354},
   {w: 4, ix: 952, iy:453},{w: 5, ix: 635, iy:377},{w: 6, ix: 596, iy:597},
   {w: 7, ix:1219, iy:500},{w: 8, ix:1089, iy:355},{w: 9, ix:1046, iy:601},
   {w:10, ix: 453, iy:495},{w:11, ix:1189, iy:565},{w:12, ix: 755, iy:564},
   {w:13, ix: 938, iy:354},{w:14, ix: 592, iy:434},{w:15, ix: 912, iy:630},
   {w:16, ix: 816, iy:393},{w:17, ix:1204, iy:397},{w:18, ix: 444, iy:542},
   {w:19, ix: 761, iy:354},{w:20, ix:1200, iy:453},{w:21, ix: 716, iy:436},
-  {w:22, ix:1302, iy:395},{w:23, ix: 872, iy:502},{w:24, ix: 446, iy:386},
+  {w:22, ix:1302, iy:395},{w:23, ix: 872, iy:502},{w:24, ix: 432, iy:385},
   {w:25, ix:1010, iy:412},{w:26, ix: 613, iy:482},{w:27, ix:1127, iy:453},
-  {w:28, ix: 578, iy:387},{w:29, ix:1095, iy:502},{w:30, ix: 500, iy:438},
-  {w:31, ix: 770, iy:633},{w:32, ix:1079, iy:561},{w:33, ix: 898, iy:352},
+  {w:28, ix: 559, iy:392},{w:29, ix:1095, iy:502},{w:30, ix: 500, iy:438},
+  {w:31, ix: 770, iy:610},{w:32, ix:1079, iy:561},{w:33, ix: 898, iy:352},
   {w:34, ix: 715, iy:594},{w:35, ix:1141, iy:410},{w:36, ix: 560, iy:482},
   {w:37, ix:1164, iy:600},{w:38, ix: 682, iy:526},{w:39, ix: 996, iy:561},
   {w:40, ix: 541, iy:568},{w:41, ix:1258, iy:538},{w:42, ix: 817, iy:462},
-  {w:43, ix:1161, iy:331},{w:44, ix: 716, iy:391},{w:45, ix:1055, iy:453},
+  {w:43, ix:1114, iy:329},{w:44, ix: 716, iy:391},{w:45, ix:1055, iy:453},
   {w:46, ix: 836, iy:561},{w:47, ix: 442, iy:428},{w:48, ix:1259, iy:462}
 ];
 
-function monthIdx(w)       { return Math.floor((w-1)/4); }
-function monthPrimary(w)   { return MONTH_COLORS[monthIdx(w)][0]; }
-function monthSecondary(w) { return MONTH_COLORS[monthIdx(w)][1]; }
+function monthColors(w){
+  const m = WEEK_MONTH[w-1];
+  return MONTH_COLORS[m] || ['#fff','#ccc'];
+}
+function monthPrimary(w)   { return monthColors(w)[0]; }
+function monthSecondary(w) { return monthColors(w)[1]; }
 
 // ─────────────────────────────────────────────────────────
 //  DOM
@@ -515,14 +575,10 @@ const cpPopupDate   = document.getElementById('cpPopupDate');
 const cpTitle       = document.getElementById('cpPopupTitle');
 const cpPopupBar    = document.getElementById('cpPopupBar');
 const cpCloseBtn    = document.getElementById('cpCloseBtn');
-const iconPreBoo    = document.getElementById('iconPreBoo');
-const iconBooTree   = document.getElementById('iconBooTree');
-const iconContTree  = document.getElementById('iconContTree');
 const FADE_MS       = 520;
 
 // ─────────────────────────────────────────────────────────
-//  CANVAS / DPR
-//  setTransform called ONCE per resize. Draw loop = CSS px only.
+//  CANVAS — DPR applied once per resize only
 // ─────────────────────────────────────────────────────────
 const ctx = canvas.getContext('2d');
 let cssW = 1, cssH = 1;
@@ -540,113 +596,100 @@ function resizeCanvas(){
 }
 
 // ─────────────────────────────────────────────────────────
-//  COORDINATE TRANSFORMS (object-fit:cover)
-//
-//  The maze image is 1600×900.  All checkpoint coordinates are
-//  stored in that image space and remain constant regardless of
-//  window size.  imgToCSS() converts them to canvas CSS-pixels
-//  at runtime, so everything scales correctly automatically.
+//  COORDINATE TRANSFORMS — object-fit:cover
+//  Checkpoint coords live in 1600×900 image space.
+//  imgToCSS() maps them to canvas CSS-px at runtime.
 // ─────────────────────────────────────────────────────────
 function getCover(){
   const scale = Math.max(cssW/IMG_W, cssH/IMG_H);
   return { scale, ox:(IMG_W*scale-cssW)/2, oy:(IMG_H*scale-cssH)/2 };
 }
-function imgToCSS(ix, iy){
-  const {scale,ox,oy} = getCover();
+function imgToCSS(ix,iy){
+  const {scale,ox,oy}=getCover();
   return { x:ix*scale-ox, y:iy*scale-oy };
 }
-// cssToImg — only needed for Bryan coordinate reading
-function cssToImg(cx, cy){
-  const {scale,ox,oy} = getCover();
+function cssToImg(cx,cy){
+  const {scale,ox,oy}=getCover();
   return {
-    ix: Math.round(Math.max(0, Math.min((cx+ox)/scale, IMG_W))),
-    iy: Math.round(Math.max(0, Math.min((cy+oy)/scale, IMG_H)))
+    ix:Math.round(Math.max(0,Math.min((cx+ox)/scale,IMG_W))),
+    iy:Math.round(Math.max(0,Math.min((cy+oy)/scale,IMG_H)))
   };
 }
 
 // ─────────────────────────────────────────────────────────
 //  GHOST IMAGE
 // ─────────────────────────────────────────────────────────
-const ghostImg = new Image();
+const ghostImg=new Image();
 function assignRandomGhost(){
-  const src = GHOSTS[Math.floor(Math.random()*GHOSTS.length)];
-  ghostImg.src = startGhost.src = src;
+  const src=GHOSTS[Math.floor(Math.random()*GHOSTS.length)];
+  ghostImg.src=startGhost.src=src;
 }
 assignRandomGhost();
 
 // ─────────────────────────────────────────────────────────
 //  STATE
 // ─────────────────────────────────────────────────────────
-let mazeStarted = false;
-let bryanOn     = false;
-let activeWeek  = CURRENT_WEEK;
+let mazeStarted=false, bryanOn=false, activeWeek=CURRENT_WEEK;
 
-let introPhase       = 'idle';
-let introGlowStart   = 0;
-let introTravelStart = 0;
-let introSrcIX = 0, introSrcIY = 0;
+let introPhase='idle', introGlowStart=0, introTravelStart=0;
+let introSrcIX=0, introSrcIY=0;
 
-const startCP   = CHECKPOINTS.find(c => c.w === CURRENT_WEEK);
-let ghostIX     = startCP.ix, ghostIY = startCP.iy;
-let ghostSrcIX  = ghostIX, ghostSrcIY = ghostIY;
-let ghostDstIX  = ghostIX, ghostDstIY = ghostIY;
-let ghostT      = 1;
-let ghostAnimStart  = 0;
-let pendingPopupCP  = null;
+const startCP=CHECKPOINTS.find(c=>c.w===CURRENT_WEEK);
+let ghostIX=startCP.ix, ghostIY=startCP.iy;
+let ghostSrcIX=ghostIX, ghostSrcIY=ghostIY;
+let ghostDstIX=ghostIX, ghostDstIY=ghostIY;
+let ghostT=1, ghostAnimStart=0, pendingPopupCP=null;
 
-let trail = [];
+let trail=[];
 
-// Per-checkpoint fairy particles
-const CP_FAIRIES = CHECKPOINTS.map(() =>
-  Array.from({length: 8}, (_, i) => ({
-    angle:        (i/8) * Math.PI*2 + Math.random()*0.5,
-    orbit:        11 + Math.random()*10,   // image-px orbit radius (smaller)
-    speed:        0.35 + Math.random()*0.5,
-    phase:        Math.random()*Math.PI*2,
-    size:         0.9 + Math.random()*1.1,  // reduced
-    twinkleSpeed: 1.9 + Math.random()*2.4,
-    twinklePhase: Math.random()*Math.PI*2,
-    useSecondary: i % 3 === 2
+// Pre-generate fairy particle offsets for each checkpoint
+const CP_FAIRIES=CHECKPOINTS.map(()=>
+  Array.from({length:8},(_,i)=>({
+    angle:(i/8)*Math.PI*2+Math.random()*.5,
+    orbit:11+Math.random()*10,
+    speed:.35+Math.random()*.5,
+    phase:Math.random()*Math.PI*2,
+    size:.9+Math.random()*1.1,
+    twinkleSpeed:1.9+Math.random()*2.4,
+    twinklePhase:Math.random()*Math.PI*2,
+    useSecondary:i%3===2
   }))
 );
 
-let bMouseX = -1, bMouseY = -1;
-let rafHandle = null;
+let bMouseX=-1, bMouseY=-1, rafHandle=null;
 
 // ─────────────────────────────────────────────────────────
 //  EASING
 // ─────────────────────────────────────────────────────────
-function ease(t){ return t<.5 ? 2*t*t : -1+(4-2*t)*t; }
+function ease(t){ return t<.5?2*t*t:-1+(4-2*t)*t; }
 
 // ─────────────────────────────────────────────────────────
 //  TRAIL
 // ─────────────────────────────────────────────────────────
-function addTrail(ix, iy){
-  const useSec = Math.random()>.55;
-  const color  = useSec ? monthSecondary(activeWeek) : monthPrimary(activeWeek);
-  trail.push({ ix, iy, life:1, size:1.8+Math.random()*4.5, color,
-    dx:(Math.random()-.5)*.28, dy:-Math.random()*.36 });
+function addTrail(ix,iy){
+  const c=Math.random()>.55?monthSecondary(activeWeek):monthPrimary(activeWeek);
+  trail.push({ix,iy,life:1,size:1.8+Math.random()*4.5,color:c,
+    dx:(Math.random()-.5)*.28,dy:-Math.random()*.36});
   if(trail.length>100) trail.shift();
 }
 
 // ─────────────────────────────────────────────────────────
-//  DRAW
+//  DRAW FRAME
 // ─────────────────────────────────────────────────────────
 function drawFrame(now){
   ctx.clearRect(0,0,cssW,cssH);
   if(!mazeStarted) return;
 
-  const sec = now/1000;
+  const sec=now/1000;
+  const cpState={};
 
-  // ── cpState map ──────────────────────────────────────
-  const cpState = {};
-
+  // ── Intro: all glow ──────────────────────────────────
   if(introPhase==='allGlow'){
-    const el      = now - introGlowStart;
-    const showEnd = INTRO_GLOW_MS*0.62;
-    let baseA     = el<showEnd ? 1 : Math.max(0,1-(el-showEnd)/(INTRO_GLOW_MS-showEnd));
+    const el=now-introGlowStart;
+    const showEnd=INTRO_GLOW_MS*.62;
+    let baseA=el<showEnd?1:Math.max(0,1-(el-showEnd)/(INTRO_GLOW_MS-showEnd));
     CHECKPOINTS.forEach(cp=>{
-      cpState[cp.w] = { alpha:OPEN_WEEKS.includes(cp.w)?1:baseA*0.78, extra:1.5 };
+      cpState[cp.w]={alpha:OPEN_WEEKS.includes(cp.w)?1:baseA*.78,extra:1.5};
     });
     if(el>=INTRO_GLOW_MS){
       introPhase='traveling'; introTravelStart=now;
@@ -654,27 +697,28 @@ function drawFrame(now){
       ghostIX=introSrcIX; ghostIY=introSrcIY;
     }
 
+  // ── Intro: ghost traveling ───────────────────────────
   } else if(introPhase==='traveling'){
     OPEN_WEEKS.forEach(w=>{ cpState[w]={alpha:1,extra:1.0}; });
-    const prog = Math.min((now-introTravelStart)/INTRO_TRAVEL_MS,1);
-    const et   = ease(prog);
-    ghostIX = introSrcIX+(startCP.ix-introSrcIX)*et;
-    ghostIY = introSrcIY+(startCP.iy-introSrcIY)*et;
+    const prog=Math.min((now-introTravelStart)/INTRO_TRAVEL_MS,1);
+    const et=ease(prog);
+    ghostIX=introSrcIX+(startCP.ix-introSrcIX)*et;
+    ghostIY=introSrcIY+(startCP.iy-introSrcIY)*et;
     if(Math.random()<.3) addTrail(ghostIX,ghostIY);
     if(prog>=1){
       introPhase='done';
       ghostIX=startCP.ix; ghostIY=startCP.iy;
       ghostSrcIX=ghostIX; ghostSrcIY=ghostIY;
       ghostDstIX=ghostIX; ghostDstIY=ghostIY; ghostT=1;
-      // Auto-open popup for current week when ghost arrives on intro
-      showPopupAtCP(startCP);
+      showPopupAtCP(startCP);  // auto-open on arrival
     }
 
+  // ── Normal play ──────────────────────────────────────
   } else {
     OPEN_WEEKS.forEach(w=>{ cpState[w]={alpha:1,extra:0}; });
     if(bryanOn){
       CHECKPOINTS.forEach(cp=>{
-        if(!cpState[cp.w]) cpState[cp.w]={alpha:0.65,extra:0.15};
+        if(!cpState[cp.w]) cpState[cp.w]={alpha:.65,extra:.15};
       });
     }
     if(ghostT<1){
@@ -684,10 +728,9 @@ function drawFrame(now){
       ghostIX=ghostSrcIX+(ghostDstIX-ghostSrcIX)*et;
       ghostIY=ghostSrcIY+(ghostDstIY-ghostSrcIY)*et;
       if(Math.random()<.28) addTrail(ghostIX,ghostIY);
-      if(ghostT>=1 && pendingPopupCP){
+      if(ghostT>=1&&pendingPopupCP){
         ghostIX=ghostDstIX; ghostIY=ghostDstIY;
-        showPopupAtCP(pendingPopupCP);
-        pendingPopupCP=null;
+        showPopupAtCP(pendingPopupCP); pendingPopupCP=null;
       }
     }
   }
@@ -697,138 +740,123 @@ function drawFrame(now){
     const p=trail[i]; const {x,y}=imgToCSS(p.ix,p.iy);
     const gr=ctx.createRadialGradient(x,y,0,x,y,p.size*2.3);
     gr.addColorStop(0,p.color); gr.addColorStop(1,'transparent');
-    ctx.globalAlpha=p.life*0.40; ctx.fillStyle=gr;
+    ctx.globalAlpha=p.life*.40; ctx.fillStyle=gr;
     ctx.beginPath(); ctx.arc(x,y,p.size*2.3,0,Math.PI*2); ctx.fill();
-    ctx.globalAlpha=p.life*0.80; ctx.fillStyle='#fff';
-    ctx.beginPath(); ctx.arc(x,y,p.size*0.34,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=p.life*.80; ctx.fillStyle='#fff';
+    ctx.beginPath(); ctx.arc(x,y,p.size*.34,0,Math.PI*2); ctx.fill();
     ctx.globalAlpha=1;
-    p.life-=0.016; p.ix+=p.dx; p.iy+=p.dy;
+    p.life-=.016; p.ix+=p.dx; p.iy+=p.dy;
   }
   trail=trail.filter(p=>p.life>0);
 
   // ── Checkpoints ───────────────────────────────────────
-  // orbitScale maps fairy orbit radius (stored in image-px) to CSS-px
-  const {scale:coverScale} = getCover();
+  const {scale:coverScale}=getCover();
 
   CHECKPOINTS.forEach((cp,cpIdx)=>{
     const state=cpState[cp.w];
-    if(!state||state.alpha<=0.01) return;
+    if(!state||state.alpha<=.01) return;
 
-    const {x,y}  = imgToCSS(cp.ix,cp.iy);
-    const col1   = monthPrimary(cp.w);
-    const col2   = monthSecondary(cp.w);
-    const pulse  = 0.5+0.5*Math.sin(sec*2.1+cp.w*0.73);
-    const pulse2 = 0.5+0.5*Math.sin(sec*1.35+cp.w*0.41+1.3);
-    // ── Smaller base radius (was 10, now 7) ──
-    const baseR  = 7;
-    const glowR  = baseR + pulse*3.5*(1+state.extra*0.6);
-    const alpha  = state.alpha;
+    const {x,y}=imgToCSS(cp.ix,cp.iy);
+    const col1=monthPrimary(cp.w), col2=monthSecondary(cp.w);
+    const pulse =.5+.5*Math.sin(sec*2.1+cp.w*.73);
+    const pulse2=.5+.5*Math.sin(sec*1.35+cp.w*.41+1.3);
+    const baseR=7;
+    const glowR=baseR+pulse*3.5*(1+state.extra*.6);
+    const alpha=state.alpha;
 
     ctx.save();
 
-    // Layer 1 — deep haze primary
-    ctx.globalAlpha=alpha*(0.10+pulse*0.07);
+    // ── Layer 1: deep haze (primary) ─────────────────
     const hazeR=glowR*4.5;
+    ctx.globalAlpha=alpha*(.14+pulse*.10);      // brighter: was .10/.07
     const haze=ctx.createRadialGradient(x,y,0,x,y,hazeR);
-    haze.addColorStop(0,col1); haze.addColorStop(0.5,col1); haze.addColorStop(1,'transparent');
-    ctx.fillStyle=haze;
-    ctx.beginPath(); ctx.arc(x,y,hazeR,0,Math.PI*2); ctx.fill();
+    haze.addColorStop(0,col1); haze.addColorStop(.5,col1); haze.addColorStop(1,'transparent');
+    ctx.fillStyle=haze; ctx.beginPath(); ctx.arc(x,y,hazeR,0,Math.PI*2); ctx.fill();
 
-    // Layer 2 — secondary haze offset
-    ctx.globalAlpha=alpha*(0.07+pulse2*0.06);
-    const haze2=ctx.createRadialGradient(x+glowR*0.3,y-glowR*0.2,0,x,y,hazeR*0.8);
-    haze2.addColorStop(0,col2); haze2.addColorStop(0.5,col2); haze2.addColorStop(1,'transparent');
-    ctx.fillStyle=haze2;
-    ctx.beginPath(); ctx.arc(x,y,hazeR*0.8,0,Math.PI*2); ctx.fill();
+    // ── Layer 2: secondary haze ───────────────────────
+    ctx.globalAlpha=alpha*(.10+pulse2*.09);     // brighter
+    const haze2=ctx.createRadialGradient(x+glowR*.3,y-glowR*.2,0,x,y,hazeR*.8);
+    haze2.addColorStop(0,col2); haze2.addColorStop(.5,col2); haze2.addColorStop(1,'transparent');
+    ctx.fillStyle=haze2; ctx.beginPath(); ctx.arc(x,y,hazeR*.8,0,Math.PI*2); ctx.fill();
 
-    // Layer 3 — dual-color mid ring
-    ctx.globalAlpha=alpha*(0.36+pulse2*0.17);
+    // ── Layer 3: dual mid ring ────────────────────────
+    ctx.globalAlpha=alpha*(.48+pulse2*.22);     // brighter: was .36/.17
     const midR=glowR*2.0;
-    const midG=ctx.createRadialGradient(x,y,glowR*0.28,x,y,midR);
+    const midG=ctx.createRadialGradient(x,y,glowR*.28,x,y,midR);
     midG.addColorStop(0,'transparent');
-    midG.addColorStop(0.35,col1); midG.addColorStop(0.65,col2); midG.addColorStop(1,'transparent');
-    ctx.fillStyle=midG;
-    ctx.beginPath(); ctx.arc(x,y,midR,0,Math.PI*2); ctx.fill();
+    midG.addColorStop(.35,col1); midG.addColorStop(.65,col2); midG.addColorStop(1,'transparent');
+    ctx.fillStyle=midG; ctx.beginPath(); ctx.arc(x,y,midR,0,Math.PI*2); ctx.fill();
 
-    // Layer 4 — inner corona
-    ctx.globalAlpha=alpha*(0.70+pulse*0.18);
+    // ── Layer 4: inner corona ─────────────────────────
+    ctx.globalAlpha=alpha*(.85+pulse*.15);      // brighter: was .70/.18
     const coronaR=glowR*1.10;
     const corona=ctx.createRadialGradient(x,y,0,x,y,coronaR);
-    corona.addColorStop(0,'#fff'); corona.addColorStop(0.2,col1);
-    corona.addColorStop(0.62,col2); corona.addColorStop(1,'transparent');
-    ctx.fillStyle=corona;
-    ctx.beginPath(); ctx.arc(x,y,coronaR,0,Math.PI*2); ctx.fill();
+    corona.addColorStop(0,'#fff'); corona.addColorStop(.2,col1);
+    corona.addColorStop(.62,col2); corona.addColorStop(1,'transparent');
+    ctx.fillStyle=corona; ctx.beginPath(); ctx.arc(x,y,coronaR,0,Math.PI*2); ctx.fill();
 
-    // Layer 5 — solid gem dot
-    ctx.globalAlpha=alpha*(0.90+pulse*0.10);
-    ctx.shadowBlur=18; ctx.shadowColor=col1;
+    // ── Layer 5: solid gem dot ────────────────────────
+    ctx.globalAlpha=alpha*(.95+pulse*.05);      // brighter: was .90/.10
+    ctx.shadowBlur=24; ctx.shadowColor=col1;    // stronger shadow
     ctx.fillStyle=col1;
-    ctx.beginPath(); ctx.arc(x,y,glowR*0.44,0,Math.PI*2); ctx.fill();
-    ctx.shadowBlur=11; ctx.shadowColor=col2;
+    ctx.beginPath(); ctx.arc(x,y,glowR*.44,0,Math.PI*2); ctx.fill();
+    ctx.shadowBlur=14; ctx.shadowColor=col2;
     ctx.fillStyle=col2;
-    ctx.beginPath(); ctx.arc(x,y,glowR*0.26,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x,y,glowR*.26,0,Math.PI*2); ctx.fill();
     ctx.shadowBlur=0;
 
-    // Layer 6 — white core
+    // ── Layer 6: white core ───────────────────────────
     ctx.globalAlpha=alpha;
-    const coreG=ctx.createRadialGradient(x,y,0,x,y,glowR*0.16);
+    const coreG=ctx.createRadialGradient(x,y,0,x,y,glowR*.16);
     coreG.addColorStop(0,'rgba(255,255,255,1)');
-    coreG.addColorStop(0.7,'rgba(255,255,255,.65)');
+    coreG.addColorStop(.7,'rgba(255,255,255,.75)');
     coreG.addColorStop(1,'rgba(255,255,255,0)');
-    ctx.fillStyle=coreG; ctx.beginPath(); ctx.arc(x,y,glowR*0.16,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle=coreG; ctx.beginPath(); ctx.arc(x,y,glowR*.16,0,Math.PI*2); ctx.fill();
 
-    // Layer 7 — 4-point star (smaller: 0.65× radius)
-    ctx.globalAlpha=alpha*(0.32+pulse*0.24);
-    ctx.strokeStyle='rgba(255,255,255,0.88)'; ctx.lineWidth=0.8;
-    ctx.shadowBlur=7; ctx.shadowColor=col1;
-    const starLen=glowR*(0.72+pulse*0.28);
+    // ── Layer 7: 4-point star ─────────────────────────
+    ctx.globalAlpha=alpha*(.42+pulse*.30);      // brighter: was .32/.24
+    ctx.strokeStyle='rgba(255,255,255,0.95)'; ctx.lineWidth=.9;
+    ctx.shadowBlur=9; ctx.shadowColor=col1;
+    const starLen=glowR*(.72+pulse*.28);
     ctx.beginPath();
-    ctx.moveTo(x,y-starLen*0.18); ctx.lineTo(x,y-starLen);
-    ctx.moveTo(x,y+starLen*0.18); ctx.lineTo(x,y+starLen);
-    ctx.moveTo(x-starLen*0.18,y); ctx.lineTo(x-starLen,y);
-    ctx.moveTo(x+starLen*0.18,y); ctx.lineTo(x+starLen,y);
-    const diagLen=starLen*0.38;
-    ctx.moveTo(x-diagLen*0.1,y-diagLen*0.1); ctx.lineTo(x-diagLen,y-diagLen);
-    ctx.moveTo(x+diagLen*0.1,y-diagLen*0.1); ctx.lineTo(x+diagLen,y-diagLen);
-    ctx.moveTo(x-diagLen*0.1,y+diagLen*0.1); ctx.lineTo(x-diagLen,y+diagLen);
-    ctx.moveTo(x+diagLen*0.1,y+diagLen*0.1); ctx.lineTo(x+diagLen,y+diagLen);
+    ctx.moveTo(x,y-starLen*.18); ctx.lineTo(x,y-starLen);
+    ctx.moveTo(x,y+starLen*.18); ctx.lineTo(x,y+starLen);
+    ctx.moveTo(x-starLen*.18,y); ctx.lineTo(x-starLen,y);
+    ctx.moveTo(x+starLen*.18,y); ctx.lineTo(x+starLen,y);
+    const dL=starLen*.38;
+    ctx.moveTo(x-dL*.1,y-dL*.1); ctx.lineTo(x-dL,y-dL);
+    ctx.moveTo(x+dL*.1,y-dL*.1); ctx.lineTo(x+dL,y-dL);
+    ctx.moveTo(x-dL*.1,y+dL*.1); ctx.lineTo(x-dL,y+dL);
+    ctx.moveTo(x+dL*.1,y+dL*.1); ctx.lineTo(x+dL,y+dL);
     ctx.stroke(); ctx.shadowBlur=0;
 
-    // Layer 8 — fairy sparkle particles (smaller, scale with cover scale)
-    const fairies=CP_FAIRIES[cpIdx];
-    fairies.forEach(f=>{
-      const angle    = f.angle + sec*f.speed;
-      const twinkle  = 0.35+0.65*Math.abs(Math.sin(sec*f.twinkleSpeed+f.twinklePhase));
-      // Orbit in image-space, convert to CSS
-      const r        = f.orbit * coverScale * (0.82+state.extra*0.08) * (0.92+0.08*Math.sin(sec*1.1+f.phase));
-      const fx       = x + Math.cos(angle)*r;
-      const fy       = y + Math.sin(angle)*r*0.84;
-      const fColor   = f.useSecondary ? col2 : col1;
-      const fAlpha   = twinkle * alpha * (0.6+state.extra*0.12);
-      // Size in CSS px — smaller than before
-      const fSize    = f.size * coverScale * (0.65+twinkle*0.45);
+    // ── Layer 8: fairy sparkles ───────────────────────
+    CP_FAIRIES[cpIdx].forEach(f=>{
+      const angle=f.angle+sec*f.speed;
+      const twinkle=.35+.65*Math.abs(Math.sin(sec*f.twinkleSpeed+f.twinklePhase));
+      const r=f.orbit*coverScale*(.82+state.extra*.08)*(.92+.08*Math.sin(sec*1.1+f.phase));
+      const fx=x+Math.cos(angle)*r, fy=y+Math.sin(angle)*r*.84;
+      const fColor=f.useSecondary?col2:col1;
+      const fAlpha=twinkle*alpha*(.70+state.extra*.15);  // brighter: was .60
+      const fSize=f.size*coverScale*(.65+twinkle*.45);
 
-      // Soft glow behind sparkle
-      ctx.globalAlpha=fAlpha*0.38;
+      ctx.globalAlpha=fAlpha*.42;
       const fg=ctx.createRadialGradient(fx,fy,0,fx,fy,fSize*3.2);
       fg.addColorStop(0,fColor); fg.addColorStop(1,'transparent');
-      ctx.fillStyle=fg;
-      ctx.beginPath(); ctx.arc(fx,fy,fSize*3.2,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle=fg; ctx.beginPath(); ctx.arc(fx,fy,fSize*3.2,0,Math.PI*2); ctx.fill();
 
-      // Tiny 4-point star
       ctx.globalAlpha=fAlpha;
-      ctx.strokeStyle='#fff'; ctx.lineWidth=fSize*0.55;
-      ctx.shadowBlur=5; ctx.shadowColor=fColor;
+      ctx.strokeStyle='#fff'; ctx.lineWidth=fSize*.55;
+      ctx.shadowBlur=6; ctx.shadowColor=fColor;
       const sl=fSize*1.9;
       ctx.beginPath();
       ctx.moveTo(fx,fy-sl); ctx.lineTo(fx,fy+sl);
       ctx.moveTo(fx-sl,fy); ctx.lineTo(fx+sl,fy);
       ctx.stroke();
 
-      // Bright center dot
       ctx.globalAlpha=fAlpha;
-      ctx.fillStyle='#fff'; ctx.shadowBlur=4; ctx.shadowColor=fColor;
-      ctx.beginPath(); ctx.arc(fx,fy,fSize*0.48,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#fff'; ctx.shadowBlur=5; ctx.shadowColor=fColor;
+      ctx.beginPath(); ctx.arc(fx,fy,fSize*.48,0,Math.PI*2); ctx.fill();
       ctx.shadowBlur=0;
     });
 
@@ -837,34 +865,32 @@ function drawFrame(now){
   });
 
   // ── Ghost ─────────────────────────────────────────────
-  const bob           = Math.sin(sec*1.85)*3.5;
-  const {x:gx,y:gy}  = imgToCSS(ghostIX,ghostIY);
-  const gR            = 28;
-  const pulseG        = 0.5+0.5*Math.sin(sec*2.1);
-  const gcol1         = monthPrimary(activeWeek);
-  const gcol2         = monthSecondary(activeWeek);
+  const bob=Math.sin(sec*1.85)*3.5;
+  const {x:gx,y:gy}=imgToCSS(ghostIX,ghostIY);
+  const gR=28, pulseG=.5+.5*Math.sin(sec*2.1);
+  const gcol1=monthPrimary(activeWeek), gcol2=monthSecondary(activeWeek);
 
   ctx.save();
-  ctx.globalAlpha=0.20+pulseG*0.10;
+  ctx.globalAlpha=.20+pulseG*.10;
   const ga=ctx.createRadialGradient(gx,gy+3,0,gx,gy+3,gR*2.0);
-  ga.addColorStop(0,gcol1); ga.addColorStop(0.5,gcol2); ga.addColorStop(1,'transparent');
+  ga.addColorStop(0,gcol1); ga.addColorStop(.5,gcol2); ga.addColorStop(1,'transparent');
   ctx.fillStyle=ga; ctx.beginPath(); ctx.arc(gx,gy+3,gR*2.0,0,Math.PI*2); ctx.fill();
-  ctx.globalAlpha=0.15+pulseG*0.06;
-  const gs=ctx.createRadialGradient(gx,gy+gR*0.7,0,gx,gy+gR*0.7,gR*0.85);
-  gs.addColorStop(0,'rgba(0,0,0,0.5)'); gs.addColorStop(1,'transparent');
-  ctx.fillStyle=gs; ctx.beginPath(); ctx.arc(gx,gy+gR*0.7,gR*0.85,0,Math.PI*2); ctx.fill();
+  ctx.globalAlpha=.14+pulseG*.06;
+  const gs=ctx.createRadialGradient(gx,gy+gR*.7,0,gx,gy+gR*.7,gR*.85);
+  gs.addColorStop(0,'rgba(0,0,0,.5)'); gs.addColorStop(1,'transparent');
+  ctx.fillStyle=gs; ctx.beginPath(); ctx.arc(gx,gy+gR*.7,gR*.85,0,Math.PI*2); ctx.fill();
   ctx.restore();
 
   ctx.save();
   if(ghostImg.complete&&ghostImg.naturalWidth>0){
     ctx.drawImage(ghostImg,gx-gR,gy-gR+bob,gR*2,gR*2);
   } else {
-    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(gx,gy+bob,gR*0.7,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(gx,gy+bob,gR*.7,0,Math.PI*2); ctx.fill();
   }
   ctx.restore();
 
   // ── Bryan crosshair ───────────────────────────────────
-  if(bryanOn && bMouseX>=0){
+  if(bryanOn&&bMouseX>=0){
     ctx.save();
     ctx.strokeStyle='rgba(255,255,255,.50)'; ctx.lineWidth=1;
     ctx.shadowBlur=8; ctx.shadowColor='rgba(255,255,255,.25)';
@@ -882,18 +908,18 @@ function loop(now){ drawFrame(now); rafHandle=requestAnimationFrame(loop); }
 function startLoop(){ if(!rafHandle) rafHandle=requestAnimationFrame(loop); }
 
 // ─────────────────────────────────────────────────────────
-//  HIT TEST
+//  HIT TEST — image-space distance
 // ─────────────────────────────────────────────────────────
-const HIT_R_IMG = 40; // image-px hit radius
+const HIT_R=40;
 function hitTest(clientX,clientY){
   const rect=canvas.getBoundingClientRect();
   const cx=clientX-rect.left, cy=clientY-rect.top;
   const {ix,iy}=cssToImg(cx,cy);
-  const pool=bryanOn ? CHECKPOINTS : CHECKPOINTS.filter(c=>OPEN_WEEKS.includes(c.w));
-  let best=null, bestD=Infinity;
+  const pool=bryanOn?CHECKPOINTS:CHECKPOINTS.filter(c=>OPEN_WEEKS.includes(c.w));
+  let best=null,bestD=Infinity;
   pool.forEach(cp=>{
     const d=Math.hypot(cp.ix-ix,cp.iy-iy);
-    if(d<HIT_R_IMG && d<bestD){ bestD=d; best=cp; }
+    if(d<HIT_R&&d<bestD){bestD=d;best=cp;}
   });
   return best;
 }
@@ -902,9 +928,7 @@ function hitTest(clientX,clientY){
 //  CANVAS EVENTS
 // ─────────────────────────────────────────────────────────
 canvas.addEventListener('click',e=>{
-  if(!mazeStarted) return;
-  if(introPhase==='allGlow'||introPhase==='traveling') return;
-
+  if(!mazeStarted||introPhase==='allGlow'||introPhase==='traveling') return;
   if(bryanOn){
     const rect=canvas.getBoundingClientRect();
     const {ix,iy}=cssToImg(e.clientX-rect.left,e.clientY-rect.top);
@@ -921,7 +945,7 @@ canvas.addEventListener('touchend',e=>{
   if(!e.changedTouches.length) return;
   const t0=e.changedTouches[0];
   const cp=hitTest(t0.clientX,t0.clientY);
-  if(cp){ startGhostTravel(cp); e.preventDefault(); }
+  if(cp){startGhostTravel(cp);e.preventDefault();}
 },{passive:false});
 canvas.addEventListener('mousemove',e=>{
   if(!bryanOn) return;
@@ -930,7 +954,7 @@ canvas.addEventListener('mousemove',e=>{
   const {ix,iy}=cssToImg(bMouseX,bMouseY);
   coordText.textContent=`x: ${ix}  y: ${iy}`;
 });
-canvas.addEventListener('mouseleave',()=>{ bMouseX=-1; bMouseY=-1; });
+canvas.addEventListener('mouseleave',()=>{bMouseX=-1;bMouseY=-1;});
 
 function startGhostTravel(cp){
   closePopup();
@@ -941,20 +965,19 @@ function startGhostTravel(cp){
 }
 
 // ─────────────────────────────────────────────────────────
-//  POPUP — always centered on screen
+//  POPUP — screen-centered via CSS, no JS positioning
 // ─────────────────────────────────────────────────────────
 function showPopupAtCP(cp){
   const col1=monthPrimary(cp.w), col2=monthSecondary(cp.w);
   cpPopupBar.style.background=`linear-gradient(90deg,${col1},${col2})`;
-  cpPopupBar.style.boxShadow=`0 0 14px ${col1}66,0 0 28px ${col2}44`;
-  cpPopupDate.textContent='This Week  '+WEEK_DATES[cp.w-1];
-  cpTitle.textContent='Week '+String(cp.w).padStart(2,'0');
+  cpPopupBar.style.boxShadow=`0 0 14px ${col1}88,0 0 28px ${col2}55`;
+  // Japanese: "第 09 週"
+  cpTitle.textContent=`第\u00a0${String(cp.w).padStart(2,'0')}\u00a0週`;
+  cpPopupDate.textContent=WEEK_DATES[cp.w-1];
 
-  // Position is pure CSS: fixed, left:50%, top:50%, transform:translate(-50%,-50%)
-  // No JS positioning needed — it's always screen-centered.
   cpScrim.classList.add('show');
   cpPopup.classList.remove('show');
-  void cpPopup.offsetWidth; // force reflow to replay animation
+  void cpPopup.offsetWidth;
   cpPopup.classList.add('show');
 }
 
@@ -963,15 +986,13 @@ function closePopup(){
   cpScrim.classList.remove('show');
 }
 
-cpCloseBtn.addEventListener('click', closePopup);
-cpScrim.addEventListener('click', closePopup);
+cpCloseBtn.addEventListener('click',closePopup);
+cpScrim.addEventListener('click',closePopup);
 
-// Icon clicks — wire landing pages here later
-[iconPreBoo,iconBooTree,iconContTree].forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    // landing page links go here
-  });
-});
+// Icon clicks — wire landing pages here
+document.getElementById('iconPreBoo').addEventListener('click',()=>{ /* add href */ });
+document.getElementById('iconBooTree').addEventListener('click',()=>{ /* add href */ });
+document.getElementById('iconContTree').addEventListener('click',()=>{ /* add href */ });
 
 // ─────────────────────────────────────────────────────────
 //  BRYAN MODE
@@ -982,14 +1003,13 @@ function applyBryan(){
   coordPill.classList.toggle('show',bryanOn);
   bryanTip.classList.toggle('show',bryanOn);
   canvas.classList.toggle('bryan',bryanOn);
-  if(!bryanOn){ bMouseX=-1;bMouseY=-1;coordText.textContent='x: —  y: —'; }
+  if(!bryanOn){bMouseX=-1;bMouseY=-1;coordText.textContent='x: —  y: —';}
 }
 bryanBtn.addEventListener('click',()=>{
   if(bryanOn){bryanOn=false;applyBryan();return;}
   const pw=prompt('Bryan mode password:');
   if(pw===null) return;
-  if(String(pw).trim()===BRYAN_PASS){bryanOn=true;applyBryan();}
-  else alert('Nope.');
+  if(String(pw).trim()===BRYAN_PASS){bryanOn=true;applyBryan();} else alert('Nope.');
 });
 coordPill.addEventListener('click',()=>{
   const m=coordText.textContent.match(/x:\s*(\d+)\s*y:\s*(\d+)/);
@@ -1029,9 +1049,9 @@ function buildSparkles(container,count=24,wide=false){
     const sp=document.createElement('div');sp.className='sp';
     const angle=(i/count)*Math.PI*2;
     const r=wide?35+Math.random()*28:28+Math.random()*18;
-    const cx=50+Math.cos(angle)*r, cy=50+Math.sin(angle)*r;
+    const cx=50+Math.cos(angle)*r,cy=50+Math.sin(angle)*r;
     const size=wide?3+Math.random()*4:2+Math.random()*3;
-    const dur=1.3+Math.random()*1.8, delay=-(Math.random()*dur);
+    const dur=1.3+Math.random()*1.8,delay=-(Math.random()*dur);
     sp.style.cssText=`--size:${size}px;--x:${cx}%;--y:${cy}%;--dur:${dur}s;--delay:${delay}s;`;
     container.appendChild(sp);
   }
@@ -1042,7 +1062,7 @@ buildSparkles(startSp,36,true);
 // ─────────────────────────────────────────────────────────
 //  OVERLAY FLOW
 // ─────────────────────────────────────────────────────────
-returnBtn.addEventListener('click',()=>{ fadeOut(); setTimeout(()=>window.location.href='index.html',FADE_MS); });
+returnBtn.addEventListener('click',()=>{fadeOut();setTimeout(()=>window.location.href='index.html',FADE_MS);});
 
 let videoPlayed=false;
 continueBtn.addEventListener('click',async()=>{
@@ -1057,7 +1077,7 @@ continueBtn.addEventListener('click',async()=>{
 
 let o2shown=false;
 function showOverlay2(){
-  if(o2shown)return; o2shown=true;
+  if(o2shown)return;o2shown=true;
   try{toMazeVideo.pause();toMazeVideo.currentTime=0;}catch(e){}
   videoWrap.classList.remove('show');
   overlay2.classList.add('show');
@@ -1069,12 +1089,12 @@ toMazeVideo.addEventListener('error',showOverlay2);
 toMazeVideo.addEventListener('timeupdate',()=>{
   const d=toMazeVideo.duration;
   if(!isFinite(d)||d<=0)return;
-  if(d-toMazeVideo.currentTime<=0.5)showOverlay2();
+  if(d-toMazeVideo.currentTime<=.5)showOverlay2();
 });
 
 let mazeLaunched=false;
 mazeStartBtn.addEventListener('click',async()=>{
-  if(mazeLaunched)return; mazeLaunched=true;
+  if(mazeLaunched)return;mazeLaunched=true;
   overlay2.classList.add('hidden');
   overlay2.addEventListener('transitionend',()=>overlay2.remove(),{once:true});
   app.classList.remove('inTransition');
@@ -1082,14 +1102,14 @@ mazeStartBtn.addEventListener('click',async()=>{
   ghostIX=CHECKPOINTS[0].ix; ghostIY=CHECKPOINTS[0].iy;
   introPhase='allGlow'; introGlowStart=performance.now();
   resizeCanvas(); startLoop();
-  try{bgMusic.volume=0.65;await bgMusic.play();}catch(e){console.warn('Music blocked',e);}
+  try{bgMusic.volume=.65;await bgMusic.play();}catch(e){console.warn('Music blocked',e);}
 });
 
 backBtn.addEventListener('click',()=>{
   try{bgMusic.pause();bgMusic.currentTime=0;}catch(e){}
-  fadeOut(); setTimeout(()=>window.location.href='index.html',FADE_MS);
+  fadeOut();setTimeout(()=>window.location.href='index.html',FADE_MS);
 });
-function fadeOut(){ fade.classList.add('on'); }
+function fadeOut(){fade.classList.add('on');}
 
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden){
