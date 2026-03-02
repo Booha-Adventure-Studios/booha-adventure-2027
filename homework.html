@@ -1,0 +1,677 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Booha Adventure 2027 — Homework Tree</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bowlby+One&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{
+      --bg:#07070b;
+      --glass: rgba(255,255,255,.10);
+      --glass2: rgba(255,255,255,.14);
+      --text:#fff;
+      --muted: rgba(255,255,255,.7);
+      --pink:#ff3bbd;
+      --pink2:#ff79d7;
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --safe-top: env(safe-area-inset-top);
+      --safe-right: env(safe-area-inset-right);
+      --safe-bottom: env(safe-area-inset-bottom);
+      --safe-left: env(safe-area-inset-left);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      color:var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 700px at 50% 20%, rgba(255,59,189,.14), rgba(0,0,0,0) 60%),
+                  radial-gradient(900px 600px at 20% 90%, rgba(120,170,255,.10), rgba(0,0,0,0) 60%),
+                  linear-gradient(180deg, #050508, #0b0b12);
+      overflow:hidden;
+    }
+
+    /* Fullscreen app */
+    #app{
+      position:fixed; inset:0;
+      padding: calc(16px + var(--safe-top)) calc(16px + var(--safe-right)) calc(16px + var(--safe-bottom)) calc(16px + var(--safe-left));
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    /* Header */
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px;
+    }
+    .brand{
+      display:flex; flex-direction:column;
+      line-height:1.05;
+    }
+    .brand .title{
+      font-family:"Bowlby One", system-ui;
+      font-size:22px;
+      letter-spacing:.5px;
+      text-shadow: 0 8px 24px rgba(0,0,0,.35);
+    }
+    .brand .sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:4px;
+    }
+    .pill{
+      background: rgba(0,0,0,.25);
+      border:1px solid rgba(255,255,255,.18);
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:12px;
+      color:rgba(255,255,255,.85);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      user-select:none;
+    }
+
+    /* Curriculum icons */
+    .chooser{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .iconBtn{
+      flex:1 1 180px;
+      min-width:180px;
+      display:flex; align-items:center; justify-content:center;
+      gap:10px;
+      padding:14px 12px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.16);
+      background: linear-gradient(180deg, var(--glass), rgba(0,0,0,.08));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color:#fff;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+    }
+    .iconBtn:active{ transform: scale(.985); }
+    .iconBtn[aria-selected="true"]{
+      border-color: rgba(255,59,189,.55);
+      background: linear-gradient(180deg, rgba(255,59,189,.18), rgba(0,0,0,.10));
+    }
+    .badge{
+      width:34px; height:34px; border-radius:12px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.35), rgba(255,255,255,.08));
+      border:1px solid rgba(255,255,255,.18);
+      box-shadow: 0 10px 28px rgba(0,0,0,.35);
+    }
+    .iconText{
+      display:flex; flex-direction:column; align-items:flex-start;
+      line-height:1.05;
+    }
+    .iconText .name{
+      font-family:"Bowlby One", system-ui;
+      font-size:16px;
+      letter-spacing:.3px;
+    }
+    .iconText .hint{
+      font-size:12px;
+      color:rgba(255,255,255,.72);
+      margin-top:4px;
+    }
+
+    /* Cards: LAST / THIS / NEXT */
+    .grid{
+      flex:1;
+      min-height:0;
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap:12px;
+    }
+    @media (max-width: 980px){
+      body{ overflow:auto; }
+      #app{ position:relative; }
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      min-height:0;
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,.16);
+      background: linear-gradient(180deg, var(--glass), rgba(0,0,0,.10));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+    .cardHead{
+      padding:12px 14px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+    }
+    .cardHead .k{
+      font-family:"Bowlby One", system-ui;
+      font-size:14px;
+      letter-spacing:.35px;
+    }
+    .cardHead .w{
+      font-size:12px;
+      color:rgba(255,255,255,.75);
+      margin-top:4px;
+    }
+    .cardBtns{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .btn{
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.22);
+      color:#fff;
+      padding:8px 10px;
+      border-radius:12px;
+      font-size:12px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn:active{ transform: scale(.98); }
+    .btn.primary{
+      border-color: rgba(255,59,189,.45);
+      background: rgba(255,59,189,.16);
+    }
+
+    .cardBody{
+      padding:12px 14px 16px;
+      overflow:auto;
+      min-height:0;
+    }
+
+    .section{
+      margin-bottom:14px;
+    }
+    .sectionTitle{
+      font-family:"Bowlby One", system-ui;
+      font-size:13px;
+      letter-spacing:.35px;
+      color:rgba(255,255,255,.92);
+      margin: 10px 0 8px;
+    }
+    ol{
+      margin:0;
+      padding-left: 20px;
+    }
+    li{
+      margin: 6px 0;
+      line-height:1.35;
+      font-size:14px;
+    }
+    .jp{
+      color:rgba(255,255,255,.78);
+      font-size:13px;
+      margin-left:6px;
+    }
+    .muted{
+      color:rgba(255,255,255,.68);
+      font-size:13px;
+      line-height:1.45;
+    }
+
+    /* Video overlay */
+    #videoOverlay{
+      position:fixed; inset:0;
+      background:#000;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+    }
+    #videoOverlay.hidden{ display:none; }
+    #enterVideo{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+    #skipBtn{
+      position:absolute;
+      top: calc(12px + var(--safe-top));
+      right: calc(12px + var(--safe-right));
+      z-index:10000;
+    }
+
+    /* Small footer hint */
+    .footerHint{
+      font-size:12px;
+      color:rgba(255,255,255,.62);
+      user-select:none;
+    }
+    a{ color: rgba(255,255,255,.86); }
+  </style>
+</head>
+
+<body>
+  <!-- Transition video overlay (optional) -->
+  <div id="videoOverlay" class="hidden">
+    <button id="skipBtn" class="btn">Skip</button>
+    <video id="enterVideo" playsinline muted autoplay></video>
+  </div>
+
+  <div id="app">
+    <div class="topbar">
+      <div class="brand">
+        <div class="title">Homework Tree</div>
+        <div class="sub">Choose a curriculum → copy LAST / THIS / NEXT</div>
+      </div>
+      <div id="weekPill" class="pill">Loading…</div>
+    </div>
+
+    <div class="chooser" role="tablist" aria-label="Curriculum chooser">
+      <div class="iconBtn" id="btnPre" role="tab" tabindex="0" aria-selected="true" data-cur="preboo">
+        <div class="badge" aria-hidden="true"></div>
+        <div class="iconText">
+          <div class="name">Pre-Boo</div>
+          <div class="hint">Basics + confidence</div>
+        </div>
+      </div>
+
+      <div class="iconBtn" id="btnBoo" role="tab" tabindex="0" aria-selected="false" data-cur="booriculum">
+        <div class="badge" aria-hidden="true"></div>
+        <div class="iconText">
+          <div class="name">Boo-riculum</div>
+          <div class="hint">Weekly core set</div>
+        </div>
+      </div>
+
+      <div class="iconBtn" id="btnCont" role="tab" tabindex="0" aria-selected="false" data-cur="boocontinuum">
+        <div class="badge" aria-hidden="true"></div>
+        <div class="iconText">
+          <div class="name">Boo-continuum</div>
+          <div class="hint">Stronger output</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card" id="cardLast">
+        <div class="cardHead">
+          <div>
+            <div class="k">LAST</div>
+            <div class="w" id="lastLabel">—</div>
+          </div>
+          <div class="cardBtns">
+            <button class="btn" data-copy="last" data-scope="vocab">Copy Vocab</button>
+            <button class="btn primary" data-copy="last" data-scope="all">Copy All</button>
+          </div>
+        </div>
+        <div class="cardBody" id="lastBody"><div class="muted">Loading…</div></div>
+      </div>
+
+      <div class="card" id="cardThis">
+        <div class="cardHead">
+          <div>
+            <div class="k">THIS</div>
+            <div class="w" id="thisLabel">—</div>
+          </div>
+          <div class="cardBtns">
+            <button class="btn" data-copy="this" data-scope="vocab">Copy Vocab</button>
+            <button class="btn primary" data-copy="this" data-scope="all">Copy All</button>
+          </div>
+        </div>
+        <div class="cardBody" id="thisBody"><div class="muted">Loading…</div></div>
+      </div>
+
+      <div class="card" id="cardNext">
+        <div class="cardHead">
+          <div>
+            <div class="k">NEXT</div>
+            <div class="w" id="nextLabel">—</div>
+          </div>
+          <div class="cardBtns">
+            <button class="btn" data-copy="next" data-scope="vocab">Copy Vocab</button>
+            <button class="btn primary" data-copy="next" data-scope="all">Copy All</button>
+          </div>
+        </div>
+        <div class="cardBody" id="nextBody"><div class="muted">Loading…</div></div>
+      </div>
+    </div>
+
+    <div class="footerHint">
+      Tip: You can bookmark this page. The Maze will pass LAST/THIS/NEXT automatically.
+    </div>
+  </div>
+
+<script>
+(() => {
+  // ----------------------------
+  // CONFIG
+  // ----------------------------
+  // Put your transition mp4 here (or leave empty to skip video).
+  // If you don’t have one yet, set to "" and the page will open instantly.
+  const ENTER_VIDEO_SRC = "assets/enter_tree.mp4"; // <- change or set "" to disable
+
+  // Week data loader: tries these paths in order.
+  // You said you’ll edit the JSON in the "weeks" folder, so this includes that.
+  function candidateWeekUrls(weekId){
+    return [
+      `weeks/${weekId}.json`,
+      `weeks/${weekId}/week.json`,
+      `data/weeks/${weekId}.json`
+    ];
+  }
+
+  // Curriculum keys
+  const CURS = {
+    preboo: "Pre-Boo",
+    booriculum: "Boo-riculum",
+    boocontinuum: "Boo-continuum"
+  };
+
+  // ----------------------------
+  // STATE
+  // ----------------------------
+  let activeCur = "preboo";
+  let ids = { last:null, week:null, next:null };
+  let data = { last:null, week:null, next:null };
+
+  // ----------------------------
+  // DOM
+  // ----------------------------
+  const weekPill = document.getElementById("weekPill");
+  const btns = Array.from(document.querySelectorAll(".iconBtn"));
+  const lastLabel = document.getElementById("lastLabel");
+  const thisLabel = document.getElementById("thisLabel");
+  const nextLabel = document.getElementById("nextLabel");
+  const lastBody  = document.getElementById("lastBody");
+  const thisBody  = document.getElementById("thisBody");
+  const nextBody  = document.getElementById("nextBody");
+
+  // Video overlay
+  const overlay = document.getElementById("videoOverlay");
+  const vid = document.getElementById("enterVideo");
+  const skipBtn = document.getElementById("skipBtn");
+
+  // ----------------------------
+  // HELPERS
+  // ----------------------------
+  function qp(name){
+    const u = new URL(location.href);
+    return u.searchParams.get(name);
+  }
+
+  function setSelected(cur){
+    activeCur = cur;
+    btns.forEach(b => b.setAttribute("aria-selected", b.dataset.cur === cur ? "true" : "false"));
+    renderAll();
+  }
+
+  function safeText(s){ return (s == null) ? "" : String(s); }
+
+  function normalizeItem(item){
+    // Accept: string OR {en,jp,hira} OR {en,ja} etc
+    if (typeof item === "string") return { en:item };
+    if (!item || typeof item !== "object") return { en: String(item) };
+    const en = item.en ?? item.english ?? item.e ?? "";
+    const jp = item.jp ?? item.ja ?? item.japanese ?? "";
+    const hira = item.hira ?? item.hiragana ?? "";
+    return { en: safeText(en), jp: safeText(jp), hira: safeText(hira) };
+  }
+
+  function renderList(arr){
+    const items = (arr || []).map(normalizeItem);
+    if (!items.length) return `<div class="muted">—</div>`;
+    const lis = items.map(x => {
+      const jpParts = [x.jp, x.hira].filter(Boolean);
+      const jp = jpParts.length ? `<span class="jp">(${jpParts.join(" / ")})</span>` : "";
+      return `<li>${escapeHtml(x.en)} ${jp}</li>`;
+    }).join("");
+    return `<ol>${lis}</ol>`;
+  }
+
+  function renderHomework(hw){
+    if (!hw) return `<div class="muted">—</div>`;
+    if (Array.isArray(hw)){
+      return `<ol>${hw.map(x=>`<li>${escapeHtml(String(x))}</li>`).join("")}</ol>`;
+    }
+    return `<div class="muted">${escapeHtml(String(hw))}</div>`;
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, m => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    })[m]);
+  }
+
+  async function fetchFirst(urls){
+    let lastErr = null;
+    for (const url of urls){
+      try{
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+        return await res.json();
+      }catch(e){
+        lastErr = e;
+      }
+    }
+    throw lastErr || new Error("Fetch failed");
+  }
+
+  async function loadWeek(weekId){
+    if (!weekId) return null;
+    return fetchFirst(candidateWeekUrls(weekId));
+  }
+
+  function getCurBlock(weekJson){
+    if (!weekJson) return null;
+    // Your weekly JSON should contain: preboo / booriculum / boocontinuum
+    return weekJson[activeCur] || null;
+  }
+
+  function getWeekLabel(weekJson, fallbackId){
+    if (!weekJson) return fallbackId || "—";
+    return weekJson.label || weekJson.title || weekJson.weekLabel || weekJson.weekId || fallbackId || "—";
+  }
+
+  function renderCard(which, weekJson, bodyEl, labelEl){
+    const curBlock = getCurBlock(weekJson);
+    labelEl.textContent = getWeekLabel(weekJson, ids[which]);
+
+    if (!curBlock){
+      bodyEl.innerHTML = `<div class="muted">No data for <b>${CURS[activeCur]}</b> in this week yet.</div>`;
+      return;
+    }
+
+    const vocab = curBlock.vocab || curBlock.words || [];
+    const sentences = curBlock.sentences || curBlock.sentence || [];
+    const questions = curBlock.questions || curBlock.qa || curBlock.q || [];
+    const homework = curBlock.homework || curBlock.hw || curBlock.homeworkIdeas || "";
+
+    bodyEl.innerHTML = `
+      <div class="section">
+        <div class="sectionTitle">VOCAB</div>
+        ${renderList(vocab)}
+      </div>
+      <div class="section">
+        <div class="sectionTitle">SENTENCES</div>
+        ${renderList(sentences)}
+      </div>
+      <div class="section">
+        <div class="sectionTitle">QUESTIONS</div>
+        ${renderList(questions)}
+      </div>
+      <div class="section">
+        <div class="sectionTitle">HOMEWORK</div>
+        ${renderHomework(homework)}
+      </div>
+    `;
+  }
+
+  function buildCopyText(weekJson, scope){
+    const curBlock = getCurBlock(weekJson);
+    if (!curBlock) return "";
+
+    const label = getWeekLabel(weekJson, weekJson?.weekId || "");
+    const header = `${CURS[activeCur]} — ${label}\n`;
+
+    const normLines = (arr) => (arr||[]).map(normalizeItem).map((x,i)=>{
+      const jp = [x.jp, x.hira].filter(Boolean).join(" / ");
+      return `${i+1}. ${x.en}${jp ? " ("+jp+")" : ""}`;
+    }).join("\n");
+
+    const vocab = curBlock.vocab || curBlock.words || [];
+    const sentences = curBlock.sentences || [];
+    const questions = curBlock.questions || curBlock.qa || [];
+    const homework = curBlock.homework || curBlock.hw || curBlock.homeworkIdeas || "";
+
+    if (scope === "vocab"){
+      return header + "\nVOCAB\n" + normLines(vocab) + "\n";
+    }
+
+    // all
+    let out = header + "\n";
+    out += "VOCAB\n" + normLines(vocab) + "\n\n";
+    out += "SENTENCES\n" + normLines(sentences) + "\n\n";
+    out += "QUESTIONS\n" + normLines(questions) + "\n\n";
+    out += "HOMEWORK\n";
+    if (Array.isArray(homework)){
+      out += homework.map((x,i)=>`${i+1}. ${String(x)}`).join("\n");
+    }else{
+      out += String(homework || "—");
+    }
+    out += "\n";
+    return out;
+  }
+
+  async function copyToClipboard(text){
+    try{
+      await navigator.clipboard.writeText(text);
+      weekPill.textContent = "Copied ✅";
+      setTimeout(()=> updatePill(), 800);
+    }catch(e){
+      // Fallback
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      try{ document.execCommand("copy"); }catch(_){}
+      document.body.removeChild(ta);
+      weekPill.textContent = "Copied ✅";
+      setTimeout(()=> updatePill(), 800);
+    }
+  }
+
+  function updatePill(){
+    const w = ids.week || "—";
+    weekPill.textContent = `Week: ${w} • ${CURS[activeCur]}`;
+  }
+
+  function renderAll(){
+    updatePill();
+    renderCard("last", data.last, lastBody, lastLabel);
+    renderCard("week", data.week, thisBody, thisLabel);
+    renderCard("next", data.next, nextBody, nextLabel);
+  }
+
+  // ----------------------------
+  // VIDEO FLOW
+  // ----------------------------
+  function playEnterVideoThenShowUI(){
+    if (!ENTER_VIDEO_SRC){
+      overlay.classList.add("hidden");
+      return;
+    }
+    overlay.classList.remove("hidden");
+    vid.src = ENTER_VIDEO_SRC;
+    vid.currentTime = 0;
+
+    const finish = () => {
+      overlay.classList.add("hidden");
+      try{ vid.pause(); }catch(e){}
+      vid.removeAttribute("src");
+      vid.load();
+    };
+
+    skipBtn.onclick = finish;
+
+    vid.onended = finish;
+    vid.onerror = finish;
+
+    // On iOS, autoplay might fail; attempt play and if it fails, just skip.
+    const p = vid.play();
+    if (p && typeof p.catch === "function"){
+      p.catch(() => finish());
+    }
+  }
+
+  // ----------------------------
+  // INIT
+  // ----------------------------
+  async function init(){
+    ids.last = qp("last");
+    ids.week = qp("week") || qp("this");  // allow ?this=
+    ids.next = qp("next");
+
+    // If you open the page directly without params, it still works if you pass just week:
+    // homework.html?week=2027_w09
+    // It will show THIS, and LAST/NEXT will just be blank.
+    weekPill.textContent = "Loading…";
+
+    playEnterVideoThenShowUI();
+
+    // Load data
+    try{
+      data.last = await loadWeek(ids.last);
+    }catch(e){ data.last = null; }
+
+    try{
+      data.week = await loadWeek(ids.week);
+    }catch(e){ data.week = null; }
+
+    try{
+      data.next = await loadWeek(ids.next);
+    }catch(e){ data.next = null; }
+
+    // Wire curriculum buttons
+    btns.forEach(b => {
+      const cur = b.dataset.cur;
+      b.addEventListener("click", () => setSelected(cur));
+      b.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); setSelected(cur); }
+      });
+    });
+
+    // Copy buttons
+    document.querySelectorAll("[data-copy]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const which = btn.getAttribute("data-copy"); // last/this/next
+        const scope = btn.getAttribute("data-scope"); // vocab/all
+        const wj = which === "last" ? data.last : which === "this" ? data.week : data.next;
+        const text = buildCopyText(wj, scope);
+        if (!text){ weekPill.textContent = "Nothing to copy"; setTimeout(()=> updatePill(), 900); return; }
+        await copyToClipboard(text);
+      });
+    });
+
+    renderAll();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
