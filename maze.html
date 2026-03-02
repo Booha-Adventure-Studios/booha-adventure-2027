@@ -34,22 +34,47 @@
       background:#000; z-index:9999; text-align:center; padding:32px;
     }
     #rotateOverlay.show{ display:flex; }
-    /* CSS-only portrait: works in ALL webviews including Messenger */
     @media screen and (orientation:portrait) and (max-width:1023px){
       #rotateOverlay{ display:flex !important; }
     }
-    .rotateIcon{ font-size:68px; display:block; transform-origin:center;
-      animation:rotateHint 2.2s ease-in-out infinite; }
+    .rotateIcon{
+      font-size:72px; display:block;
+      transform-origin:center;
+      animation:rotateHint 2.2s ease-in-out infinite;
+    }
     @keyframes rotateHint{
       0%  { transform:rotate(0deg); }
       35% { transform:rotate(-90deg); }
       65% { transform:rotate(-90deg); }
       100%{ transform:rotate(0deg); }
     }
-    .rotateTitle{ font-family:'Bowlby One',sans-serif;
-      font-size:clamp(20px,5vw,28px); letter-spacing:2px; color:#fff; margin:0;
-      text-shadow:0 0 30px rgba(255,140,255,.7),0 0 60px rgba(255,80,200,.35); }
-    .rotateSub{ font-size:15px; color:rgba(255,255,255,.6); margin:0; line-height:1.6; }
+    .rotateEmoji{
+      font-size:48px;
+      animation:floatEmoji 2s ease-in-out infinite;
+    }
+    @keyframes floatEmoji{
+      0%,100%{ transform:translateY(0); }
+      50%{ transform:translateY(-10px); }
+    }
+    .rotateTitle{
+      font-family:'Bowlby One',sans-serif;
+      font-size:clamp(22px,6vw,34px);
+      letter-spacing:2px; color:#fff; margin:0;
+      text-shadow:0 0 30px rgba(255,140,255,.8),0 0 60px rgba(255,80,200,.4);
+    }
+    .rotateSub{
+      font-size:16px; color:rgba(255,255,255,.65); margin:0;
+      line-height:1.7;
+    }
+    .rotateGlow{
+      width:140px; height:4px; border-radius:999px; margin:0 auto;
+      background:linear-gradient(90deg,var(--pink),var(--blue),var(--pink));
+      background-size:200%; animation:shimmer 2s linear infinite;
+      box-shadow:0 0 16px rgba(255,59,189,.5);
+    }
+    @keyframes shimmer{
+      0%{ background-position:0% } 100%{ background-position:200% }
+    }
 
     /* ════════════════════════════════
        SHARED OVERLAY BASE
@@ -159,7 +184,6 @@
     #overlay2{ z-index:45; display:none; }
     #overlay2.show{ display:flex; }
 
-    /* Ghost is the button */
     .ghostBtnWrap{
       position:relative;
       display:inline-flex; align-items:center; justify-content:center;
@@ -182,7 +206,6 @@
         0 0 16px 5px rgba(255,100,220,.75);
     }
     #startGhost{
-      /* Scales with the shorter viewport dimension — good in landscape */
       width:  clamp(100px, 28vmin, 200px);
       height: clamp(100px, 28vmin, 200px);
       object-fit:contain; user-select:none; -webkit-user-drag:none;
@@ -200,18 +223,12 @@
     ════════════════════════════════ */
     #mazeScene{ position:absolute; inset:0; background:#000; }
 
-    /*
-      STAGE fills the entire screen — no bottom reserve.
-      The floating back button overlays the corner but never
-      obscures the maze centre where gameplay happens.
-    */
     #stage{
       position:absolute;
       inset:0;
       overflow:hidden;
     }
 
-    /* Maze fills entire screen as background — no black bars ever */
     #mazeImg{
       display:block;
       position:absolute;
@@ -224,13 +241,12 @@
       pointer-events:none;
     }
 
-    /* Hit layer — JS positions it to match rendered maze rect */
     #hitLayer{
       position:absolute; left:0; top:0; width:0; height:0;
       cursor:default; z-index:5; pointer-events:auto;
     }
 
-    /* Dev grid + crosshair (Bryan mode) */
+    /* Dev grid + crosshair */
     #grid{
       position:absolute; inset:0; display:none; pointer-events:none;
       background-image:
@@ -248,7 +264,7 @@
     .chLineH{ height:1px; left:0; right:0; top:0; }
     .chLineV{ width:1px;  top:0; bottom:0; left:0; }
 
-    /* ── HUD (desktop only) ── */
+    /* ── HUD ── */
     .hudTitle{
       font-family:'Bowlby One',sans-serif; font-size:clamp(13px,1.8vw,18px);
       letter-spacing:2px; line-height:1.15; color:#fff;
@@ -277,7 +293,7 @@
     .coordSmall{ font-size:12px; color:rgba(255,255,255,.7); font-weight:800; letter-spacing:1px; }
     .coordBig  { font-size:14px; margin-top:4px; }
 
-    /* ── Floating ghost avatar (desktop top-right) ── */
+    /* ── Floating ghost avatar ── */
     #avatar{
       position:absolute;
       right:calc(10px + var(--safe-right)); top:calc(10px + var(--safe-top));
@@ -285,6 +301,7 @@
       filter:drop-shadow(0 8px 16px rgba(0,0,0,.55));
       opacity:.95; transform-origin:50% 60%;
       animation:floaty 3.8s ease-in-out infinite;
+      display:none; /* hidden — ghost is on canvas */
     }
     @keyframes floaty{
       0%  { transform:translateY(0px)  rotate(var(--r,0deg)); }
@@ -292,7 +309,7 @@
       100%{ transform:translateY(0px)  rotate(var(--r,0deg)); }
     }
 
-    /* ── BRYAN button (desktop bottom-left) ── */
+    /* ── BRYAN button ── */
     #bryanBtn{
       position:absolute;
       left:calc(10px + var(--safe-left)); bottom:calc(10px + var(--safe-bottom));
@@ -310,49 +327,39 @@
     }
     #bryanBtn:active{ transform:scale(.96); }
 
-    /*
-      ── BACK BUTTON ──
-      On mobile: small, semi-transparent, bottom-right corner, doesn't obscure maze.
-      On desktop: slightly larger.
-    */
+    /* ── BACK BUTTON — smaller, bottom-right ── */
     #backBtn{
       position:absolute;
-      right:  calc(10px + var(--safe-right));
-      bottom: calc(10px + var(--safe-bottom));
+      right:  calc(8px + var(--safe-right));
+      bottom: calc(8px + var(--safe-bottom));
       z-index:20;
       appearance:none; border:0; border-radius:999px;
-      /* mobile-first sizing */
-      padding:7px 14px;
-      font-size:12px; font-weight:1000; letter-spacing:.5px;
+      padding:5px 12px;
+      font-size:11px; font-weight:1000; letter-spacing:.5px;
       cursor:pointer; color:#000;
       background:linear-gradient(180deg,var(--pink2),var(--pink));
       box-shadow:
-        0 5px 14px rgba(255,59,189,.28),
-        0 0 0 2px rgba(255,59,189,.15),
-        0 0 18px rgba(255,59,189,.32);
-      /* semi-transparent on mobile so it feels lighter on the maze */
-      opacity:0.82;
+        0 4px 10px rgba(255,59,189,.28),
+        0 0 0 1px rgba(255,59,189,.15),
+        0 0 14px rgba(255,59,189,.28);
+      opacity:0.75;
       -webkit-tap-highlight-color:transparent; transform:translateZ(0);
       transition:opacity 200ms;
     }
     #backBtn:hover { opacity:1; }
     #backBtn:active{ transform:scale(.96); opacity:1; }
 
-    /* Desktop: a bit bigger */
     @media (min-width:900px) and (pointer:fine){
-      #backBtn{ padding:9px 18px; font-size:14px; opacity:1; }
+      #backBtn{ padding:7px 14px; font-size:12px; opacity:0.85; }
       #bryanBtn{ padding:8px 12px; font-size:10px; color:rgba(255,255,255,.6); }
-      #avatar{ width:56px; height:56px; }
     }
 
-    /* On touch/mobile: hide HUD title & Bryan, keep back button */
     @media (pointer:coarse){
       .hudTitle{ display:none; }
       #bryanBtn{ display:none; }
       #hud{ display:none; }
     }
 
-    /* Hide BRYAN + HUD during transition (video + overlay 2) */
     #app.inTransition #bryanBtn,
     #app.inTransition #hud,
     #app.inTransition #avatar,
@@ -364,6 +371,58 @@
       pointer-events:none; transition:opacity 520ms ease; z-index:200;
     }
     #fade.on{ opacity:1; }
+
+    /* ════════════════════════════════
+       CANVAS LAYER — checkpoints + ghost
+    ════════════════════════════════ */
+    #mazeCanvas{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      pointer-events:none;
+      z-index:6;
+    }
+    #mazeCanvas.interactive{ pointer-events:auto; }
+
+    /* ════════════════════════════════
+       CHECKPOINT POPUP
+    ════════════════════════════════ */
+    #cpPopup{
+      position:absolute; z-index:30;
+      background:rgba(0,0,0,.88);
+      border:1.5px solid rgba(255,255,255,.18);
+      border-radius:20px;
+      padding:22px 28px;
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+      text-align:center;
+      min-width:200px;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.06),
+        0 20px 60px rgba(0,0,0,.7),
+        0 0 40px rgba(255,59,189,.15);
+      display:none;
+      transform:translate(-50%,-120%);
+      pointer-events:auto;
+    }
+    #cpPopup.show{ display:block; }
+    #cpPopup h2{
+      font-family:'Bowlby One',sans-serif;
+      font-size:clamp(14px,2.5vw,20px);
+      letter-spacing:1px; margin:0 0 8px; color:#fff;
+      text-shadow:0 0 20px rgba(255,140,255,.6);
+    }
+    #cpPopup p{
+      font-size:13px; color:rgba(255,255,255,.6); margin:0 0 16px;
+      line-height:1.5;
+    }
+    #cpCloseBtn{
+      appearance:none; border:0; border-radius:999px;
+      padding:8px 20px; font-size:13px; font-weight:900;
+      cursor:pointer; color:#000;
+      background:linear-gradient(180deg,var(--pink2),var(--pink));
+      box-shadow:0 4px 14px rgba(255,59,189,.35);
+    }
+    #cpCloseBtn:active{ transform:scale(.96); }
 
     @media (prefers-reduced-motion:reduce){
       #avatar,#startGhost{ animation:none; }
@@ -379,8 +438,9 @@
   <!-- ROTATE OVERLAY -->
   <div id="rotateOverlay" role="alert" aria-live="polite">
     <span class="rotateIcon">📱</span>
-    <h1 class="rotateTitle">よこむきにしてね！</h1>
-    <p class="rotateSub">めいろをあそぶには<br>スマホをよこにむけてください。</p>
+    <div class="rotateGlow"></div>
+    <h1 class="rotateTitle">よこにしてね！</h1>
+    <p class="rotateSub">めいろをあそぶには<br>スマホを<strong style="color:#ff79d7">よこむき</strong>にしてください</p>
   </div>
 
   <!-- OVERLAY 1 — confirmation -->
@@ -415,6 +475,7 @@
   <section id="mazeScene" aria-label="めいろ">
     <div id="stage">
       <img id="mazeImg" src="assets/img/maze.png" alt="めいろ" />
+      <canvas id="mazeCanvas" aria-hidden="true"></canvas>
       <div id="hitLayer" aria-hidden="true">
         <div id="grid"></div>
         <div id="crosshair">
@@ -424,7 +485,14 @@
       </div>
     </div>
 
-    <!-- Desktop HUD (hidden on touch devices) -->
+    <!-- Checkpoint popup -->
+    <div id="cpPopup" role="dialog" aria-modal="true">
+      <h2 id="cpPopupTitle">Week XX</h2>
+      <p id="cpPopupBody">このウィークのコンテンツはここにはいります！</p>
+      <button id="cpCloseBtn" type="button">とじる ✕</button>
+    </div>
+
+    <!-- Desktop HUD -->
     <div id="hud">
       <div class="hudTitle">BOOHA<br>ADVENTURE</div>
       <div id="coordPill" class="pill">
@@ -434,13 +502,8 @@
       </div>
     </div>
 
-    <!-- Ghost avatar floating top-right (desktop) -->
     <img id="avatar" alt="ブーハー" />
-
-    <!-- Bryan mode (desktop only) -->
     <button id="bryanBtn" type="button" aria-label="Bryan mode">BRYAN</button>
-
-    <!-- Back — always visible, small on mobile -->
     <button id="backBtn" type="button" aria-label="もどる">もどる</button>
   </section>
 
@@ -456,6 +519,87 @@
     'assets/img/green-boo.png','assets/img/pink-boo.png','assets/img/purple-boo.png'
   ];
 
+  // Natural image dimensions
+  const IMG_W = 1600;
+  const IMG_H = 900;
+
+  // All 48 checkpoints [week, imgX, imgY]
+  const ALL_CHECKPOINTS = [
+    { week:1,  ix:439,  iy:406 },
+    { week:2,  ix:1246, iy:509 },
+    { week:3,  ix:1146, iy:383 },
+    { week:4,  ix:879,  iy:504 },
+    { week:5,  ix:562,  iy:428 },
+    { week:6,  ix:523,  iy:648 },
+    { week:7,  ix:1146, iy:551 },
+    { week:8,  ix:1016, iy:406 },
+    { week:9,  ix:973,  iy:652 },
+    { week:10, ix:380,  iy:546 },
+    { week:11, ix:1116, iy:616 },
+    { week:12, ix:682,  iy:615 },
+    { week:13, ix:865,  iy:405 },
+    { week:14, ix:519,  iy:485 },
+    { week:15, ix:839,  iy:681 },
+    { week:16, ix:743,  iy:444 },
+    { week:17, ix:1131, iy:448 },
+    { week:18, ix:371,  iy:593 },
+    { week:19, ix:688,  iy:405 },
+    { week:20, ix:1127, iy:504 },
+    { week:21, ix:643,  iy:487 },
+    { week:22, ix:1229, iy:446 },
+    { week:23, ix:799,  iy:553 },
+    { week:24, ix:373,  iy:437 },
+    { week:25, ix:937,  iy:463 },
+    { week:26, ix:540,  iy:533 },
+    { week:27, ix:1054, iy:504 },
+    { week:28, ix:505,  iy:438 },
+    { week:29, ix:1022, iy:553 },
+    { week:30, ix:427,  iy:489 },
+    { week:31, ix:697,  iy:684 },
+    { week:32, ix:1006, iy:612 },
+    { week:33, ix:825,  iy:403 },
+    { week:34, ix:642,  iy:645 },
+    { week:35, ix:1068, iy:461 },
+    { week:36, ix:487,  iy:533 },
+    { week:37, ix:1091, iy:651 },
+    { week:38, ix:609,  iy:577 },
+    { week:39, ix:923,  iy:612 },
+    { week:40, ix:468,  iy:619 },
+    { week:41, ix:1185, iy:589 },
+    { week:42, ix:744,  iy:513 },
+    { week:43, ix:1088, iy:382 },
+    { week:44, ix:643,  iy:442 },
+    { week:45, ix:982,  iy:504 },
+    { week:46, ix:763,  iy:612 },
+    { week:47, ix:369,  iy:479 },
+    { week:48, ix:1186, iy:513 },
+  ];
+
+  // Months: 4 weeks each (weeks 1-4 = month1, 5-8 = month2, ...)
+  // 12 months * 4 weeks = 48 weeks
+  const MONTH_COLORS = [
+    '#ff3bbd', // month 1 — hot pink
+    '#ff6b3b', // month 2 — orange
+    '#ffd700', // month 3 — gold
+    '#3bff8a', // month 4 — green
+    '#3bc8ff', // month 5 — cyan
+    '#3b6fff', // month 6 — blue
+    '#a03bff', // month 7 — purple
+    '#ff3b6f', // month 8 — rose
+    '#ff9f3b', // month 9 — amber
+    '#3bffee', // month 10 — teal
+    '#c8ff3b', // month 11 — lime
+    '#ff3b3b', // month 12 — red
+  ];
+
+  function monthForWeek(w){ return Math.floor((w-1)/4); } // 0-indexed
+  function colorForWeek(w){ return MONTH_COLORS[monthForWeek(w)]; }
+
+  // Current open weeks: 8, 9, 10
+  const OPEN_WEEKS = [8, 9, 10];
+  const CURRENT_WEEK = 10; // where ghost travels on open
+
+  // DOM refs
   const app             = document.getElementById('app');
   const rotateOverlay   = document.getElementById('rotateOverlay');
   const overlay1        = document.getElementById('overlay1');
@@ -479,11 +623,15 @@
   const backBtn         = document.getElementById('backBtn');
   const coordPill       = document.getElementById('coordPill');
   const coordText       = document.getElementById('coordText');
+  const canvas          = document.getElementById('mazeCanvas');
+  const ctx             = canvas.getContext('2d');
+  const cpPopup         = document.getElementById('cpPopup');
+  const cpPopupTitle    = document.getElementById('cpPopupTitle');
+  const cpPopupBody     = document.getElementById('cpPopupBody');
+  const cpCloseBtn      = document.getElementById('cpCloseBtn');
   const FADE_MS         = 520;
 
-  // ── Orientation — CSS media query handles it; JS is backup only ──
-  // The @media (orientation:portrait) rule already shows #rotateOverlay.
-  // This JS adds a .show class for belt-and-suspenders on older webviews.
+  // ── Orientation ──────────────────────────────────────────
   function checkOrientation(){
     const portrait    = window.innerHeight > window.innerWidth;
     const smallScreen = window.innerWidth < 1024;
@@ -503,9 +651,7 @@
   function assignRandomGhost(){
     const src = pickRandom(GHOSTS);
     startGhost.src = avatar.src = src;
-    const r = (Math.random()*10-5).toFixed(2)+'deg';
-    avatar.style.setProperty('--r', r);
-    startGhost.style.setProperty('--r', r);
+    ghostImg.src = src;
   }
 
   // ── Sparkle builder ───────────────────────────────────────
@@ -527,10 +673,96 @@
   buildSparkles(confirmSparkles, 24);
   buildSparkles(startSparkles, 36, true);
 
+  // ── Cover-mode coordinate transforms ─────────────────────
+  function getCoverTransform(){
+    const rect = canvas.getBoundingClientRect();
+    const cw = rect.width, ch = rect.height;
+    const scale = Math.max(cw / IMG_W, ch / IMG_H);
+    const dw = IMG_W * scale, dh = IMG_H * scale;
+    const ox = (dw - cw) / 2; // crop offset left
+    const oy = (dh - ch) / 2; // crop offset top
+    return { scale, ox, oy, cw, ch };
+  }
+
+  // Image coords → screen (canvas-relative) pixel
+  function imgToScreen(ix, iy){
+    const { scale, ox, oy } = getCoverTransform();
+    return {
+      sx: ix * scale - ox,
+      sy: iy * scale - oy
+    };
+  }
+
+  // Screen pixel → image coords
+  function screenToImg(sx, sy){
+    const { scale, ox, oy, cw, ch } = getCoverTransform();
+    return {
+      ix: Math.round(Math.min(Math.max((sx + ox) / scale, 0), IMG_W)),
+      iy: Math.round(Math.min(Math.max((sy + oy) / scale, 0), IMG_H))
+    };
+  }
+
+  // ── Ghost image ──────────────────────────────────────────
+  const ghostImg = new Image();
+  ghostImg.src = GHOSTS[0];
+  let ghostSrc = GHOSTS[0];
+
+  // Ghost state
+  let ghostIX = ALL_CHECKPOINTS.find(c=>c.week===CURRENT_WEEK).ix;
+  let ghostIY = ALL_CHECKPOINTS.find(c=>c.week===CURRENT_WEEK).iy;
+  let ghostTargetIX = ghostIX;
+  let ghostTargetIY = ghostIY;
+  let ghostAnimProgress = 1; // 0..1
+  let ghostStartIX = ghostIX;
+  let ghostStartIY = ghostIY;
+  const GHOST_TRAVEL_DURATION = 1200; // ms for checkpoint-to-checkpoint move
+  let ghostAnimStart = 0;
+  let ghostBobT = 0;
+  let ghostTrail = []; // [{ix,iy,life}]
+  let rafId = null;
+
+  // Intro animation state
+  let introPhase = 'idle'; // 'idle' | 'allGlow' | 'traveling'
+  let introAllGlowStart = 0;
+  const INTRO_ALL_GLOW_MS = 2200; // time all checkpoints show before fade
+  let introTravelStart = 0;
+  let introGhostStartIX = 0;
+  let introGhostStartIY = 0;
+  const INTRO_TRAVEL_MS = 2000;
+
+  // Checkpoint glow animation
+  let cpGlowT = 0;
+  let bryanOn = false;
+  let mazeStarted = false;
+  let activeWeek = CURRENT_WEEK;
+
+  // Trail particle struct
+  function addTrailParticle(ix, iy){
+    ghostTrail.push({
+      ix, iy,
+      life: 1.0,
+      size: 4 + Math.random() * 6,
+      color: colorForWeek(activeWeek),
+      dx: (Math.random()-0.5)*0.5,
+      dy: -Math.random()*0.5,
+    });
+    if(ghostTrail.length > 60) ghostTrail.shift();
+  }
+
+  // ── Canvas sizing ────────────────────────────────────────
+  function resizeCanvas(){
+    const rect = document.getElementById('stage').getBoundingClientRect();
+    canvas.width  = rect.width  * window.devicePixelRatio;
+    canvas.height = rect.height * window.devicePixelRatio;
+    canvas.style.width  = rect.width  + 'px';
+    canvas.style.height = rect.height + 'px';
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  }
+  window.addEventListener('resize', ()=>{ resizeCanvas(); positionSoon(); }, {passive:true});
+  window.addEventListener('orientationchange', ()=>setTimeout(()=>{ resizeCanvas(); positionSoon(); },200), {passive:true});
+
   // ── Hit layer positioning ─────────────────────────────────
-  // Always uses contain coordinates — no cover offset needed.
   function positionHitLayer(){
-    // In cover mode the image fills the stage exactly — hitLayer matches stage
     const s = document.getElementById('stage').getBoundingClientRect();
     hitLayer.style.left   = '0px';
     hitLayer.style.top    = '0px';
@@ -538,12 +770,297 @@
     hitLayer.style.height = s.height + 'px';
   }
   function positionSoon(){
-    requestAnimationFrame(()=>requestAnimationFrame(positionHitLayer));
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{ positionHitLayer(); resizeCanvas(); }));
   }
   window.addEventListener('resize', positionSoon, {passive:true});
   window.addEventListener('orientationchange', ()=>setTimeout(positionSoon,200), {passive:true});
   if(mazeImg.complete) setTimeout(positionSoon, 0);
   else mazeImg.addEventListener('load', ()=>setTimeout(positionSoon, 0));
+
+  // ── Draw ─────────────────────────────────────────────────
+  function easeInOut(t){ return t<.5 ? 2*t*t : -1+(4-2*t)*t; }
+
+  function drawAll(now){
+    const W = canvas.width  / window.devicePixelRatio;
+    const H = canvas.height / window.devicePixelRatio;
+    ctx.save();
+    ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+
+    // Determine which checkpoints to show and their alpha/glow
+    let cpStates = {}; // week -> {alpha, glowExtra, color}
+
+    if(!mazeStarted){
+      // nothing
+    } else if(introPhase === 'allGlow'){
+      // All checkpoints glowing, then fading out
+      const elapsed = now - introAllGlowStart;
+      const showTime = INTRO_ALL_GLOW_MS * 0.6;
+      const fadeTime = INTRO_ALL_GLOW_MS * 0.4;
+      let alpha = 1;
+      if(elapsed > showTime){
+        alpha = Math.max(0, 1 - (elapsed - showTime) / fadeTime);
+      }
+      ALL_CHECKPOINTS.forEach(cp => {
+        if(!OPEN_WEEKS.includes(cp.week)){
+          cpStates[cp.week] = { alpha: alpha * 0.85, glowExtra: 1, color: colorForWeek(cp.week) };
+        }
+      });
+      OPEN_WEEKS.forEach(w => {
+        cpStates[w] = { alpha: 1, glowExtra: 1.5, color: colorForWeek(w) };
+      });
+      if(elapsed >= INTRO_ALL_GLOW_MS){
+        introPhase = 'traveling';
+        introTravelStart = now;
+        introGhostStartIX = ALL_CHECKPOINTS[0].ix;
+        introGhostStartIY = ALL_CHECKPOINTS[0].iy;
+      }
+    } else if(introPhase === 'traveling'){
+      OPEN_WEEKS.forEach(w => {
+        cpStates[w] = { alpha: 1, glowExtra: 1, color: colorForWeek(w) };
+      });
+      // Ghost traveling to current week
+      const elapsed = now - introTravelStart;
+      const t = Math.min(elapsed / INTRO_TRAVEL_MS, 1);
+      const et = easeInOut(t);
+      const target = ALL_CHECKPOINTS.find(c=>c.week===CURRENT_WEEK);
+      const cix = introGhostStartIX + (target.ix - introGhostStartIX)*et;
+      const ciy = introGhostStartIY + (target.iy - introGhostStartIY)*et;
+      if(t < 1){
+        // trail
+        if(Math.random()<0.4) addTrailParticle(cix, ciy);
+        ghostIX = cix; ghostIY = ciy;
+      } else {
+        introPhase = 'done';
+        ghostIX = target.ix;
+        ghostIY = target.iy;
+        ghostTargetIX = ghostIX;
+        ghostTargetIY = ghostIY;
+        ghostAnimProgress = 1;
+        activeWeek = CURRENT_WEEK;
+      }
+    } else {
+      // Normal: open weeks always visible
+      OPEN_WEEKS.forEach(w => {
+        cpStates[w] = { alpha: 1, glowExtra: bryanOn ? 0.5 : 0, color: colorForWeek(w) };
+      });
+      if(bryanOn){
+        ALL_CHECKPOINTS.forEach(cp => {
+          if(!OPEN_WEEKS.includes(cp.week)){
+            cpStates[cp.week] = { alpha: 0.75, glowExtra: 0.5, color: colorForWeek(cp.week) };
+          }
+        });
+      }
+    }
+
+    // Draw trail particles
+    ghostTrail.forEach((p, i) => {
+      const { sx, sy } = imgToScreen(p.ix, p.iy);
+      const a = p.life * 0.85;
+      ctx.save();
+      ctx.globalAlpha = a;
+      const grad = ctx.createRadialGradient(sx, sy, 0, sx, sy, p.size*2);
+      grad.addColorStop(0, p.color || '#fff');
+      grad.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(sx, sy, p.size*2, 0, Math.PI*2);
+      ctx.fill();
+      // sparkle star
+      ctx.fillStyle = 'rgba(255,255,255,' + (a*0.9) + ')';
+      ctx.beginPath();
+      ctx.arc(sx, sy, p.size*0.5, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+      p.life -= 0.025;
+      p.ix += p.dx;
+      p.iy += p.dy;
+    });
+    ghostTrail = ghostTrail.filter(p=>p.life>0);
+
+    // Draw checkpoints
+    cpGlowT = now / 1000;
+    ALL_CHECKPOINTS.forEach(cp => {
+      const state = cpStates[cp.week];
+      if(!state || state.alpha <= 0) return;
+      const { sx, sy } = imgToScreen(cp.ix, cp.iy);
+      const color = state.color;
+      const pulse = 0.5 + 0.5*Math.sin(cpGlowT * 2.5 + cp.week * 0.7);
+      const glowR = 14 + pulse * 8 * (1 + state.glowExtra);
+      ctx.save();
+      ctx.globalAlpha = state.alpha;
+
+      // Outer glow
+      const gGlow = ctx.createRadialGradient(sx, sy, 0, sx, sy, glowR*2.2);
+      gGlow.addColorStop(0, color.replace(')', ',0.45)').replace('rgb','rgba').replace('#','rgba(').replace('rgba(','rgba(').replace(/rgba\(([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2}),/, (m,r,g,b)=>`rgba(${parseInt(r,16)},${parseInt(g,16)},${parseInt(b,16)},`));
+      // simpler approach:
+      const glowAlpha = 0.35 + pulse * 0.2;
+      ctx.globalAlpha = state.alpha * glowAlpha;
+      ctx.beginPath();
+      ctx.arc(sx, sy, glowR*2.2, 0, Math.PI*2);
+      const gr = ctx.createRadialGradient(sx, sy, 0, sx, sy, glowR*2.2);
+      gr.addColorStop(0, color);
+      gr.addColorStop(1, 'transparent');
+      ctx.fillStyle = gr;
+      ctx.fill();
+
+      // Inner circle
+      ctx.globalAlpha = state.alpha * (0.85 + pulse * 0.15);
+      ctx.beginPath();
+      ctx.arc(sx, sy, glowR * 0.55, 0, Math.PI*2);
+      ctx.fillStyle = color;
+      ctx.shadowBlur = 18;
+      ctx.shadowColor = color;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // White core
+      ctx.globalAlpha = state.alpha * 0.9;
+      ctx.beginPath();
+      ctx.arc(sx, sy, glowR * 0.22, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(255,255,255,0.95)';
+      ctx.fill();
+
+      // Week number label
+      if(OPEN_WEEKS.includes(cp.week) || bryanOn){
+        ctx.globalAlpha = state.alpha * 0.95;
+        ctx.font = `900 ${Math.round(glowR * 0.7)}px system-ui`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#000';
+        ctx.fillText(cp.week, sx, sy + glowR * 1.05);
+      }
+
+      ctx.restore();
+    });
+
+    // Draw ghost
+    if(mazeStarted){
+      // Update ghost travel animation
+      if(ghostAnimProgress < 1){
+        const elapsed = now - ghostAnimStart;
+        ghostAnimProgress = Math.min(elapsed / GHOST_TRAVEL_DURATION, 1);
+        const et = easeInOut(ghostAnimProgress);
+        const cix = ghostStartIX + (ghostTargetIX - ghostStartIX)*et;
+        const ciy = ghostStartIY + (ghostTargetIY - ghostStartIY)*et;
+        if(Math.random()<0.35) addTrailParticle(cix, ciy);
+        ghostIX = cix;
+        ghostIY = ciy;
+        if(ghostAnimProgress >= 1){
+          ghostIX = ghostTargetIX;
+          ghostIY = ghostTargetIY;
+        }
+      }
+
+      ghostBobT = now / 1000;
+      const bobY = Math.sin(ghostBobT * 1.9) * 3;
+      const { sx, sy } = imgToScreen(ghostIX, ghostIY);
+      const gSize = 36;
+
+      // Ghost glow
+      ctx.save();
+      ctx.globalAlpha = 0.35;
+      const gg = ctx.createRadialGradient(sx, sy+4, 0, sx, sy+4, gSize*1.4);
+      gg.addColorStop(0, colorForWeek(activeWeek));
+      gg.addColorStop(1, 'transparent');
+      ctx.fillStyle = gg;
+      ctx.beginPath();
+      ctx.arc(sx, sy+4, gSize*1.4, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+
+      // Ghost image
+      if(ghostImg.complete && ghostImg.naturalWidth>0){
+        ctx.save();
+        ctx.drawImage(ghostImg, sx-gSize, sy-gSize+bobY, gSize*2, gSize*2);
+        ctx.restore();
+      } else {
+        // Fallback circle
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(sx, sy+bobY, gSize*0.65, 0, Math.PI*2);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    ctx.restore();
+  }
+
+  // ── RAF loop ──────────────────────────────────────────────
+  function loop(now){
+    drawAll(now);
+    rafId = requestAnimationFrame(loop);
+  }
+
+  // ── Canvas click / touch — checkpoint interaction ────────
+  function handleCanvasInteraction(clientX, clientY){
+    if(introPhase === 'allGlow' || introPhase === 'traveling') return;
+
+    const rect = canvas.getBoundingClientRect();
+    const sx = clientX - rect.left;
+    const sy = clientY - rect.top;
+    const { ix, iy } = screenToImg(sx, sy);
+
+    // Find nearest checkpoint within threshold
+    const HIT_RADIUS_IMG = 40; // in image px
+    let best = null, bestDist = Infinity;
+    const weeksToCheck = bryanOn ? ALL_CHECKPOINTS.map(c=>c.week) : OPEN_WEEKS;
+    ALL_CHECKPOINTS.forEach(cp => {
+      if(!weeksToCheck.includes(cp.week)) return;
+      const d = Math.hypot(cp.ix - ix, cp.iy - iy);
+      if(d < HIT_RADIUS_IMG && d < bestDist){
+        bestDist = d; best = cp;
+      }
+    });
+
+    if(best){
+      moveGhostTo(best);
+      openPopup(best, sx, sy);
+    }
+  }
+
+  canvas.classList.add('interactive');
+  canvas.addEventListener('click', e=>{
+    handleCanvasInteraction(e.clientX, e.clientY);
+  });
+  canvas.addEventListener('touchend', e=>{
+    if(e.changedTouches.length){
+      const t = e.changedTouches[0];
+      handleCanvasInteraction(t.clientX, t.clientY);
+      e.preventDefault();
+    }
+  }, {passive:false});
+
+  function moveGhostTo(cp){
+    ghostStartIX = ghostIX;
+    ghostStartIY = ghostIY;
+    ghostTargetIX = cp.ix;
+    ghostTargetIY = cp.iy;
+    ghostAnimProgress = 0;
+    ghostAnimStart = performance.now();
+    activeWeek = cp.week;
+  }
+
+  // ── Popup ─────────────────────────────────────────────────
+  function openPopup(cp, sx, sy){
+    cpPopupTitle.textContent = `Week ${cp.week}`;
+    cpPopupBody.textContent = `Week ${cp.week}のコンテンツはここにはいります！ (準備中...)`;
+
+    // Position popup above checkpoint in screen space
+    const rect = document.getElementById('stage').getBoundingClientRect();
+    const absX = rect.left + sx;
+    const absY = rect.top + sy;
+
+    cpPopup.style.left = Math.min(Math.max(absX, 120), rect.right - 120) + 'px';
+    cpPopup.style.top  = (absY - 20) + 'px';
+    cpPopup.style.transform = 'translate(-50%, -100%)';
+    cpPopup.classList.add('show');
+  }
+
+  cpCloseBtn.addEventListener('click', ()=> cpPopup.classList.remove('show'));
+  cpPopup.addEventListener('click', e=>e.stopPropagation());
 
   // ── Overlay 1 ─────────────────────────────────────────────
   returnBtn.addEventListener('click', ()=>{
@@ -558,9 +1075,7 @@
     overlay1.classList.add('hidden');
     overlay1.addEventListener('transitionend', ()=>overlay1.classList.add('gone'), {once:true});
 
-    // Hide maze chrome while video plays
     app.classList.add('inTransition');
-
     videoWrap.classList.add('show');
     try{ toMazeVideo.currentTime = 0; }catch(e){}
     try{ await toMazeVideo.play(); }catch(e){ showOverlay2(); }
@@ -574,7 +1089,7 @@
     try{ toMazeVideo.currentTime = 0; }catch(e){}
     videoWrap.classList.remove('show');
     overlay2.classList.add('show');
-    app.classList.add('inTransition'); // still pre-maze
+    app.classList.add('inTransition');
     positionSoon();
   }
   toMazeVideo.addEventListener('ended', showOverlay2);
@@ -586,24 +1101,35 @@
   });
 
   // ── Overlay 2 → maze start ───────────────────────────────
-  let mazeStarted = false;
   mazeStartBtn.addEventListener('click', async ()=>{
     if(mazeStarted) return; mazeStarted = true;
 
     overlay2.classList.add('hidden');
     overlay2.addEventListener('transitionend', ()=>overlay2.remove(), {once:true});
 
-    // Reveal maze chrome
     app.classList.remove('inTransition');
 
-    // sneaky.mp3 — gesture unlocks audio
+    // Place ghost off-screen top-left to start intro
+    const firstCP = ALL_CHECKPOINTS[0];
+    ghostIX = firstCP.ix;
+    ghostIY = firstCP.iy;
+    ghostTargetIX = ghostIX;
+    ghostTargetIY = ghostIY;
+    ghostAnimProgress = 1;
+
+    // Start intro sequence
+    introPhase = 'allGlow';
+    introAllGlowStart = performance.now();
+
     try{ bgMusic.volume=0.65; await bgMusic.play(); }
     catch(e){ console.warn('Music blocked:', e); }
 
+    resizeCanvas();
     positionSoon();
+    if(!rafId) rafId = requestAnimationFrame(loop);
   });
 
-  // ── Back button (always visible) ─────────────────────────
+  // ── Back button ───────────────────────────────────────────
   backBtn.addEventListener('click', ()=>{
     try{ bgMusic.pause(); bgMusic.currentTime=0; }catch(e){}
     fadeToBlack(true);
@@ -617,12 +1143,11 @@
       try{ bgMusic.pause(); }catch(e){}
     } else {
       if(videoPlayed && !overlay2Shown) try{ toMazeVideo.play(); }catch(e){}
-      if(mazeStarted)                   try{ bgMusic.play(); }catch(e){}
+      if(mazeStarted) try{ bgMusic.play(); }catch(e){}
     }
   });
 
-  // ── Bryan mode (desktop only) ────────────────────────────
-  let bryanOn = false;
+  // ── Bryan mode ────────────────────────────────────────────
   function applyBryanUI(){
     bryanBtn.classList.toggle('on', bryanOn);
     grid.classList.toggle('show', bryanOn);
@@ -667,32 +1192,15 @@
     String(pw).trim()===BRYAN_PASS ? (bryanOn=true, applyBryanUI()) : alert('Nope.');
   });
 
-  // ── Coordinate finder — cover mode ──────────────────────
+  // ── Coordinate display (Bryan mode, hitLayer) ────────────
   function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
 
-  function getImageCoords(cx,cy){
-    const rect = hitLayer.getBoundingClientRect();
-    const lx = cx - rect.left;
-    const ly = cy - rect.top;
-
-    const nw = mazeImg.naturalWidth  || 0;
-    const nh = mazeImg.naturalHeight || 0;
-    if(!nw || !nh) return { x:0, y:0, localX:lx, localY:ly };
-
-    const cw = rect.width;
-    const ch = rect.height;
-
-    // Reverse the cover scale + crop to get true image coordinates
-    const scale = Math.max(cw / nw, ch / nh);
-    const dw = nw * scale;
-    const dh = nh * scale;
-    const ox = (dw - cw) / 2; // pixels cropped from left
-    const oy = (dh - ch) / 2; // pixels cropped from top
-
-    const x = Math.round(clamp((lx + ox) / scale, 0, nw));
-    const y = Math.round(clamp((ly + oy) / scale, 0, nh));
-
-    return { x, y, localX:lx, localY:ly };
+  function getImageCoordsFromClient(cx, cy){
+    const rect = canvas.getBoundingClientRect();
+    const sx = cx - rect.left;
+    const sy = cy - rect.top;
+    const c = screenToImg(sx, sy);
+    return { x: c.ix, y: c.iy, localX: sx, localY: sy };
   }
 
   function setCrosshair(lx,ly){
@@ -716,14 +1224,14 @@
 
   hitLayer.addEventListener('mousemove', e=>{
     if(!bryanOn) return;
-    const c = getImageCoords(e.clientX, e.clientY);
+    const c = getImageCoordsFromClient(e.clientX, e.clientY);
     coordText.textContent = `x: ${c.x}  y: ${c.y}`;
     setCrosshair(c.localX, c.localY);
   });
 
   hitLayer.addEventListener('click', async e=>{
     if(!bryanOn) return;
-    const c  = getImageCoords(e.clientX, e.clientY);
+    const c = getImageCoordsFromClient(e.clientX, e.clientY);
     coordText.textContent = `x: ${c.x}  y: ${c.y}`;
     setCrosshair(c.localX, c.localY);
     placeDot(c.localX, c.localY, c.x, c.y);
@@ -742,6 +1250,7 @@
 
   // ── Init ──────────────────────────────────────────────────
   assignRandomGhost();
+  resizeCanvas();
   positionSoon();
 </script>
 </body>
