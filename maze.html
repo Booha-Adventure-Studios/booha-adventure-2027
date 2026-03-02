@@ -35,8 +35,7 @@
     }
     .rotateIcon{ font-size:72px; display:block; transform-origin:center; animation:rotateHint 2.2s ease-in-out infinite; }
     @keyframes rotateHint{
-      0%  { transform:rotate(0deg); } 35%{ transform:rotate(-90deg); }
-      65% { transform:rotate(-90deg); } 100%{ transform:rotate(0deg); }
+      0%,100%{ transform:rotate(0deg); } 35%,65%{ transform:rotate(-90deg); }
     }
     .rotateTitle{
       font-family:'Bowlby One',sans-serif; font-size:clamp(22px,6vw,34px);
@@ -172,6 +171,19 @@
     #coordPill{ display:none; } #coordPill.show{ display:block; }
     .coordSmall{ font-size:12px; color:rgba(255,255,255,.7); font-weight:800; letter-spacing:1px; }
     .coordBig{ font-size:14px; margin-top:4px; }
+    /* Bryan tip text */
+    #bryanTip{
+      position:absolute; left:50%; top:calc(10px + var(--safe-top));
+      transform:translateX(-50%);
+      z-index:10; display:none;
+      background:rgba(0,0,0,.72); border:1px solid rgba(255,59,189,.3);
+      border-radius:12px; padding:8px 16px;
+      font-size:12px; font-weight:700; letter-spacing:.5px;
+      color:rgba(255,255,255,.75); text-align:center; line-height:1.5;
+      backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+      pointer-events:none; white-space:nowrap;
+    }
+    #bryanTip.show{ display:block; }
 
     /* ══ BRYAN BUTTON ══ */
     #bryanBtn{
@@ -204,83 +216,87 @@
     @media (pointer:coarse){ .hudTitle{ display:none; } #bryanBtn{ display:none; } #hud{ display:none; } }
     #app.inTransition #bryanBtn,#app.inTransition #hud,#app.inTransition #backBtn{ display:none !important; }
 
-    /* ══ CHECKPOINT POPUP ══ */
+    /* ══ CHECKPOINT POPUP — always screen-centered ══ */
     #cpPopup{
-      position:fixed; z-index:50;
-      min-width:240px; max-width:310px;
+      /* Fixed positioning + centering via transform */
+      position:fixed;
+      left:50%; top:50%;
+      transform:translate(-50%,-50%);
+      z-index:60;
+      min-width:260px; max-width:340px; width:min(88vw, 340px);
       background:linear-gradient(150deg,rgba(8,3,26,.97) 0%,rgba(3,8,32,.97) 100%);
-      border-radius:22px; padding:20px 22px 18px;
-      backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+      border-radius:24px; padding:22px 24px 20px;
+      backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px);
       text-align:center;
       border:1px solid rgba(255,255,255,.11);
-      box-shadow:0 0 0 1px rgba(255,255,255,.05),0 28px 80px rgba(0,0,0,.8),
-        inset 0 1px 0 rgba(255,255,255,.09);
+      box-shadow:0 0 0 1px rgba(255,255,255,.05),0 32px 90px rgba(0,0,0,.85),
+        0 0 80px rgba(160,60,255,.14), inset 0 1px 0 rgba(255,255,255,.09);
       display:none; pointer-events:auto;
-      transform:translate(-50%,-100%);
     }
+    /* Backdrop scrim behind the popup */
+    #cpScrim{
+      position:fixed; inset:0; z-index:55;
+      background:rgba(0,0,0,.45);
+      backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px);
+      display:none;
+    }
+    #cpScrim.show{ display:block; }
     #cpPopup.show{
       display:block;
-      animation:popIn 300ms cubic-bezier(.34,1.46,.64,1) both;
+      animation:popIn 320ms cubic-bezier(.34,1.46,.64,1) both;
     }
     @keyframes popIn{
-      from{ opacity:0; transform:translate(-50%,-92%) scale(.82); }
-      to  { opacity:1; transform:translate(-50%,-100%) scale(1); }
+      from{ opacity:0; transform:translate(-50%,-50%) scale(.80); }
+      to  { opacity:1; transform:translate(-50%,-50%) scale(1); }
     }
-
-    /* Popup accent bar */
     #cpPopupBar{
-      height:3px; border-radius:999px; margin:0 auto 14px;
-      width:60%; opacity:.9;
+      height:3px; border-radius:999px; margin:0 auto 16px;
+      width:55%; opacity:.92;
     }
-
     #cpPopup .cp-date{
       font-family:'Bowlby One',sans-serif;
-      font-size:clamp(10px,1.8vw,13px);
-      letter-spacing:1.5px; text-transform:uppercase;
-      color:rgba(255,255,255,.45); margin:0 0 4px;
+      font-size:clamp(9px,1.6vw,12px);
+      letter-spacing:1.8px; text-transform:uppercase;
+      color:rgba(255,255,255,.4); margin:0 0 5px;
     }
     #cpPopupTitle{
-      font-family:'Bowlby One',sans-serif; font-size:clamp(15px,2.6vw,20px);
-      letter-spacing:1px; margin:0 0 16px; color:#fff;
-      line-height:1.25;
+      font-family:'Bowlby One',sans-serif; font-size:clamp(17px,2.8vw,24px);
+      letter-spacing:1px; margin:0 0 18px; color:#fff; line-height:1.2;
     }
-
-    /* Three icon buttons */
     .cp-icons{
-      display:flex; justify-content:center; gap:14px;
-      margin-bottom:16px;
+      display:flex; justify-content:center; gap:clamp(10px,3vw,18px);
+      margin-bottom:18px;
     }
     .cp-icon-btn{
-      display:flex; flex-direction:column; align-items:center; gap:6px;
+      display:flex; flex-direction:column; align-items:center; gap:7px;
       background:none; border:none; cursor:pointer; padding:0;
-      -webkit-tap-highlight-color:transparent;
-      transition:transform 120ms ease;
+      -webkit-tap-highlight-color:transparent; transition:transform 120ms ease;
     }
-    .cp-icon-btn:active{ transform:scale(.91); }
+    .cp-icon-btn:active{ transform:scale(.90); }
     .cp-icon-img{
-      width:clamp(48px,10vw,68px); height:clamp(48px,10vw,68px);
-      object-fit:contain; border-radius:14px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.12);
-      padding:6px;
-      box-shadow:0 4px 18px rgba(0,0,0,.5),0 0 24px rgba(180,100,255,.12);
-      transition:box-shadow 120ms ease,border-color 120ms ease;
+      width:clamp(52px,12vw,72px); height:clamp(52px,12vw,72px);
+      object-fit:contain; border-radius:16px;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.13);
+      padding:7px;
+      box-shadow:0 4px 20px rgba(0,0,0,.55),0 0 28px rgba(180,100,255,.10);
+      transition:box-shadow 140ms ease, border-color 140ms ease, transform 140ms ease;
     }
     .cp-icon-btn:hover .cp-icon-img{
-      border-color:rgba(255,255,255,.28);
-      box-shadow:0 6px 24px rgba(0,0,0,.6),0 0 30px rgba(180,100,255,.25);
+      border-color:rgba(255,255,255,.30);
+      box-shadow:0 6px 28px rgba(0,0,0,.65),0 0 36px rgba(180,100,255,.28);
+      transform:translateY(-2px);
     }
     .cp-icon-label{
-      font-size:clamp(8px,1.5vw,11px); font-weight:900; letter-spacing:.8px;
-      text-transform:uppercase; color:rgba(255,255,255,.55);
-      line-height:1.2; text-align:center; max-width:70px;
+      font-size:clamp(8px,1.4vw,10px); font-weight:900; letter-spacing:.9px;
+      text-transform:uppercase; color:rgba(255,255,255,.50);
+      line-height:1.2; text-align:center; max-width:72px;
     }
-
     #cpCloseBtn{
       appearance:none; border:0; border-radius:999px;
-      padding:8px 22px; font-size:12px; font-weight:900; cursor:pointer; color:#000;
+      padding:9px 26px; font-size:13px; font-weight:900; cursor:pointer; color:#000;
       background:linear-gradient(180deg,var(--pink2),var(--pink));
-      box-shadow:0 4px 16px rgba(255,59,189,.4),0 0 24px rgba(255,59,189,.18);
+      box-shadow:0 4px 18px rgba(255,59,189,.42),0 0 28px rgba(255,59,189,.18);
       transition:transform 100ms;
     }
     #cpCloseBtn:active{ transform:scale(.95); }
@@ -288,7 +304,6 @@
     /* ══ FADE ══ */
     #fade{ position:fixed; inset:0; background:#000; opacity:0; pointer-events:none; transition:opacity 520ms ease; z-index:200; }
     #fade.on{ opacity:1; }
-
     @media (prefers-reduced-motion:reduce){
       #startGhost{ animation:none; }
       .rotateIcon{ animation:none; transform:rotate(-90deg); }
@@ -344,41 +359,50 @@
       <div id="grid"></div>
     </div>
 
-    <!-- Checkpoint popup -->
-    <div id="cpPopup" role="dialog" aria-modal="true">
-      <div id="cpPopupBar"></div>
-      <p class="cp-date" id="cpPopupDate">This Week</p>
-      <h2 id="cpPopupTitle">Week —</h2>
-      <div class="cp-icons">
-        <button class="cp-icon-btn" id="iconPreBoo" type="button" aria-label="Pre-boo">
-          <img class="cp-icon-img" src="assets/img/pre-boo.png" alt="Pre-boo" />
-          <span class="cp-icon-label">Pre-boo</span>
-        </button>
-        <button class="cp-icon-btn" id="iconBooTree" type="button" aria-label="Boo-riculum">
-          <img class="cp-icon-img" src="assets/img/boo-tree.png" alt="Boo-riculum" />
-          <span class="cp-icon-label">Boo-riculum</span>
-        </button>
-        <button class="cp-icon-btn" id="iconContTree" type="button" aria-label="Boo-continuum">
-          <img class="cp-icon-img" src="assets/img/cont-tree.png" alt="Boo-continuum" />
-          <span class="cp-icon-label">Boo-continuum</span>
-        </button>
-      </div>
-      <button id="cpCloseBtn" type="button">とじる ✕</button>
-    </div>
-
     <!-- HUD (desktop only) -->
     <div id="hud">
       <div class="hudTitle">BOOHA<br>ADVENTURE</div>
       <div id="coordPill" class="pill">
-        <div class="coordSmall">COORDINATES</div>
+        <div class="coordSmall">IMAGE COORDINATES</div>
         <div class="coordBig" id="coordText">x: —  y: —</div>
         <div class="coordSmall" style="margin-top:6px;opacity:.9;">click to copy</div>
       </div>
     </div>
 
+    <!-- Bryan tip shown top-center when Bryan is on -->
+    <div id="bryanTip">
+      Use a <strong>1600 × 900</strong> browser window for exact coordinates.<br>
+      Move mouse → read coords → click to copy.
+    </div>
+
     <button id="bryanBtn" type="button" aria-label="Bryan mode">BRYAN</button>
     <button id="backBtn" type="button" aria-label="もどる">もどる</button>
   </section>
+
+  <!-- Scrim behind popup -->
+  <div id="cpScrim"></div>
+
+  <!-- Checkpoint popup — always screen-centered -->
+  <div id="cpPopup" role="dialog" aria-modal="true">
+    <div id="cpPopupBar"></div>
+    <p class="cp-date" id="cpPopupDate">This Week</p>
+    <h2 id="cpPopupTitle">Week —</h2>
+    <div class="cp-icons">
+      <button class="cp-icon-btn" id="iconPreBoo" type="button" aria-label="Pre-boo">
+        <img class="cp-icon-img" src="assets/img/pre-boo.png" alt="Pre-boo" />
+        <span class="cp-icon-label">Pre-boo</span>
+      </button>
+      <button class="cp-icon-btn" id="iconBooTree" type="button" aria-label="Boo-riculum">
+        <img class="cp-icon-img" src="assets/img/boo-tree.png" alt="Boo-riculum" />
+        <span class="cp-icon-label">Boo-riculum</span>
+      </button>
+      <button class="cp-icon-btn" id="iconContTree" type="button" aria-label="Boo-continuum">
+        <img class="cp-icon-img" src="assets/img/cont-tree.png" alt="Boo-continuum" />
+        <span class="cp-icon-label">Boo-continuum</span>
+      </button>
+    </div>
+    <button id="cpCloseBtn" type="button">とじる ✕</button>
+  </div>
 
   <div id="fade" aria-hidden="true"></div>
 </div>
@@ -390,8 +414,8 @@
 //  CONFIG
 // ─────────────────────────────────────────────────────────
 const BRYAN_PASS      = 'him141amra803';
-const IMG_W           = 1600;
-const IMG_H           = 900;
+const IMG_W           = 1600;   // native image width  — coordinates are in this space
+const IMG_H           = 900;    // native image height
 const OPEN_WEEKS      = [8, 9, 10];
 const CURRENT_WEEK    = 10;
 const GHOST_TRAVEL_MS = 3800;
@@ -419,24 +443,24 @@ const WEEK_DATES = [
   "10 Nov – 16 Nov","17 Nov – 23 Nov","24 Nov – 30 Nov","1 Dec – 7 Dec"
 ];
 
-// Each month gets TWO colors for a richer dual-tone glow
-// [primary, secondary]
+// Each month: [primary colour, secondary colour]
 const MONTH_COLORS = [
-  ['#ff3bbd','#ff79d7'], // Jan  — hot pink / soft pink
-  ['#ff6b3b','#ffaa5e'], // Feb  — orange / peach
-  ['#ffd700','#fff176'], // Mar  — gold / yellow
-  ['#3bff8a','#b2ffda'], // Apr  — green / mint
-  ['#3bc8ff','#a8edff'], // May  — cyan / ice
-  ['#3b6fff','#90aaff'], // Jun  — blue / periwinkle
-  ['#a03bff','#d49aff'], // Jul  — purple / lavender
-  ['#ff3b6f','#ff85a1'], // Aug  — rose / blush
-  ['#ff9f3b','#ffd08a'], // Sep  — amber / honey
-  ['#3bffee','#a8fff8'], // Oct  — teal / aqua
-  ['#c8ff3b','#e8ffaa'], // Nov  — lime / chartreuse
-  ['#ff3b3b','#ff8f8f']  // Dec  — red / coral
+  ['#ff3bbd','#ff79d7'], // Jan
+  ['#ff6b3b','#ffaa5e'], // Feb
+  ['#ffd700','#fff176'], // Mar
+  ['#3bff8a','#b2ffda'], // Apr
+  ['#3bc8ff','#a8edff'], // May
+  ['#3b6fff','#90aaff'], // Jun
+  ['#a03bff','#d49aff'], // Jul
+  ['#ff3b6f','#ff85a1'], // Aug
+  ['#ff9f3b','#ffd08a'], // Sep
+  ['#3bffee','#a8fff8'], // Oct
+  ['#c8ff3b','#e8ffaa'], // Nov
+  ['#ff3b3b','#ff8f8f']  // Dec
 ];
 
-// ── Corrected coordinates (dy = -51 from previous) ──
+// ── Checkpoints — coords in IMAGE SPACE (1600×900) ──────
+// These never change regardless of window size.
 const CHECKPOINTS = [
   {w: 1, ix: 512, iy:355},{w: 2, ix:1319, iy:458},{w: 3, ix:1219, iy:332},
   {w: 4, ix: 952, iy:453},{w: 5, ix: 635, iy:377},{w: 6, ix: 596, iy:597},
@@ -456,9 +480,9 @@ const CHECKPOINTS = [
   {w:46, ix: 836, iy:561},{w:47, ix: 442, iy:428},{w:48, ix:1259, iy:462}
 ];
 
-function monthIdx(w)      { return Math.floor((w-1)/4); }
-function monthPrimary(w)  { return MONTH_COLORS[monthIdx(w)][0]; }
-function monthSecondary(w){ return MONTH_COLORS[monthIdx(w)][1]; }
+function monthIdx(w)       { return Math.floor((w-1)/4); }
+function monthPrimary(w)   { return MONTH_COLORS[monthIdx(w)][0]; }
+function monthSecondary(w) { return MONTH_COLORS[monthIdx(w)][1]; }
 
 // ─────────────────────────────────────────────────────────
 //  DOM
@@ -481,9 +505,11 @@ const mazeImg       = document.getElementById('mazeImg');
 const canvas        = document.getElementById('mazeCanvas');
 const gridEl        = document.getElementById('grid');
 const bryanBtn      = document.getElementById('bryanBtn');
+const bryanTip      = document.getElementById('bryanTip');
 const backBtn       = document.getElementById('backBtn');
 const coordPill     = document.getElementById('coordPill');
 const coordText     = document.getElementById('coordText');
+const cpScrim       = document.getElementById('cpScrim');
 const cpPopup       = document.getElementById('cpPopup');
 const cpPopupDate   = document.getElementById('cpPopupDate');
 const cpTitle       = document.getElementById('cpPopupTitle');
@@ -515,6 +541,11 @@ function resizeCanvas(){
 
 // ─────────────────────────────────────────────────────────
 //  COORDINATE TRANSFORMS (object-fit:cover)
+//
+//  The maze image is 1600×900.  All checkpoint coordinates are
+//  stored in that image space and remain constant regardless of
+//  window size.  imgToCSS() converts them to canvas CSS-pixels
+//  at runtime, so everything scales correctly automatically.
 // ─────────────────────────────────────────────────────────
 function getCover(){
   const scale = Math.max(cssW/IMG_W, cssH/IMG_H);
@@ -524,6 +555,7 @@ function imgToCSS(ix, iy){
   const {scale,ox,oy} = getCover();
   return { x:ix*scale-ox, y:iy*scale-oy };
 }
+// cssToImg — only needed for Bryan coordinate reading
 function cssToImg(cx, cy){
   const {scale,ox,oy} = getCover();
   return {
@@ -564,17 +596,17 @@ let pendingPopupCP  = null;
 
 let trail = [];
 
-// Per-checkpoint fairy particles — pre-generated offsets
+// Per-checkpoint fairy particles
 const CP_FAIRIES = CHECKPOINTS.map(() =>
-  Array.from({length: 9}, (_, i) => ({
-    angle:  (i / 9) * Math.PI * 2 + Math.random() * 0.5,
-    orbit:  16 + Math.random() * 18,  // orbit radius in image px equivalent
-    speed:  0.38 + Math.random() * 0.55,
-    phase:  Math.random() * Math.PI * 2,
-    size:   1.2 + Math.random() * 1.6,
-    twinkleSpeed: 1.8 + Math.random() * 2.2,
-    twinklePhase: Math.random() * Math.PI * 2,
-    useSecondary: i % 3 === 2  // every 3rd sparkle uses secondary color
+  Array.from({length: 8}, (_, i) => ({
+    angle:        (i/8) * Math.PI*2 + Math.random()*0.5,
+    orbit:        11 + Math.random()*10,   // image-px orbit radius (smaller)
+    speed:        0.35 + Math.random()*0.5,
+    phase:        Math.random()*Math.PI*2,
+    size:         0.9 + Math.random()*1.1,  // reduced
+    twinkleSpeed: 1.9 + Math.random()*2.4,
+    twinklePhase: Math.random()*Math.PI*2,
+    useSecondary: i % 3 === 2
   }))
 );
 
@@ -590,70 +622,69 @@ function ease(t){ return t<.5 ? 2*t*t : -1+(4-2*t)*t; }
 //  TRAIL
 // ─────────────────────────────────────────────────────────
 function addTrail(ix, iy){
-  const useSec = Math.random() > 0.55;
+  const useSec = Math.random()>.55;
   const color  = useSec ? monthSecondary(activeWeek) : monthPrimary(activeWeek);
-  trail.push({ ix, iy, life:1, size:2+Math.random()*5, color,
-    dx:(Math.random()-.5)*.28, dy:-Math.random()*.38 });
-  if(trail.length > 100) trail.shift();
+  trail.push({ ix, iy, life:1, size:1.8+Math.random()*4.5, color,
+    dx:(Math.random()-.5)*.28, dy:-Math.random()*.36 });
+  if(trail.length>100) trail.shift();
 }
 
 // ─────────────────────────────────────────────────────────
 //  DRAW
 // ─────────────────────────────────────────────────────────
 function drawFrame(now){
-  ctx.clearRect(0, 0, cssW, cssH);
+  ctx.clearRect(0,0,cssW,cssH);
   if(!mazeStarted) return;
 
-  const sec = now / 1000;
+  const sec = now/1000;
 
   // ── cpState map ──────────────────────────────────────
   const cpState = {};
 
-  if(introPhase === 'allGlow'){
-    const el    = now - introGlowStart;
-    const showEnd = INTRO_GLOW_MS * 0.62;
-    let baseA   = el < showEnd ? 1 : Math.max(0, 1-(el-showEnd)/(INTRO_GLOW_MS-showEnd));
-    CHECKPOINTS.forEach(cp => {
-      cpState[cp.w] = { alpha: OPEN_WEEKS.includes(cp.w)?1:baseA*0.78, extra:1.5 };
+  if(introPhase==='allGlow'){
+    const el      = now - introGlowStart;
+    const showEnd = INTRO_GLOW_MS*0.62;
+    let baseA     = el<showEnd ? 1 : Math.max(0,1-(el-showEnd)/(INTRO_GLOW_MS-showEnd));
+    CHECKPOINTS.forEach(cp=>{
+      cpState[cp.w] = { alpha:OPEN_WEEKS.includes(cp.w)?1:baseA*0.78, extra:1.5 };
     });
-    if(el >= INTRO_GLOW_MS){
-      introPhase=      'traveling';
-      introTravelStart= now;
-      introSrcIX = CHECKPOINTS[0].ix;
-      introSrcIY = CHECKPOINTS[0].iy;
-      ghostIX    = introSrcIX;
-      ghostIY    = introSrcIY;
+    if(el>=INTRO_GLOW_MS){
+      introPhase='traveling'; introTravelStart=now;
+      introSrcIX=CHECKPOINTS[0].ix; introSrcIY=CHECKPOINTS[0].iy;
+      ghostIX=introSrcIX; ghostIY=introSrcIY;
     }
 
-  } else if(introPhase === 'traveling'){
-    OPEN_WEEKS.forEach(w => { cpState[w]={alpha:1,extra:1.0}; });
-    const prog = Math.min((now-introTravelStart)/INTRO_TRAVEL_MS, 1);
+  } else if(introPhase==='traveling'){
+    OPEN_WEEKS.forEach(w=>{ cpState[w]={alpha:1,extra:1.0}; });
+    const prog = Math.min((now-introTravelStart)/INTRO_TRAVEL_MS,1);
     const et   = ease(prog);
-    ghostIX = introSrcIX + (startCP.ix-introSrcIX)*et;
-    ghostIY = introSrcIY + (startCP.iy-introSrcIY)*et;
-    if(Math.random()<.32) addTrail(ghostIX, ghostIY);
+    ghostIX = introSrcIX+(startCP.ix-introSrcIX)*et;
+    ghostIY = introSrcIY+(startCP.iy-introSrcIY)*et;
+    if(Math.random()<.3) addTrail(ghostIX,ghostIY);
     if(prog>=1){
-      introPhase='done'; ghostIX=startCP.ix; ghostIY=startCP.iy;
+      introPhase='done';
+      ghostIX=startCP.ix; ghostIY=startCP.iy;
       ghostSrcIX=ghostIX; ghostSrcIY=ghostIY;
       ghostDstIX=ghostIX; ghostDstIY=ghostIY; ghostT=1;
+      // Auto-open popup for current week when ghost arrives on intro
+      showPopupAtCP(startCP);
     }
 
   } else {
-    // Normal
-    OPEN_WEEKS.forEach(w => { cpState[w]={alpha:1,extra:0}; });
+    OPEN_WEEKS.forEach(w=>{ cpState[w]={alpha:1,extra:0}; });
     if(bryanOn){
-      CHECKPOINTS.forEach(cp => {
+      CHECKPOINTS.forEach(cp=>{
         if(!cpState[cp.w]) cpState[cp.w]={alpha:0.65,extra:0.15};
       });
     }
-    if(ghostT < 1){
-      const el = now - ghostAnimStart;
-      ghostT   = Math.min(el/GHOST_TRAVEL_MS, 1);
-      const et = ease(ghostT);
-      ghostIX  = ghostSrcIX + (ghostDstIX-ghostSrcIX)*et;
-      ghostIY  = ghostSrcIY + (ghostDstIY-ghostSrcIY)*et;
-      if(Math.random()<.28) addTrail(ghostIX, ghostIY);
-      if(ghostT >= 1 && pendingPopupCP){
+    if(ghostT<1){
+      const el=now-ghostAnimStart;
+      ghostT=Math.min(el/GHOST_TRAVEL_MS,1);
+      const et=ease(ghostT);
+      ghostIX=ghostSrcIX+(ghostDstIX-ghostSrcIX)*et;
+      ghostIY=ghostSrcIY+(ghostDstIY-ghostSrcIY)*et;
+      if(Math.random()<.28) addTrail(ghostIX,ghostIY);
+      if(ghostT>=1 && pendingPopupCP){
         ghostIX=ghostDstIX; ghostIY=ghostDstIY;
         showPopupAtCP(pendingPopupCP);
         pendingPopupCP=null;
@@ -662,149 +693,143 @@ function drawFrame(now){
   }
 
   // ── Trail ─────────────────────────────────────────────
-  for(let i=trail.length-1; i>=0; i--){
+  for(let i=trail.length-1;i>=0;i--){
     const p=trail[i]; const {x,y}=imgToCSS(p.ix,p.iy);
-    const gr=ctx.createRadialGradient(x,y,0,x,y,p.size*2.4);
+    const gr=ctx.createRadialGradient(x,y,0,x,y,p.size*2.3);
     gr.addColorStop(0,p.color); gr.addColorStop(1,'transparent');
-    ctx.globalAlpha=p.life*0.42; ctx.fillStyle=gr;
-    ctx.beginPath(); ctx.arc(x,y,p.size*2.4,0,Math.PI*2); ctx.fill();
-    ctx.globalAlpha=p.life*0.82; ctx.fillStyle='#fff';
-    ctx.beginPath(); ctx.arc(x,y,p.size*0.36,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=p.life*0.40; ctx.fillStyle=gr;
+    ctx.beginPath(); ctx.arc(x,y,p.size*2.3,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=p.life*0.80; ctx.fillStyle='#fff';
+    ctx.beginPath(); ctx.arc(x,y,p.size*0.34,0,Math.PI*2); ctx.fill();
     ctx.globalAlpha=1;
     p.life-=0.016; p.ix+=p.dx; p.iy+=p.dy;
   }
   trail=trail.filter(p=>p.life>0);
 
   // ── Checkpoints ───────────────────────────────────────
-  CHECKPOINTS.forEach((cp, cpIdx) => {
-    const state = cpState[cp.w];
-    if(!state || state.alpha<=0.01) return;
+  // orbitScale maps fairy orbit radius (stored in image-px) to CSS-px
+  const {scale:coverScale} = getCover();
 
-    const {x,y}  = imgToCSS(cp.ix, cp.iy);
+  CHECKPOINTS.forEach((cp,cpIdx)=>{
+    const state=cpState[cp.w];
+    if(!state||state.alpha<=0.01) return;
+
+    const {x,y}  = imgToCSS(cp.ix,cp.iy);
     const col1   = monthPrimary(cp.w);
     const col2   = monthSecondary(cp.w);
-    const pulse  = 0.5 + 0.5*Math.sin(sec*2.1 + cp.w*0.73);
-    const pulse2 = 0.5 + 0.5*Math.sin(sec*1.35 + cp.w*0.41 + 1.3);
-    const baseR  = 10;
-    const glowR  = baseR + pulse*5*(1+state.extra*0.65);
+    const pulse  = 0.5+0.5*Math.sin(sec*2.1+cp.w*0.73);
+    const pulse2 = 0.5+0.5*Math.sin(sec*1.35+cp.w*0.41+1.3);
+    // ── Smaller base radius (was 10, now 7) ──
+    const baseR  = 7;
+    const glowR  = baseR + pulse*3.5*(1+state.extra*0.6);
     const alpha  = state.alpha;
 
     ctx.save();
 
-    // Layer 1 — deep haze (primary)
-    ctx.globalAlpha = alpha*(0.10+pulse*0.08);
-    const hazeR=glowR*4.8;
+    // Layer 1 — deep haze primary
+    ctx.globalAlpha=alpha*(0.10+pulse*0.07);
+    const hazeR=glowR*4.5;
     const haze=ctx.createRadialGradient(x,y,0,x,y,hazeR);
     haze.addColorStop(0,col1); haze.addColorStop(0.5,col1); haze.addColorStop(1,'transparent');
     ctx.fillStyle=haze;
     ctx.beginPath(); ctx.arc(x,y,hazeR,0,Math.PI*2); ctx.fill();
 
-    // Layer 2 — secondary color haze offset slightly
-    ctx.globalAlpha = alpha*(0.08+pulse2*0.07);
-    const haze2=ctx.createRadialGradient(x+glowR*0.3,y-glowR*0.2,0,x,y,hazeR*0.85);
+    // Layer 2 — secondary haze offset
+    ctx.globalAlpha=alpha*(0.07+pulse2*0.06);
+    const haze2=ctx.createRadialGradient(x+glowR*0.3,y-glowR*0.2,0,x,y,hazeR*0.8);
     haze2.addColorStop(0,col2); haze2.addColorStop(0.5,col2); haze2.addColorStop(1,'transparent');
     ctx.fillStyle=haze2;
-    ctx.beginPath(); ctx.arc(x,y,hazeR*0.85,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x,y,hazeR*0.8,0,Math.PI*2); ctx.fill();
 
-    // Layer 3 — dual-color mid ring (primary inner, secondary outer)
-    ctx.globalAlpha = alpha*(0.38+pulse2*0.18);
-    const midR=glowR*2.1;
-    const midG=ctx.createRadialGradient(x,y,glowR*0.3,x,y,midR);
+    // Layer 3 — dual-color mid ring
+    ctx.globalAlpha=alpha*(0.36+pulse2*0.17);
+    const midR=glowR*2.0;
+    const midG=ctx.createRadialGradient(x,y,glowR*0.28,x,y,midR);
     midG.addColorStop(0,'transparent');
-    midG.addColorStop(0.35,col1);
-    midG.addColorStop(0.65,col2);
-    midG.addColorStop(1,'transparent');
+    midG.addColorStop(0.35,col1); midG.addColorStop(0.65,col2); midG.addColorStop(1,'transparent');
     ctx.fillStyle=midG;
     ctx.beginPath(); ctx.arc(x,y,midR,0,Math.PI*2); ctx.fill();
 
-    // Layer 4 — inner corona (white→col1→col2→transparent)
-    ctx.globalAlpha = alpha*(0.72+pulse*0.18);
-    const coronaR=glowR*1.12;
+    // Layer 4 — inner corona
+    ctx.globalAlpha=alpha*(0.70+pulse*0.18);
+    const coronaR=glowR*1.10;
     const corona=ctx.createRadialGradient(x,y,0,x,y,coronaR);
-    corona.addColorStop(0,'#fff');
-    corona.addColorStop(0.2,col1);
-    corona.addColorStop(0.6,col2);
-    corona.addColorStop(1,'transparent');
+    corona.addColorStop(0,'#fff'); corona.addColorStop(0.2,col1);
+    corona.addColorStop(0.62,col2); corona.addColorStop(1,'transparent');
     ctx.fillStyle=corona;
     ctx.beginPath(); ctx.arc(x,y,coronaR,0,Math.PI*2); ctx.fill();
 
-    // Layer 5 — solid gem dot with dual shadow
+    // Layer 5 — solid gem dot
     ctx.globalAlpha=alpha*(0.90+pulse*0.10);
-    ctx.shadowBlur=20; ctx.shadowColor=col1;
+    ctx.shadowBlur=18; ctx.shadowColor=col1;
     ctx.fillStyle=col1;
-    ctx.beginPath(); ctx.arc(x,y,glowR*0.45,0,Math.PI*2); ctx.fill();
-    ctx.shadowBlur=12; ctx.shadowColor=col2;
+    ctx.beginPath(); ctx.arc(x,y,glowR*0.44,0,Math.PI*2); ctx.fill();
+    ctx.shadowBlur=11; ctx.shadowColor=col2;
     ctx.fillStyle=col2;
-    ctx.beginPath(); ctx.arc(x,y,glowR*0.28,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x,y,glowR*0.26,0,Math.PI*2); ctx.fill();
     ctx.shadowBlur=0;
 
     // Layer 6 — white core
     ctx.globalAlpha=alpha;
-    const coreG=ctx.createRadialGradient(x,y,0,x,y,glowR*0.18);
+    const coreG=ctx.createRadialGradient(x,y,0,x,y,glowR*0.16);
     coreG.addColorStop(0,'rgba(255,255,255,1)');
-    coreG.addColorStop(0.7,'rgba(255,255,255,.7)');
+    coreG.addColorStop(0.7,'rgba(255,255,255,.65)');
     coreG.addColorStop(1,'rgba(255,255,255,0)');
-    ctx.fillStyle=coreG;
-    ctx.beginPath(); ctx.arc(x,y,glowR*0.18,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle=coreG; ctx.beginPath(); ctx.arc(x,y,glowR*0.16,0,Math.PI*2); ctx.fill();
 
-    // Layer 7 — 4-point star burst (smaller: 0.7× previous)
-    ctx.globalAlpha=alpha*(0.35+pulse*0.28);
-    ctx.strokeStyle='rgba(255,255,255,0.9)';
-    ctx.lineWidth=0.9;
-    ctx.shadowBlur=8; ctx.shadowColor=col1;
-    const starLen=glowR*(0.85+pulse*0.32); // reduced vs before
+    // Layer 7 — 4-point star (smaller: 0.65× radius)
+    ctx.globalAlpha=alpha*(0.32+pulse*0.24);
+    ctx.strokeStyle='rgba(255,255,255,0.88)'; ctx.lineWidth=0.8;
+    ctx.shadowBlur=7; ctx.shadowColor=col1;
+    const starLen=glowR*(0.72+pulse*0.28);
     ctx.beginPath();
-    ctx.moveTo(x, y-starLen*0.18); ctx.lineTo(x, y-starLen);
-    ctx.moveTo(x, y+starLen*0.18); ctx.lineTo(x, y+starLen);
-    ctx.moveTo(x-starLen*0.18, y); ctx.lineTo(x-starLen, y);
-    ctx.moveTo(x+starLen*0.18, y); ctx.lineTo(x+starLen, y);
-    // diagonal arms (shorter)
-    const diagLen=starLen*0.45;
-    ctx.moveTo(x-diagLen*0.12,y-diagLen*0.12); ctx.lineTo(x-diagLen,y-diagLen);
-    ctx.moveTo(x+diagLen*0.12,y-diagLen*0.12); ctx.lineTo(x+diagLen,y-diagLen);
-    ctx.moveTo(x-diagLen*0.12,y+diagLen*0.12); ctx.lineTo(x-diagLen,y+diagLen);
-    ctx.moveTo(x+diagLen*0.12,y+diagLen*0.12); ctx.lineTo(x+diagLen,y+diagLen);
-    ctx.stroke();
-    ctx.shadowBlur=0;
+    ctx.moveTo(x,y-starLen*0.18); ctx.lineTo(x,y-starLen);
+    ctx.moveTo(x,y+starLen*0.18); ctx.lineTo(x,y+starLen);
+    ctx.moveTo(x-starLen*0.18,y); ctx.lineTo(x-starLen,y);
+    ctx.moveTo(x+starLen*0.18,y); ctx.lineTo(x+starLen,y);
+    const diagLen=starLen*0.38;
+    ctx.moveTo(x-diagLen*0.1,y-diagLen*0.1); ctx.lineTo(x-diagLen,y-diagLen);
+    ctx.moveTo(x+diagLen*0.1,y-diagLen*0.1); ctx.lineTo(x+diagLen,y-diagLen);
+    ctx.moveTo(x-diagLen*0.1,y+diagLen*0.1); ctx.lineTo(x-diagLen,y+diagLen);
+    ctx.moveTo(x+diagLen*0.1,y+diagLen*0.1); ctx.lineTo(x+diagLen,y+diagLen);
+    ctx.stroke(); ctx.shadowBlur=0;
 
-    // Layer 8 — fairy sparkle particles (9 per checkpoint)
-    const fairies = CP_FAIRIES[cpIdx];
-    // Orbit radius scales with screen so it feels right at all sizes
-    const orbitScale = Math.min(cssW, cssH) / 900;
-    fairies.forEach(f => {
+    // Layer 8 — fairy sparkle particles (smaller, scale with cover scale)
+    const fairies=CP_FAIRIES[cpIdx];
+    fairies.forEach(f=>{
       const angle    = f.angle + sec*f.speed;
-      const twinkle  = 0.4 + 0.6*Math.abs(Math.sin(sec*f.twinkleSpeed + f.twinklePhase));
-      const r        = f.orbit * orbitScale * (0.82 + state.extra*0.1) * (0.9+0.1*Math.sin(sec*1.2+f.phase));
+      const twinkle  = 0.35+0.65*Math.abs(Math.sin(sec*f.twinkleSpeed+f.twinklePhase));
+      // Orbit in image-space, convert to CSS
+      const r        = f.orbit * coverScale * (0.82+state.extra*0.08) * (0.92+0.08*Math.sin(sec*1.1+f.phase));
       const fx       = x + Math.cos(angle)*r;
-      const fy       = y + Math.sin(angle)*r * 0.85; // slightly elliptical
+      const fy       = y + Math.sin(angle)*r*0.84;
       const fColor   = f.useSecondary ? col2 : col1;
-      const fAlpha   = twinkle * alpha * (0.65+state.extra*0.15);
-      const fSize    = f.size * (0.7+twinkle*0.5) * orbitScale;
+      const fAlpha   = twinkle * alpha * (0.6+state.extra*0.12);
+      // Size in CSS px — smaller than before
+      const fSize    = f.size * coverScale * (0.65+twinkle*0.45);
 
-      // Soft glow halo behind sparkle
-      ctx.globalAlpha = fAlpha * 0.45;
-      const fg=ctx.createRadialGradient(fx,fy,0,fx,fy,fSize*3.5);
+      // Soft glow behind sparkle
+      ctx.globalAlpha=fAlpha*0.38;
+      const fg=ctx.createRadialGradient(fx,fy,0,fx,fy,fSize*3.2);
       fg.addColorStop(0,fColor); fg.addColorStop(1,'transparent');
       ctx.fillStyle=fg;
-      ctx.beginPath(); ctx.arc(fx,fy,fSize*3.5,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(fx,fy,fSize*3.2,0,Math.PI*2); ctx.fill();
 
-      // 4-point tiny star for the fairy sparkle itself
-      ctx.globalAlpha = fAlpha;
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth   = fSize*0.6;
-      ctx.shadowBlur  = 6; ctx.shadowColor = fColor;
-      const sl = fSize*2.2;
+      // Tiny 4-point star
+      ctx.globalAlpha=fAlpha;
+      ctx.strokeStyle='#fff'; ctx.lineWidth=fSize*0.55;
+      ctx.shadowBlur=5; ctx.shadowColor=fColor;
+      const sl=fSize*1.9;
       ctx.beginPath();
-      ctx.moveTo(fx, fy-sl); ctx.lineTo(fx, fy+sl);
-      ctx.moveTo(fx-sl, fy); ctx.lineTo(fx+sl, fy);
+      ctx.moveTo(fx,fy-sl); ctx.lineTo(fx,fy+sl);
+      ctx.moveTo(fx-sl,fy); ctx.lineTo(fx+sl,fy);
       ctx.stroke();
 
       // Bright center dot
-      ctx.globalAlpha = fAlpha * 1.0;
-      ctx.fillStyle   = '#fff';
-      ctx.shadowBlur  = 4; ctx.shadowColor = fColor;
-      ctx.beginPath(); ctx.arc(fx, fy, fSize*0.55, 0, Math.PI*2); ctx.fill();
-      ctx.shadowBlur  = 0;
+      ctx.globalAlpha=fAlpha;
+      ctx.fillStyle='#fff'; ctx.shadowBlur=4; ctx.shadowColor=fColor;
+      ctx.beginPath(); ctx.arc(fx,fy,fSize*0.48,0,Math.PI*2); ctx.fill();
+      ctx.shadowBlur=0;
     });
 
     ctx.globalAlpha=1;
@@ -813,31 +838,26 @@ function drawFrame(now){
 
   // ── Ghost ─────────────────────────────────────────────
   const bob           = Math.sin(sec*1.85)*3.5;
-  const {x:gx,y:gy}  = imgToCSS(ghostIX, ghostIY);
-  const gR            = 30;
-  const pulseG        = 0.5 + 0.5*Math.sin(sec*2.1);
+  const {x:gx,y:gy}  = imgToCSS(ghostIX,ghostIY);
+  const gR            = 28;
+  const pulseG        = 0.5+0.5*Math.sin(sec*2.1);
   const gcol1         = monthPrimary(activeWeek);
   const gcol2         = monthSecondary(activeWeek);
 
   ctx.save();
-  // Dual-color aura
-  ctx.globalAlpha = 0.22 + pulseG*0.12;
-  const ga1=ctx.createRadialGradient(gx,gy+4,0,gx,gy+4,gR*2.1);
-  ga1.addColorStop(0,gcol1); ga1.addColorStop(0.5,gcol2); ga1.addColorStop(1,'transparent');
-  ctx.fillStyle=ga1;
-  ctx.beginPath(); ctx.arc(gx,gy+4,gR*2.1,0,Math.PI*2); ctx.fill();
-  // Shadow blob
-  ctx.globalAlpha=0.16+pulseG*0.07;
-  const gs=ctx.createRadialGradient(gx,gy+gR*0.7,0,gx,gy+gR*0.7,gR*0.9);
-  gs.addColorStop(0,'rgba(0,0,0,0.55)'); gs.addColorStop(1,'transparent');
-  ctx.fillStyle=gs;
-  ctx.beginPath(); ctx.arc(gx,gy+gR*0.7,gR*0.9,0,Math.PI*2); ctx.fill();
+  ctx.globalAlpha=0.20+pulseG*0.10;
+  const ga=ctx.createRadialGradient(gx,gy+3,0,gx,gy+3,gR*2.0);
+  ga.addColorStop(0,gcol1); ga.addColorStop(0.5,gcol2); ga.addColorStop(1,'transparent');
+  ctx.fillStyle=ga; ctx.beginPath(); ctx.arc(gx,gy+3,gR*2.0,0,Math.PI*2); ctx.fill();
+  ctx.globalAlpha=0.15+pulseG*0.06;
+  const gs=ctx.createRadialGradient(gx,gy+gR*0.7,0,gx,gy+gR*0.7,gR*0.85);
+  gs.addColorStop(0,'rgba(0,0,0,0.5)'); gs.addColorStop(1,'transparent');
+  ctx.fillStyle=gs; ctx.beginPath(); ctx.arc(gx,gy+gR*0.7,gR*0.85,0,Math.PI*2); ctx.fill();
   ctx.restore();
 
   ctx.save();
-  ctx.globalAlpha=1;
-  if(ghostImg.complete && ghostImg.naturalWidth>0){
-    ctx.drawImage(ghostImg, gx-gR, gy-gR+bob, gR*2, gR*2);
+  if(ghostImg.complete&&ghostImg.naturalWidth>0){
+    ctx.drawImage(ghostImg,gx-gR,gy-gR+bob,gR*2,gR*2);
   } else {
     ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(gx,gy+bob,gR*0.7,0,Math.PI*2); ctx.fill();
   }
@@ -846,8 +866,8 @@ function drawFrame(now){
   // ── Bryan crosshair ───────────────────────────────────
   if(bryanOn && bMouseX>=0){
     ctx.save();
-    ctx.strokeStyle='rgba(255,255,255,.55)'; ctx.lineWidth=1;
-    ctx.shadowBlur=8; ctx.shadowColor='rgba(255,255,255,.3)';
+    ctx.strokeStyle='rgba(255,255,255,.50)'; ctx.lineWidth=1;
+    ctx.shadowBlur=8; ctx.shadowColor='rgba(255,255,255,.25)';
     ctx.setLineDash([5,5]);
     ctx.beginPath(); ctx.moveTo(0,bMouseY); ctx.lineTo(cssW,bMouseY); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(bMouseX,0); ctx.lineTo(bMouseX,cssH); ctx.stroke();
@@ -864,8 +884,8 @@ function startLoop(){ if(!rafHandle) rafHandle=requestAnimationFrame(loop); }
 // ─────────────────────────────────────────────────────────
 //  HIT TEST
 // ─────────────────────────────────────────────────────────
-const HIT_R = 44;
-function hitTest(clientX, clientY){
+const HIT_R_IMG = 40; // image-px hit radius
+function hitTest(clientX,clientY){
   const rect=canvas.getBoundingClientRect();
   const cx=clientX-rect.left, cy=clientY-rect.top;
   const {ix,iy}=cssToImg(cx,cy);
@@ -873,7 +893,7 @@ function hitTest(clientX, clientY){
   let best=null, bestD=Infinity;
   pool.forEach(cp=>{
     const d=Math.hypot(cp.ix-ix,cp.iy-iy);
-    if(d<HIT_R && d<bestD){ bestD=d; best=cp; }
+    if(d<HIT_R_IMG && d<bestD){ bestD=d; best=cp; }
   });
   return best;
 }
@@ -881,9 +901,10 @@ function hitTest(clientX, clientY){
 // ─────────────────────────────────────────────────────────
 //  CANVAS EVENTS
 // ─────────────────────────────────────────────────────────
-canvas.addEventListener('click', e=>{
+canvas.addEventListener('click',e=>{
   if(!mazeStarted) return;
   if(introPhase==='allGlow'||introPhase==='traveling') return;
+
   if(bryanOn){
     const rect=canvas.getBoundingClientRect();
     const {ix,iy}=cssToImg(e.clientX-rect.left,e.clientY-rect.top);
@@ -895,14 +916,14 @@ canvas.addEventListener('click', e=>{
   const cp=hitTest(e.clientX,e.clientY);
   if(cp) startGhostTravel(cp);
 });
-canvas.addEventListener('touchend', e=>{
+canvas.addEventListener('touchend',e=>{
   if(!mazeStarted||introPhase==='allGlow'||introPhase==='traveling') return;
   if(!e.changedTouches.length) return;
   const t0=e.changedTouches[0];
   const cp=hitTest(t0.clientX,t0.clientY);
   if(cp){ startGhostTravel(cp); e.preventDefault(); }
 },{passive:false});
-canvas.addEventListener('mousemove', e=>{
+canvas.addEventListener('mousemove',e=>{
   if(!bryanOn) return;
   const rect=canvas.getBoundingClientRect();
   bMouseX=e.clientX-rect.left; bMouseY=e.clientY-rect.top;
@@ -912,47 +933,43 @@ canvas.addEventListener('mousemove', e=>{
 canvas.addEventListener('mouseleave',()=>{ bMouseX=-1; bMouseY=-1; });
 
 function startGhostTravel(cp){
-  cpPopup.classList.remove('show');
+  closePopup();
   ghostSrcIX=ghostIX; ghostSrcIY=ghostIY;
-  ghostDstIX=cp.ix;   ghostDstIY=cp.iy;
+  ghostDstIX=cp.ix; ghostDstIY=cp.iy;
   ghostT=0; ghostAnimStart=performance.now();
   activeWeek=cp.w; pendingPopupCP=cp;
 }
 
 // ─────────────────────────────────────────────────────────
-//  POPUP
+//  POPUP — always centered on screen
 // ─────────────────────────────────────────────────────────
 function showPopupAtCP(cp){
   const col1=monthPrimary(cp.w), col2=monthSecondary(cp.w);
-
-  // Accent bar: gradient of both month colors
   cpPopupBar.style.background=`linear-gradient(90deg,${col1},${col2})`;
   cpPopupBar.style.boxShadow=`0 0 14px ${col1}66,0 0 28px ${col2}44`;
+  cpPopupDate.textContent='This Week  '+WEEK_DATES[cp.w-1];
+  cpTitle.textContent='Week '+String(cp.w).padStart(2,'0');
 
-  cpPopupDate.textContent='This Week  ' + WEEK_DATES[cp.w-1];
-  cpTitle.textContent    = 'Week ' + String(cp.w).padStart(2,'0');
-
-  // Position popup above the checkpoint
-  const {x,y}=imgToCSS(cp.ix,cp.iy);
-  const rect=canvas.getBoundingClientRect();
-  const absX=rect.left+x, absY=rect.top+y;
-  const margin=18, halfW=155;
-  const px=Math.min(Math.max(absX,halfW+margin),window.innerWidth-halfW-margin);
-  const py=absY-14;
-
+  // Position is pure CSS: fixed, left:50%, top:50%, transform:translate(-50%,-50%)
+  // No JS positioning needed — it's always screen-centered.
+  cpScrim.classList.add('show');
   cpPopup.classList.remove('show');
   void cpPopup.offsetWidth; // force reflow to replay animation
-  cpPopup.style.left     =px+'px';
-  cpPopup.style.top      =py+'px';
-  cpPopup.style.transform='translate(-50%,-100%)';
   cpPopup.classList.add('show');
 }
-cpCloseBtn.addEventListener('click',()=>cpPopup.classList.remove('show'));
+
+function closePopup(){
+  cpPopup.classList.remove('show');
+  cpScrim.classList.remove('show');
+}
+
+cpCloseBtn.addEventListener('click', closePopup);
+cpScrim.addEventListener('click', closePopup);
 
 // Icon clicks — wire landing pages here later
 [iconPreBoo,iconBooTree,iconContTree].forEach(btn=>{
   btn.addEventListener('click',()=>{
-    // placeholder — landing page links will be added
+    // landing page links go here
   });
 });
 
@@ -963,6 +980,7 @@ function applyBryan(){
   bryanBtn.classList.toggle('on',bryanOn);
   gridEl.classList.toggle('show',bryanOn);
   coordPill.classList.toggle('show',bryanOn);
+  bryanTip.classList.toggle('show',bryanOn);
   canvas.classList.toggle('bryan',bryanOn);
   if(!bryanOn){ bMouseX=-1;bMouseY=-1;coordText.textContent='x: —  y: —'; }
 }
@@ -970,7 +988,8 @@ bryanBtn.addEventListener('click',()=>{
   if(bryanOn){bryanOn=false;applyBryan();return;}
   const pw=prompt('Bryan mode password:');
   if(pw===null) return;
-  if(String(pw).trim()===BRYAN_PASS){bryanOn=true;applyBryan();} else alert('Nope.');
+  if(String(pw).trim()===BRYAN_PASS){bryanOn=true;applyBryan();}
+  else alert('Nope.');
 });
 coordPill.addEventListener('click',()=>{
   const m=coordText.textContent.match(/x:\s*(\d+)\s*y:\s*(\d+)/);
@@ -1010,9 +1029,9 @@ function buildSparkles(container,count=24,wide=false){
     const sp=document.createElement('div');sp.className='sp';
     const angle=(i/count)*Math.PI*2;
     const r=wide?35+Math.random()*28:28+Math.random()*18;
-    const cx=50+Math.cos(angle)*r,cy=50+Math.sin(angle)*r;
+    const cx=50+Math.cos(angle)*r, cy=50+Math.sin(angle)*r;
     const size=wide?3+Math.random()*4:2+Math.random()*3;
-    const dur=1.3+Math.random()*1.8,delay=-(Math.random()*dur);
+    const dur=1.3+Math.random()*1.8, delay=-(Math.random()*dur);
     sp.style.cssText=`--size:${size}px;--x:${cx}%;--y:${cy}%;--dur:${dur}s;--delay:${delay}s;`;
     container.appendChild(sp);
   }
@@ -1023,11 +1042,11 @@ buildSparkles(startSp,36,true);
 // ─────────────────────────────────────────────────────────
 //  OVERLAY FLOW
 // ─────────────────────────────────────────────────────────
-returnBtn.addEventListener('click',()=>{fadeOut();setTimeout(()=>window.location.href='index.html',FADE_MS);});
+returnBtn.addEventListener('click',()=>{ fadeOut(); setTimeout(()=>window.location.href='index.html',FADE_MS); });
 
 let videoPlayed=false;
 continueBtn.addEventListener('click',async()=>{
-  if(videoPlayed)return;videoPlayed=true;
+  if(videoPlayed)return; videoPlayed=true;
   overlay1.classList.add('hidden');
   overlay1.addEventListener('transitionend',()=>overlay1.classList.add('gone'),{once:true});
   app.classList.add('inTransition');
@@ -1038,7 +1057,7 @@ continueBtn.addEventListener('click',async()=>{
 
 let o2shown=false;
 function showOverlay2(){
-  if(o2shown)return;o2shown=true;
+  if(o2shown)return; o2shown=true;
   try{toMazeVideo.pause();toMazeVideo.currentTime=0;}catch(e){}
   videoWrap.classList.remove('show');
   overlay2.classList.add('show');
@@ -1055,22 +1074,22 @@ toMazeVideo.addEventListener('timeupdate',()=>{
 
 let mazeLaunched=false;
 mazeStartBtn.addEventListener('click',async()=>{
-  if(mazeLaunched)return;mazeLaunched=true;
+  if(mazeLaunched)return; mazeLaunched=true;
   overlay2.classList.add('hidden');
   overlay2.addEventListener('transitionend',()=>overlay2.remove(),{once:true});
   app.classList.remove('inTransition');
   mazeStarted=true;
-  ghostIX=CHECKPOINTS[0].ix;ghostIY=CHECKPOINTS[0].iy;
-  introPhase='allGlow';introGlowStart=performance.now();
-  resizeCanvas();startLoop();
+  ghostIX=CHECKPOINTS[0].ix; ghostIY=CHECKPOINTS[0].iy;
+  introPhase='allGlow'; introGlowStart=performance.now();
+  resizeCanvas(); startLoop();
   try{bgMusic.volume=0.65;await bgMusic.play();}catch(e){console.warn('Music blocked',e);}
 });
 
 backBtn.addEventListener('click',()=>{
   try{bgMusic.pause();bgMusic.currentTime=0;}catch(e){}
-  fadeOut();setTimeout(()=>window.location.href='index.html',FADE_MS);
+  fadeOut(); setTimeout(()=>window.location.href='index.html',FADE_MS);
 });
-function fadeOut(){fade.classList.add('on');}
+function fadeOut(){ fade.classList.add('on'); }
 
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden){
