@@ -30,16 +30,9 @@
       color: var(--text);
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
         "Noto Sans","Hiragino Kaku Gothic ProN","Yu Gothic", sans-serif;
-      /* prevent iOS rubber-band showing white */
       overscroll-behavior: none;
     }
 
-    /* ══════════════════════════════════════════
-       APP ROOT
-       position:fixed keeps background-1.png always
-       visible and fills the whole viewport on mobile.
-       overflow:hidden here; hub scrolls internally.
-    ══════════════════════════════════════════ */
     #app {
       position: fixed;
       inset: 0;
@@ -47,7 +40,6 @@
       overflow: hidden;
     }
 
-    /* Dark vignette over bg */
     #app::before {
       content: '';
       position: absolute; inset: 0;
@@ -58,32 +50,32 @@
       z-index: 0;
     }
 
-    /* ── Rotate overlay ── */
-    #rotateOverlay {
-      position: absolute; inset: 0;
+    /* ── Landscape overlay ── */
+    #landscapeOverlay {
+      position: fixed; inset: 0;
       display: none;
       align-items: center; justify-content: center;
       padding: 24px;
       text-align: center;
-      background: rgba(0,0,0,.94);
-      z-index: 200;
+      background: rgba(0,0,0,.97);
+      z-index: 9999;
     }
-    #rotateOverlay .card {
-      max-width: 480px;
+    #landscapeOverlay.show { display: flex; }
+    #landscapeOverlay .card {
+      max-width: 340px;
       border: 1px solid rgba(255,255,255,.18);
       border-radius: 22px;
-      padding: 22px 18px;
+      padding: 28px 22px;
     }
-    #rotateOverlay h2 { margin: 0 0 8px; font-size: clamp(18px,4vw,22px); }
-    #rotateOverlay p  { margin: 0; color: var(--muted); line-height: 1.4; font-size: clamp(13px,3.5vw,15px); }
+    #landscapeOverlay h2 { margin: 0 0 10px; font-size: clamp(18px,5vw,24px); }
+    #landscapeOverlay p  { margin: 0; color: var(--muted); line-height: 1.5; font-size: clamp(13px,3.5vw,15px); }
+    .rotate-icon { font-size: 48px; margin-bottom: 14px; display: block; animation: rotateHint 2s ease-in-out infinite; }
+    @keyframes rotateHint {
+      0%,100% { transform: rotate(0deg); }
+      50%      { transform: rotate(90deg); }
+    }
 
-    /* ══════════════════════════════════════════
-       SCENES
-       All scenes fill #app absolutely.
-       Start and video are solid black.
-       Hub is transparent (bg image shows through)
-       and scrolls its own content vertically.
-    ══════════════════════════════════════════ */
+    /* ══ SCENES ══ */
     .scene {
       position: absolute; inset: 0;
       display: none;
@@ -91,27 +83,26 @@
     }
     .scene.active { display: flex; }
 
-    /* ── START SCENE ── */
+    /* ── START ── */
     #startScene {
       background: #000;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: clamp(16px, 4vw, 26px);
+      gap: clamp(12px, 3vw, 22px);
       padding:
-        calc(clamp(20px,5vw,28px) + var(--safe-top))
-        calc(clamp(20px,5vw,28px) + var(--safe-right))
-        calc(clamp(20px,5vw,28px) + var(--safe-bottom))
-        calc(clamp(20px,5vw,28px) + var(--safe-left));
+        calc(clamp(16px,3vw,24px) + var(--safe-top))
+        calc(clamp(16px,3vw,24px) + var(--safe-right))
+        calc(clamp(16px,3vw,24px) + var(--safe-bottom))
+        calc(clamp(16px,3vw,24px) + var(--safe-left));
       text-align: center;
       overflow: hidden;
     }
 
-    /* Ghost + sparkles – shrinks on small screens */
     .ghostOuter {
       position: relative;
-      width:  clamp(130px, 30vmin, 250px);
-      height: clamp(130px, 30vmin, 250px);
+      width:  clamp(110px, 22vmin, 200px);
+      height: clamp(110px, 22vmin, 200px);
       flex-shrink: 0;
     }
 
@@ -173,7 +164,7 @@
       -webkit-user-drag: none;
     }
 
-    /* ── VIDEO SCENE ── */
+    /* ── VIDEO ── */
     #videoScene {
       background: #000;
       align-items: center; justify-content: center;
@@ -185,51 +176,42 @@
       background: #000;
     }
 
-    /* ══════════════════════════════════════════
-       HUB SCENE
-       Transparent so background-1.png shows.
-       Overrides display:flex → block so it can
-       scroll vertically on short screens.
-    ══════════════════════════════════════════ */
+    /* ── HUB ── */
     #hubScene {
       background: transparent;
-      /* Allow scroll when content taller than viewport */
       overflow-y: auto;
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
-      /* Override .scene.active flex with block */
       display: none;
     }
     #hubScene.active {
       display: block;
     }
 
-    /* Wrapper centres hub and adds safe-area padding */
     .hubScroll {
       min-height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
       padding:
-        calc(clamp(16px,3.5vw,24px) + var(--safe-top))
-        calc(clamp(14px,3vw,22px)   + var(--safe-right))
-        calc(clamp(16px,3.5vw,24px) + var(--safe-bottom))
-        calc(clamp(14px,3vw,22px)   + var(--safe-left));
+        calc(clamp(10px,2vw,16px) + var(--safe-top))
+        calc(clamp(10px,2vw,16px) + var(--safe-right))
+        calc(clamp(10px,2vw,16px) + var(--safe-bottom))
+        calc(clamp(10px,2vw,16px) + var(--safe-left));
     }
 
     .hub {
-      width: min(1000px, 100%);
+      width: min(1100px, 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: clamp(12px, 2.5vw, 20px);
+      gap: clamp(8px, 1.8vw, 16px);
     }
 
-    /* Hub title */
     .hubHeading {
       text-align: center;
       font-family: 'Bowlby One', system-ui, sans-serif;
-      font-size: clamp(22px, 5vw, 52px);
+      font-size: clamp(20px, 4.5vw, 48px);
       font-weight: 400;
       letter-spacing: 3px;
       color: #fff;
@@ -237,23 +219,25 @@
         0 0 32px rgba(255,140,255,.65),
         0 0 80px rgba(255,80,200,.3),
         0 2px 8px rgba(0,0,0,.9);
+      line-height: 1.1;
     }
 
-    /* 3-card row – collapses on narrow screens */
+    /* ── 3-card row – always horizontal in landscape ── */
     .hubRow {
       display: grid;
       grid-template-columns: repeat(3, minmax(0,1fr));
-      gap: clamp(8px, 2vw, 16px);
+      gap: clamp(8px, 1.6vw, 14px);
       width: 100%;
     }
 
-    /* ── Glassy week card ── */
+    /* ── Week card – compact height ── */
     .weekCard {
       position: relative;
-      border-radius: clamp(18px,3vw,26px);
+      border-radius: clamp(14px,2vw,22px);
       overflow: hidden;
-      padding: clamp(14px,2.5vw,20px) clamp(12px,2vw,18px) clamp(12px,2vw,16px);
-      min-height: clamp(120px,18vw,170px);
+      padding: clamp(10px,1.6vw,16px) clamp(10px,1.6vw,16px) clamp(8px,1.2vw,12px);
+      /* Fixed compact height — no stretchy min-height */
+      height: clamp(100px, 14vw, 140px);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -261,8 +245,12 @@
       cursor: pointer;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
+      /* Use transform3d to avoid repaints */
       transform: translateZ(0);
       transition: transform 220ms ease, box-shadow 220ms ease;
+      /* Prevent flicker via composite layer */
+      will-change: transform;
+      backface-visibility: hidden;
 
       background: rgba(255,255,255,.09);
       backdrop-filter: blur(18px) saturate(160%);
@@ -270,9 +258,9 @@
 
       box-shadow:
         inset 0 0 0 1px rgba(255,255,255,.22),
-        0 8px 32px rgba(0,0,0,.35),
+        0 6px 24px rgba(0,0,0,.35),
         0 0 0 2px hsl(var(--hue,0deg) 90% 65% / .7),
-        0 0 22px 4px hsl(var(--hue,0deg) 90% 65% / .35);
+        0 0 18px 4px hsl(var(--hue,0deg) 90% 65% / .30);
 
       animation: rainbowHue var(--rainbow-speed,5s) linear infinite;
       animation-delay: var(--rainbow-offset,0s);
@@ -318,74 +306,74 @@
     }
 
     .weekCard:hover {
-      transform: translateY(-4px) scale(1.02);
+      transform: translateY(-3px) scale(1.015) translateZ(0);
       box-shadow:
         inset 0 0 0 1px rgba(255,255,255,.32),
-        0 16px 40px rgba(0,0,0,.45),
+        0 12px 32px rgba(0,0,0,.45),
         0 0 0 2px hsl(var(--hue,0deg) 90% 70% / .9),
-        0 0 36px 8px hsl(var(--hue,0deg) 90% 65% / .5);
+        0 0 28px 6px hsl(var(--hue,0deg) 90% 65% / .45);
     }
-    .weekCard:active { transform: scale(.99); }
+    .weekCard:active { transform: scale(.99) translateZ(0); }
 
     .weekTag {
-      font-weight: 1000; letter-spacing: 1.5px;
-      font-size: clamp(10px,1.8vw,13px);
+      font-weight: 900; letter-spacing: 1.5px;
+      font-size: clamp(9px,1.2vw,12px);
       text-transform: uppercase;
       color: rgba(255,255,255,.6);
     }
     .weekTag span { color: rgba(255,255,255,.9); margin-left: 4px; }
 
     .weekTitle {
-      font-size: clamp(14px, 2.5vw, 22px);
-      font-weight: 1000; letter-spacing: .4px;
+      font-size: clamp(12px, 2vw, 19px);
+      font-weight: 900; letter-spacing: .4px;
       color: #fff;
       text-shadow: 0 2px 12px rgba(0,0,0,.6);
-      margin-top: 7px;
+      margin-top: 4px;
+      line-height: 1.2;
     }
 
     .weekDates {
-      font-size: clamp(10px, 1.6vw, 13px);
+      font-size: clamp(9px, 1.2vw, 12px);
       color: rgba(255,255,255,.65);
-      margin-top: 4px;
-      line-height: 1.4;
+      margin-top: 3px;
+      line-height: 1.3;
     }
 
     .weekHint {
-      margin-top: 10px;
-      font-size: clamp(9px,1.3vw,11px);
+      font-size: clamp(8px,1vw,10px);
       letter-spacing: 1.5px;
-      color: rgba(255,255,255,.45);
+      color: rgba(255,255,255,.40);
       text-transform: uppercase;
     }
 
-    /* Hub bottom button */
+    /* Hub bottom */
     .hubBottom {
       display: flex;
       justify-content: center;
-      padding-top: 4px;
+      padding-top: 2px;
     }
 
     /* ── Shared button ── */
     .btn {
       appearance: none; border: 0;
       border-radius: 999px;
-      padding: clamp(11px,2vw,14px) clamp(18px,3vw,22px);
-      font-size: clamp(14px,2.2vw,18px);
+      padding: clamp(10px,1.6vw,13px) clamp(16px,2.5vw,22px);
+      font-size: clamp(13px,1.8vw,17px);
       font-weight: 900; letter-spacing: .6px;
       cursor: pointer; color: #000;
       background: linear-gradient(180deg, var(--pink2), var(--pink));
       box-shadow:
-        0 10px 22px rgba(255,59,189,.28),
+        0 8px 18px rgba(255,59,189,.28),
         0 0 0 2px rgba(255,59,189,.15),
-        0 0 26px rgba(255,59,189,.35);
+        0 0 22px rgba(255,59,189,.30);
       transform: translateZ(0);
       -webkit-tap-highlight-color: transparent;
       white-space: nowrap;
     }
-    .btn:active { transform: scale(.98); }
+    .btn:active { transform: scale(.98) translateZ(0); }
     .btnSmall {
-      padding: clamp(9px,1.6vw,12px) clamp(14px,2.5vw,20px);
-      font-size: clamp(13px,1.8vw,15px);
+      padding: clamp(8px,1.2vw,11px) clamp(12px,2vw,18px);
+      font-size: clamp(12px,1.5vw,14px);
     }
 
     /* ── Fade layer ── */
@@ -393,10 +381,12 @@
       position: absolute; inset: 0;
       background: #000; opacity: 0;
       pointer-events: none;
+      /* Use will-change to prevent flicker */
+      will-change: opacity;
       transition: opacity 520ms ease;
       z-index: 40;
     }
-    #fade.on { opacity: 1; }
+    #fade.on { opacity: 1; pointer-events: all; }
 
     /* ══════════════════════════════════════════
        PICKER OVERLAY
@@ -404,16 +394,15 @@
     .picker {
       position: absolute; inset: 0;
       display: none;
-      align-items: flex-start;
+      align-items: center;
       justify-content: center;
-      /* Scrolls if picker panel is taller than viewport on small phones */
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       padding:
-        calc(clamp(12px,2.5vw,18px) + var(--safe-top))
-        calc(clamp(12px,2.5vw,18px) + var(--safe-right))
-        calc(clamp(12px,2.5vw,18px) + var(--safe-bottom))
-        calc(clamp(12px,2.5vw,18px) + var(--safe-left));
+        calc(clamp(10px,2vw,16px) + var(--safe-top))
+        calc(clamp(10px,2vw,16px) + var(--safe-right))
+        calc(clamp(10px,2vw,16px) + var(--safe-bottom))
+        calc(clamp(10px,2vw,16px) + var(--safe-left));
       background:
         radial-gradient(ellipse at center,
           rgba(0,0,0,.55) 0%,
@@ -427,16 +416,17 @@
 
     .pickerPanel {
       position: relative;
-      width: min(920px, 100%);
-      border-radius: clamp(20px,3vw,30px);
+      /* Narrow panel — tiles stack vertically */
+      width: min(420px, 94%);
+      border-radius: clamp(20px,3vw,28px);
       overflow: hidden;
-      padding: clamp(14px,2.5vw,18px);
-      /* Ensure panel doesn't get cut off – margin centres it vertically when possible */
+      padding: clamp(14px,2.5vw,20px) clamp(14px,2vw,18px);
       margin: auto;
 
       background: rgba(255,255,255,.09);
       backdrop-filter: blur(22px) saturate(160%);
       -webkit-backdrop-filter: blur(22px) saturate(160%);
+      will-change: transform;
 
       box-shadow:
         inset 0 0 0 1px rgba(255,255,255,.22),
@@ -453,7 +443,7 @@
       background: linear-gradient(
         120deg,
         transparent 35%,
-        rgba(255,255,255,.16) 50%,
+        rgba(255,255,255,.14) 50%,
         transparent 65%
       );
       transform: translateX(-110%) skewX(-12deg);
@@ -463,13 +453,13 @@
 
     .pickerTop {
       display: flex; align-items: center;
-      justify-content: space-between; gap: 10px;
+      justify-content: space-between; gap: 8px;
       position: relative; z-index: 1;
     }
 
     .pickerTitle {
       font-family: 'Bowlby One', system-ui, sans-serif;
-      font-size: clamp(14px, 2.8vw, 24px);
+      font-size: clamp(13px, 2.2vw, 20px);
       letter-spacing: 2px;
       text-align: center; flex: 1;
       text-shadow:
@@ -483,72 +473,76 @@
       background: rgba(0,0,0,.22);
       color: rgba(255,255,255,.92);
       border-radius: 999px;
-      padding: clamp(7px,1.2vw,10px) clamp(10px,1.8vw,16px);
-      font-size: clamp(11px,1.6vw,14px);
-      font-weight: 1000; letter-spacing: .4px;
+      padding: clamp(6px,1vw,9px) clamp(10px,1.6vw,14px);
+      font-size: clamp(10px,1.4vw,13px);
+      font-weight: 900; letter-spacing: .4px;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       white-space: nowrap;
       flex-shrink: 0;
       box-shadow:
         inset 0 0 0 1px rgba(255,255,255,.10),
-        0 10px 22px rgba(0,0,0,.35);
+        0 8px 18px rgba(0,0,0,.30);
     }
     .ghostBtn:hover  { background: rgba(255,255,255,.10); }
     .ghostBtn:active { transform: scale(.99); }
 
     .pickerSub {
-      margin-top: 8px;
+      margin-top: 6px;
       color: rgba(255,255,255,.72);
-      font-size: clamp(11px,1.8vw,14px);
+      font-size: clamp(10px,1.5vw,13px);
       text-align: center;
       position: relative; z-index: 1;
     }
 
     .pickerSub2 {
-      margin-top: 5px;
-      font-size: clamp(9px,1.3vw,12px);
+      margin-top: 4px;
+      font-size: clamp(8px,1.1vw,11px);
       letter-spacing: 1.4px;
-      color: rgba(255,255,255,.45);
+      color: rgba(255,255,255,.40);
       text-transform: uppercase; text-align: center;
       position: relative; z-index: 1;
     }
 
+    /* ── Picker grid: VERTICAL STACK, centered ── */
     .pickerGrid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap: clamp(8px,1.8vw,12px);
-      margin-top: clamp(10px,2vw,16px);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(7px,1.2vw,10px);
+      margin-top: clamp(10px,1.8vw,14px);
+      align-items: center;
       position: relative; z-index: 1;
     }
 
     .pickTile {
       appearance: none; border: 0;
-      border-radius: clamp(14px,2.5vw,22px);
-      padding: clamp(11px,1.8vw,18px) clamp(10px,1.6vw,16px) clamp(11px,1.8vw,16px);
+      border-radius: clamp(12px,2vw,18px);
+      padding: clamp(10px,1.6vw,14px) clamp(14px,2vw,18px);
       cursor: pointer;
       text-align: left;
       color: #fff;
+      width: 100%;
       background: rgba(0,0,0,.16);
       box-shadow:
         inset 0 0 0 1px rgba(255,255,255,.18),
-        0 18px 30px rgba(0,0,0,.35),
-        0 0 0 2px hsl(var(--tileHue,210deg) 90% 65% / .55),
-        0 0 26px 6px hsl(var(--tileHue,210deg) 90% 65% / .22);
+        0 12px 24px rgba(0,0,0,.30),
+        0 0 0 2px hsl(var(--tileHue,210deg) 90% 65% / .50),
+        0 0 20px 4px hsl(var(--tileHue,210deg) 90% 65% / .18);
       transition: transform 160ms ease, box-shadow 200ms ease, background 200ms ease;
       -webkit-tap-highlight-color: transparent;
+      will-change: transform;
     }
 
     .pickTile:hover {
-      transform: translateY(-3px);
+      transform: translateY(-2px) translateZ(0);
       background: rgba(255,255,255,.08);
       box-shadow:
         inset 0 0 0 1px rgba(255,255,255,.28),
-        0 24px 40px rgba(0,0,0,.45),
-        0 0 0 2px hsl(var(--tileHue,210deg) 95% 70% / .75),
-        0 0 36px 10px hsl(var(--tileHue,210deg) 90% 65% / .32);
+        0 18px 32px rgba(0,0,0,.40),
+        0 0 0 2px hsl(var(--tileHue,210deg) 95% 70% / .70),
+        0 0 28px 8px hsl(var(--tileHue,210deg) 90% 65% / .28);
     }
-    .pickTile:active { transform: translateY(-1px) scale(.99); }
+    .pickTile:active { transform: translateY(-1px) scale(.99) translateZ(0); }
 
     .pickTile[data-curr="preboo"]       { --tileHue: 315deg; }
     .pickTile[data-curr="booriculum"]   { --tileHue: 190deg; }
@@ -557,19 +551,20 @@
     .tileTop {
       display: flex;
       align-items: center;
-      gap: clamp(8px,1.5vw,12px);
+      justify-content: center;
+      gap: clamp(8px,1.4vw,12px);
     }
 
     .tileIcon {
       flex-shrink: 0;
-      width:  clamp(36px,5.5vw,60px);
-      height: clamp(36px,5.5vw,60px);
-      border-radius: clamp(10px,1.8vw,18px);
+      width:  clamp(32px,4.5vw,48px);
+      height: clamp(32px,4.5vw,48px);
+      border-radius: clamp(8px,1.4vw,14px);
       display: grid; place-items: center;
       background: rgba(255,255,255,.08);
       box-shadow:
         inset 0 0 0 1px rgba(255,255,255,.18),
-        0 10px 20px rgba(0,0,0,.35);
+        0 6px 14px rgba(0,0,0,.30);
     }
 
     .tileIcon img {
@@ -579,86 +574,36 @@
       user-select: none;
       -webkit-user-drag: none;
       filter:
-        drop-shadow(0 0 10px rgba(255,255,255,.4))
-        drop-shadow(0 0 20px rgba(255,255,255,.2));
+        drop-shadow(0 0 8px rgba(255,255,255,.35))
+        drop-shadow(0 0 16px rgba(255,255,255,.18));
       transition: transform 200ms ease;
     }
     .pickTile:hover .tileIcon img { transform: scale(1.10); }
 
     .tileName {
-      font-size: clamp(13px,2vw,18px);
-      font-weight: 1000; letter-spacing: .3px; line-height: 1.1;
+      font-size: clamp(13px,1.8vw,17px);
+      font-weight: 900; letter-spacing: .3px; line-height: 1.1;
     }
 
     .tileJp {
       display: block;
-      margin-top: 4px;
-      font-size: clamp(10px,1.4vw,13px);
-      color: rgba(255,255,255,.70);
+      margin-top: 3px;
+      font-size: clamp(10px,1.2vw,12px);
+      color: rgba(255,255,255,.65);
     }
 
-    .tileHint {
-      margin-top: clamp(6px,1.2vw,12px);
-      font-size: clamp(9px,1.1vw,11px);
-      letter-spacing: 1.6px;
-      color: rgba(255,255,255,.45);
-      text-transform: uppercase;
-    }
+    /* hide hint text in vertical layout */
+    .tileHint { display: none; }
 
     .pickerNote {
-      margin-top: clamp(8px,1.5vw,14px);
-      font-size: clamp(10px,1.3vw,12px);
-      color: rgba(255,255,255,.50);
+      margin-top: clamp(8px,1.4vw,12px);
+      font-size: clamp(9px,1.1vw,11px);
+      color: rgba(255,255,255,.45);
       text-align: center;
       position: relative; z-index: 1;
     }
 
-    /* ══════════════════════════════════════════
-       RESPONSIVE BREAKPOINTS
-    ══════════════════════════════════════════ */
-
-    /* Phones ≤ 600px — single column everything */
-    @media (max-width: 600px) {
-      .hubRow {
-        grid-template-columns: 1fr;
-      }
-      .weekCard {
-        min-height: 100px;
-        padding: 14px 16px 12px;
-      }
-      /* Picker tiles stack vertically, horizontal layout */
-      .pickerGrid {
-        grid-template-columns: 1fr;
-        gap: 8px;
-      }
-      .pickTile {
-        padding: 12px 14px;
-      }
-      .tileHint { display: none; } /* too cramped on phone */
-      .pickerSub2 { display: none; }
-    }
-
-    /* Mid tablets 601–860px — 2-col picker, 1-col hub */
-    @media (min-width: 601px) and (max-width: 860px) {
-      .hubRow {
-        grid-template-columns: 1fr;
-      }
-      .pickerGrid {
-        grid-template-columns: repeat(2, minmax(0,1fr));
-      }
-    }
-
-    /* Short landscape phones (height ≤ 480px) */
-    @media (max-height: 480px) {
-      .ghostOuter {
-        width:  clamp(90px, 18vmin, 150px);
-        height: clamp(90px, 18vmin, 150px);
-      }
-      #startScene { gap: 12px; }
-      .hubHeading { font-size: clamp(16px, 4vw, 26px); letter-spacing: 2px; }
-      .weekCard   { min-height: 80px; }
-    }
-
+    /* ══ REDUCED MOTION ══ */
     @media (prefers-reduced-motion: reduce) {
       .ghostWrap         { animation: none; }
       #fade              { transition: none; }
@@ -666,17 +611,19 @@
       .weekCard::before  { animation: none; }
       .pickerPanel       { animation: none; }
       .pickerPanel::before { animation: none; }
+      .rotate-icon       { animation: none; }
     }
   </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- Rotate nudge – only shown on very tiny portrait screens -->
-  <div id="rotateOverlay" aria-hidden="true">
+  <!-- Landscape required overlay -->
+  <div id="landscapeOverlay" aria-hidden="true">
     <div class="card">
+      <span class="rotate-icon">📱</span>
       <h2>Rotate to Landscape</h2>
-      <p>Please turn your device sideways for Booha Adventure.</p>
+      <p>Please turn your device sideways to play Booha Adventure.</p>
     </div>
   </div>
 
@@ -700,7 +647,6 @@
 
   <!-- ── HUB ── -->
   <section id="hubScene" class="scene" aria-label="Week Hub">
-    <!-- hubScroll allows vertical scrolling on phones -->
     <div class="hubScroll">
       <div class="hub">
         <div class="hubHeading">BOOHA ADVENTURE</div>
@@ -720,12 +666,12 @@
   <div id="picker" class="picker" aria-hidden="true">
     <div class="pickerPanel" role="dialog" aria-modal="true" aria-label="Choose Curriculum">
       <div class="pickerTop">
-        <div style="width:60px; flex-shrink:0;"></div>
+        <div style="width:52px; flex-shrink:0;"></div>
         <div class="pickerTitle" id="pickerTitle">THIS WEEK（今週）</div>
         <button id="pickerClose" class="ghostBtn" type="button" aria-label="Back">戻る</button>
       </div>
 
-      <div class="pickerSub" id="pickerDates">Jan 3 – Jan 9（1月3日–1月9日）</div>
+      <div class="pickerSub" id="pickerDates">Mar 1 – Mar 7（3月1日–3月7日）</div>
       <div class="pickerSub2">Choose your curriculum</div>
 
       <div class="pickerGrid">
@@ -739,7 +685,6 @@
               <span class="tileJp">プレブー</span>
             </div>
           </div>
-          <div class="tileHint">Tap to enter →</div>
         </button>
 
         <button class="pickTile" type="button" data-curr="booriculum">
@@ -752,7 +697,6 @@
               <span class="tileJp">ブーリキュラム</span>
             </div>
           </div>
-          <div class="tileHint">Tap to enter →</div>
         </button>
 
         <button class="pickTile" type="button" data-curr="boocontinuum">
@@ -765,7 +709,6 @@
               <span class="tileJp">ブーコンティニューム</span>
             </div>
           </div>
-          <div class="tileHint">Tap to enter →</div>
         </button>
       </div>
 
@@ -778,43 +721,39 @@
 
 <script>
   /* ── Element refs ── */
-  const startScene    = document.getElementById('startScene');
-  const videoScene    = document.getElementById('videoScene');
-  const hubScene      = document.getElementById('hubScene');
-  const startBtn      = document.getElementById('startBtn');
-  const introVideo    = document.getElementById('introVideo');
-  const fade          = document.getElementById('fade');
-  const rotateOverlay = document.getElementById('rotateOverlay');
-  const ghostWrap     = document.querySelector('.ghostWrap');
-  const sparkleField  = document.querySelector('.sparkleField');
+  const startScene  = document.getElementById('startScene');
+  const videoScene  = document.getElementById('videoScene');
+  const hubScene    = document.getElementById('hubScene');
+  const startBtn    = document.getElementById('startBtn');
+  const introVideo  = document.getElementById('introVideo');
+  const fade        = document.getElementById('fade');
+  const ghostWrap   = document.querySelector('.ghostWrap');
+  const sparkleField = document.querySelector('.sparkleField');
+  const lsOverlay   = document.getElementById('landscapeOverlay');
+
+  /* ══════════════════════════════════
+     LANDSCAPE ENFORCEMENT
+     Show overlay whenever portrait on
+     any screen size.
+  ══════════════════════════════════ */
+  function checkOrientation(){
+    const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+    lsOverlay.classList.toggle('show', isPortrait);
+    lsOverlay.setAttribute('aria-hidden', isPortrait ? 'false' : 'true');
+  }
+  window.addEventListener('resize',          checkOrientation, { passive: true });
+  window.addEventListener('orientationchange', checkOrientation, { passive: true });
+  checkOrientation();
 
   /* ── Scene helpers ── */
   function showScene(el){
     [startScene, videoScene, hubScene].forEach(s => s.classList.remove('active'));
     el.classList.add('active');
-    // Scroll hub back to top every time it appears
-    if (el === hubScene){
-      hubScene.scrollTop = 0;
-    }
+    if (el === hubScene) hubScene.scrollTop = 0;
   }
-  function fadeToBlack(on = true){
+  function fadeToBlack(on){
     fade.classList.toggle('on', !!on);
   }
-
-  /* ── Orientation overlay ──
-     Only nudges on extremely small portrait screens (< 420px short side).
-     We fully support portrait on larger phones — just a gentle prompt on
-     tiny devices where 3 cards genuinely don't fit even stacked.
-  */
-  function updateOrientationOverlay(){
-    const portrait  = window.matchMedia('(orientation: portrait)').matches;
-    const tinyShort = Math.min(window.innerWidth, window.innerHeight) < 360;
-    const show      = tinyShort && portrait;
-    rotateOverlay.style.display = show ? 'flex' : 'none';
-    rotateOverlay.setAttribute('aria-hidden', show ? 'false' : 'true');
-  }
-  window.addEventListener('resize', updateOrientationOverlay, { passive: true });
-  updateOrientationOverlay();
 
   /* ── Sparkles ── */
   (function initSparkles(){
@@ -822,32 +761,48 @@
     const COUNT = 32;
     sparkleField.innerHTML = '';
     for (let i = 0; i < COUNT; i++){
-      const sp      = document.createElement('div');
-      sp.className  = 'sp';
-      const angle   = (i / COUNT) * Math.PI * 2;
-      const radius  = 28 + Math.random() * 22;
-      const cx      = 50 + Math.cos(angle) * radius;
-      const cy      = 50 + Math.sin(angle) * radius;
-      const size    = 2 + Math.random() * 3;
-      const dur     = 1.4 + Math.random() * 2.0;
-      const delay   = -(Math.random() * dur);
-      sp.style.cssText = `
-        --size:${size}px; --x:${cx}%; --y:${cy}%;
-        --dur:${dur}s; --delay:${delay}s;
-      `;
+      const sp   = document.createElement('div');
+      sp.className = 'sp';
+      const angle  = (i / COUNT) * Math.PI * 2;
+      const radius = 28 + Math.random() * 22;
+      const cx     = 50 + Math.cos(angle) * radius;
+      const cy     = 50 + Math.sin(angle) * radius;
+      const size   = 2 + Math.random() * 3;
+      const dur    = 1.4 + Math.random() * 2.0;
+      const delay  = -(Math.random() * dur);
+      sp.style.cssText = `--size:${size}px;--x:${cx}%;--y:${cy}%;--dur:${dur}s;--delay:${delay}s;`;
       sparkleField.appendChild(sp);
     }
   })();
 
-  /* ── Date / week logic ── */
+  /* ══════════════════════════════════
+     DATE / WEEK LOGIC
+     Locked to Japan time (Asia/Tokyo).
+     Cycle starts 2027-01-03 (Sunday).
+     Each week is Mon–Sun.
+     Week 1 of the cycle = Jan 3–9 2027.
+
+     Current real date context:
+       This week  = Mar 1–7
+       Last week  = Feb 22–28
+       Next week  = Mar 8–14
+
+     We determine the correct week by
+     computing which Mon-anchored week
+     "today" (Tokyo) falls in relative
+     to the cycle start.
+  ══════════════════════════════════ */
+
+  const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun',
+                      'Jul','Aug','Sep','Oct','Nov','Dec'];
   const MONTH_NAME = {
     jan:'January', feb:'February', mar:'March',     apr:'April',
     may:'May',     jun:'June',     jul:'July',       aug:'August',
     sep:'September', oct:'October', nov:'November', dec:'December'
   };
 
-  // DEV DATE OVERRIDE — set to null before launch
-  const DEV_DATE = '2027-01-03';
+  // Set to null for production — will use real Tokyo time
+  const DEV_DATE = null; // production: uses real Japan time
 
   function tokyoTodayYMD(){
     if (DEV_DATE){
@@ -874,9 +829,8 @@
   }
 
   function fmtRange(s,e){
-    const MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const en = ymd => `${MO[ymd.m-1]} ${ymd.d}`;
-    const jp = ymd => `${ymd.m}月${ymd.d}日`;
+    const en  = ymd => `${MONTH_ABBR[ymd.m-1]} ${ymd.d}`;
+    const jp  = ymd => `${ymd.m}月${ymd.d}日`;
     return `${en(s)} – ${en(e)}（${jp(s)}–${jp(e)}）`;
   }
 
@@ -885,16 +839,20 @@
     if (id === 'dec_w4_pre') return 'December Week 4';
     if (id.includes('_') && id.split('_').length >= 4){
       const p = id.split('_');
-      return `${MONTH_NAME[p[2]]||p[2]} Week ${(p[3]||'w1').replace('w','')}`;
+      const mn = p[2] || '';
+      return `${MONTH_NAME[mn] || mn} Week ${(p[3]||'w1').replace('w','')}`;
     }
     if (id.startsWith('week_')) return `Week ${id.replace('week_','')}`;
     return id;
   }
 
-  function buildCard({tagEn, tagJp, weekId, title, rangeText, hint}){
+  function buildCard({tagEn, tagJp, weekId, title, rangeText, hint, locked}){
     const div = document.createElement('div');
     div.className = 'weekCard';
+    if (locked) div.classList.add('lockedCard');
     div.dataset.weekId = weekId || '';
+    div.dataset.tagEn  = tagEn;
+    div.dataset.tagJp  = tagJp;
     div.innerHTML = `
       <div>
         <div class="weekTag">${tagEn}<span>（${tagJp}）</span></div>
@@ -906,7 +864,7 @@
     return div;
   }
 
-  /* ── Picker (bound once) ── */
+  /* ── Picker ── */
   const picker      = document.getElementById('picker');
   const pickerTitle = document.getElementById('pickerTitle');
   const pickerDates = document.getElementById('pickerDates');
@@ -958,18 +916,23 @@
       if (res.ok) year = await res.json();
     } catch(e){}
 
+    // Cycle starts on 2027-01-03 (Sunday).
+    // Weeks run Sun–Sat to align with the cycle anchor.
+    // Adjust: the first "week" is Jan 3–9 (Sun–Sat).
     const CYCLE_START_STR = (year && year.cycleStart) || '2027-01-03';
-    const cycleStart   = parseYMD(CYCLE_START_STR);
-    const cycleStartMs = ymdToMs(cycleStart.y, cycleStart.m, cycleStart.d);
-    const cycleLength  = (year && year.cycleLength) || 48;
-    const weeks        = (year && year.weeks)       || [];
+    const cycleStart      = parseYMD(CYCLE_START_STR);
+    const cycleStartMs    = ymdToMs(cycleStart.y, cycleStart.m, cycleStart.d);
+    const cycleLength     = (year && year.cycleLength) || 48;
+    const weeks           = (year && year.weeks)       || [];
 
-    const today    = tokyoTodayYMD();
-    const todayMs  = ymdToMs(today.y, today.m, today.d);
+    const today   = tokyoTodayYMD();
+    const todayMs = ymdToMs(today.y, today.m, today.d);
     const diffDays = Math.floor((todayMs - cycleStartMs) / 86400000);
 
     let thisIdx, thisWeekId, thisStart;
+
     if (diffDays < 0){
+      // Before cycle starts
       thisIdx    = -1;
       thisWeekId = (year && year.preStartWeek) || 'dec_w4_pre';
       thisStart  = addDays(cycleStart, -14);
@@ -980,13 +943,14 @@
     }
     const thisEnd = addDays(thisStart, 6);
 
+    // Last week
     let lastWeekId=null, lastStart=null, lastEnd=null;
     if (thisIdx === -1){
       lastWeekId = null;
     } else if (thisIdx === 0){
       lastWeekId = 'dec_w4_pre';
-      lastStart  = {y:2026, m:12, d:20};
-      lastEnd    = {y:2026, m:12, d:26};
+      lastStart  = addDays(cycleStart, -7);
+      lastEnd    = addDays(lastStart, 6);
     } else {
       const lIdx = (thisIdx-1+cycleLength) % cycleLength;
       lastWeekId = weeks[lIdx] || `week_${lIdx+1}`;
@@ -994,6 +958,7 @@
       lastEnd    = addDays(lastStart, 6);
     }
 
+    // Next week
     let nextWeekId=null, nextStart=null, nextEnd=null;
     if (thisIdx === -1){
       nextWeekId = weeks[0] || 'week_1';
@@ -1006,6 +971,7 @@
       nextEnd    = addDays(nextStart, 6);
     }
 
+    // LAST WEEK card
     if (lastWeekId){
       weekCards.appendChild(buildCard({
         tagEn:'LAST WEEK', tagJp:'先週',
@@ -1015,33 +981,36 @@
     } else {
       weekCards.appendChild(buildCard({
         tagEn:'LAST WEEK', tagJp:'先週',
-        weekId:'', title:'—', rangeText:'—', hint:'LOCKED'
+        weekId:'', title:'—', rangeText:'—', hint:'LOCKED', locked:true
       }));
     }
 
+    // THIS WEEK card
     weekCards.appendChild(buildCard({
       tagEn:'THIS WEEK', tagJp:'今週',
       weekId:thisWeekId, title:labelFromWeekId(thisWeekId),
       rangeText:fmtRange(thisStart, thisEnd)
     }));
 
+    // NEXT WEEK card
     weekCards.appendChild(buildCard({
       tagEn:'NEXT WEEK', tagJp:'来週',
       weekId:nextWeekId||'',
       title:nextWeekId ? labelFromWeekId(nextWeekId) : '—',
       rangeText:nextWeekId ? fmtRange(nextStart, nextEnd) : '—',
-      hint:nextWeekId ? 'TAP TO OPEN' : 'LOCKED'
+      hint:nextWeekId ? 'TAP TO OPEN' : 'LOCKED',
+      locked:!nextWeekId
     }));
 
+    // Bind card click → picker
     weekCards.querySelectorAll('.weekCard').forEach(card => {
       card.addEventListener('click', () => {
-        const wid   = card.dataset.weekId;
+        const wid  = card.dataset.weekId;
         if (!wid) return;
         const dates = card.querySelector('.weekDates')?.textContent || '';
-        const tag   = card.querySelector('.weekTag')?.textContent   || '';
-        if      (tag.includes('LAST WEEK')) openPicker('LAST WEEK','先週', dates, wid);
-        else if (tag.includes('THIS WEEK')) openPicker('THIS WEEK','今週', dates, wid);
-        else                                openPicker('NEXT WEEK','来週', dates, wid);
+        const tagEn = card.dataset.tagEn || '';
+        const tagJp = card.dataset.tagJp || '';
+        openPicker(tagEn, tagJp, dates, wid);
       });
     });
   }
@@ -1058,7 +1027,8 @@
     await new Promise(r => setTimeout(r, 900));
     showScene(videoScene);
     try { introVideo.currentTime = 0; } catch(e){}
-    setTimeout(() => fadeToBlack(false), 60);
+    // Use rAF to ensure scene swap is painted before fading in
+    requestAnimationFrame(() => requestAnimationFrame(() => fadeToBlack(false)));
     try {
       await introVideo.play();
     } catch(err){
@@ -1073,19 +1043,35 @@
 
   startBtn.addEventListener('click', startIntro);
 
-  /* ── Video → Hub ── */
+  /* ── Video → Hub transition (no flicker) ── */
   const FADE_MS = 520;
+  let hubRendered = false;
+
+  // Pre-render hub data as soon as page loads so transition is instant
+  (async function preloadHub(){
+    try {
+      await renderHub();
+      hubRendered = true;
+    } catch(e){ console.error(e); }
+  })();
 
   async function goToHub(){
     if (fadingOut) return;
     fadingOut = true;
     fadeToBlack(true);
-    setTimeout(async () => {
-      try { introVideo.pause(); } catch(e){}
-      showScene(hubScene);
-      try { await renderHub(); } catch(e){ console.error(e); }
-      requestAnimationFrame(() => requestAnimationFrame(() => fadeToBlack(false)));
-    }, FADE_MS);
+
+    await new Promise(r => setTimeout(r, FADE_MS));
+    try { introVideo.pause(); } catch(e){}
+
+    showScene(hubScene);
+
+    // If not pre-rendered yet, render now
+    if (!hubRendered){
+      try { await renderHub(); hubRendered = true; } catch(e){ console.error(e); }
+    }
+
+    // Double rAF ensures DOM is fully painted before revealing
+    requestAnimationFrame(() => requestAnimationFrame(() => fadeToBlack(false)));
   }
 
   introVideo.addEventListener('timeupdate', () => {
@@ -1094,15 +1080,7 @@
     if (d - introVideo.currentTime <= 0.85) goToHub();
   });
   introVideo.addEventListener('ended', goToHub);
-
-  introVideo.addEventListener('error', () => {
-    fadeToBlack(true);
-    setTimeout(async () => {
-      showScene(hubScene);
-      try { await renderHub(); } catch(e){ console.error(e); }
-      requestAnimationFrame(() => requestAnimationFrame(() => fadeToBlack(false)));
-    }, FADE_MS);
-  });
+  introVideo.addEventListener('error', goToHub);
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) try { introVideo.pause(); } catch(e){}
