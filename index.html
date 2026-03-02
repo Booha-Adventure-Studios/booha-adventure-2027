@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Booha Adventure 2027</title>
+  <title>Booha Adventure</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bowlby+One&display=swap" rel="stylesheet" />
@@ -50,29 +50,52 @@
       z-index: 0;
     }
 
-    /* ── Landscape overlay ── */
+    /* ══════════════════════════════════════════
+       LANDSCAPE OVERLAY
+       Only shown when start/video scenes are
+       active AND device is in portrait mode.
+       Hub and picker allow both orientations.
+    ══════════════════════════════════════════ */
     #landscapeOverlay {
       position: fixed; inset: 0;
       display: none;
+      flex-direction: column;
       align-items: center; justify-content: center;
-      padding: 24px;
+      padding: 28px 24px;
       text-align: center;
       background: rgba(0,0,0,.97);
       z-index: 9999;
     }
     #landscapeOverlay.show { display: flex; }
-    #landscapeOverlay .card {
-      max-width: 340px;
-      border: 1px solid rgba(255,255,255,.18);
-      border-radius: 22px;
-      padding: 28px 22px;
+
+    .ls-phone {
+      font-size: clamp(56px, 16vmin, 88px);
+      line-height: 1;
+      margin-bottom: 14px;
+      display: block;
+      animation: wobblePhone 1.6s ease-in-out infinite;
+      transform-origin: center center;
     }
-    #landscapeOverlay h2 { margin: 0 0 10px; font-size: clamp(18px,5vw,24px); }
-    #landscapeOverlay p  { margin: 0; color: var(--muted); line-height: 1.5; font-size: clamp(13px,3.5vw,15px); }
-    .rotate-icon { font-size: 48px; margin-bottom: 14px; display: block; animation: rotateHint 2s ease-in-out infinite; }
-    @keyframes rotateHint {
-      0%,100% { transform: rotate(0deg); }
-      50%      { transform: rotate(90deg); }
+    @keyframes wobblePhone {
+      0%   { transform: rotate(-15deg); }
+      50%  { transform: rotate(15deg); }
+      100% { transform: rotate(-15deg); }
+    }
+
+    .ls-main-jp {
+      font-size: clamp(26px, 7vmin, 44px);
+      font-weight: 900;
+      color: var(--pink2);
+      margin: 0 0 10px;
+      line-height: 1.3;
+      text-shadow: 0 0 24px rgba(255,100,220,.5);
+    }
+
+    .ls-sub-jp {
+      font-size: clamp(15px, 4vmin, 22px);
+      color: rgba(255,255,255,.65);
+      margin: 0;
+      line-height: 1.6;
     }
 
     /* ══ SCENES ══ */
@@ -176,7 +199,9 @@
       background: #000;
     }
 
-    /* ── HUB ── */
+    /* ══════════════════════════════════════════
+       HUB — works in portrait AND landscape
+    ══════════════════════════════════════════ */
     #hubScene {
       background: transparent;
       overflow-y: auto;
@@ -184,9 +209,7 @@
       -webkit-overflow-scrolling: touch;
       display: none;
     }
-    #hubScene.active {
-      display: block;
-    }
+    #hubScene.active { display: block; }
 
     .hubScroll {
       min-height: 100%;
@@ -194,10 +217,10 @@
       align-items: center;
       justify-content: center;
       padding:
-        calc(clamp(10px,2vw,16px) + var(--safe-top))
-        calc(clamp(10px,2vw,16px) + var(--safe-right))
-        calc(clamp(10px,2vw,16px) + var(--safe-bottom))
-        calc(clamp(10px,2vw,16px) + var(--safe-left));
+        calc(clamp(10px,2vw,18px) + var(--safe-top))
+        calc(clamp(10px,2vw,18px) + var(--safe-right))
+        calc(clamp(10px,2vw,18px) + var(--safe-bottom))
+        calc(clamp(10px,2vw,18px) + var(--safe-left));
     }
 
     .hub {
@@ -222,7 +245,11 @@
       line-height: 1.1;
     }
 
-    /* ── 3-card row – always horizontal in landscape ── */
+    /*
+      Hub row:
+        landscape / wide  → 3 columns side by side
+        portrait / narrow → 1 column stacked
+    */
     .hubRow {
       display: grid;
       grid-template-columns: repeat(3, minmax(0,1fr));
@@ -230,13 +257,23 @@
       width: 100%;
     }
 
-    /* ── Week card – compact height ── */
+    @media (orientation: portrait), (max-width: 600px) {
+      .hubRow {
+        grid-template-columns: 1fr;
+      }
+      .weekCard {
+        height: auto !important;
+        min-height: 80px;
+        padding: 14px 16px 12px !important;
+      }
+    }
+
+    /* ── Week card ── */
     .weekCard {
       position: relative;
       border-radius: clamp(14px,2vw,22px);
       overflow: hidden;
       padding: clamp(10px,1.6vw,16px) clamp(10px,1.6vw,16px) clamp(8px,1.2vw,12px);
-      /* Fixed compact height — no stretchy min-height */
       height: clamp(100px, 14vw, 140px);
       display: flex;
       flex-direction: column;
@@ -245,12 +282,10 @@
       cursor: pointer;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
-      /* Use transform3d to avoid repaints */
       transform: translateZ(0);
-      transition: transform 220ms ease, box-shadow 220ms ease;
-      /* Prevent flicker via composite layer */
       will-change: transform;
       backface-visibility: hidden;
+      transition: transform 220ms ease, box-shadow 220ms ease;
 
       background: rgba(255,255,255,.09);
       backdrop-filter: blur(18px) saturate(160%);
@@ -346,7 +381,6 @@
       text-transform: uppercase;
     }
 
-    /* Hub bottom */
     .hubBottom {
       display: flex;
       justify-content: center;
@@ -381,7 +415,6 @@
       position: absolute; inset: 0;
       background: #000; opacity: 0;
       pointer-events: none;
-      /* Use will-change to prevent flicker */
       will-change: opacity;
       transition: opacity 520ms ease;
       z-index: 40;
@@ -389,7 +422,7 @@
     #fade.on { opacity: 1; pointer-events: all; }
 
     /* ══════════════════════════════════════════
-       PICKER OVERLAY
+       PICKER — works in portrait AND landscape
     ══════════════════════════════════════════ */
     .picker {
       position: absolute; inset: 0;
@@ -416,8 +449,7 @@
 
     .pickerPanel {
       position: relative;
-      /* Narrow panel — tiles stack vertically */
-      width: min(420px, 94%);
+      width: min(420px, 92%);
       border-radius: clamp(20px,3vw,28px);
       overflow: hidden;
       padding: clamp(14px,2.5vw,20px) clamp(14px,2vw,18px);
@@ -497,20 +529,18 @@
 
     .pickerSub2 {
       margin-top: 4px;
-      font-size: clamp(8px,1.1vw,11px);
-      letter-spacing: 1.4px;
-      color: rgba(255,255,255,.40);
-      text-transform: uppercase; text-align: center;
+      font-size: clamp(9px,1.2vw,12px);
+      color: rgba(255,255,255,.45);
+      text-align: center;
       position: relative; z-index: 1;
     }
 
-    /* ── Picker grid: VERTICAL STACK, centered ── */
+    /* Vertical stacked tiles */
     .pickerGrid {
       display: flex;
       flex-direction: column;
       gap: clamp(7px,1.2vw,10px);
       margin-top: clamp(10px,1.8vw,14px);
-      align-items: center;
       position: relative; z-index: 1;
     }
 
@@ -536,13 +566,8 @@
     .pickTile:hover {
       transform: translateY(-2px) translateZ(0);
       background: rgba(255,255,255,.08);
-      box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,.28),
-        0 18px 32px rgba(0,0,0,.40),
-        0 0 0 2px hsl(var(--tileHue,210deg) 95% 70% / .70),
-        0 0 28px 8px hsl(var(--tileHue,210deg) 90% 65% / .28);
     }
-    .pickTile:active { transform: translateY(-1px) scale(.99) translateZ(0); }
+    .pickTile:active { transform: scale(.99) translateZ(0); }
 
     .pickTile[data-curr="preboo"]       { --tileHue: 315deg; }
     .pickTile[data-curr="booriculum"]   { --tileHue: 190deg; }
@@ -551,7 +576,6 @@
     .tileTop {
       display: flex;
       align-items: center;
-      justify-content: center;
       gap: clamp(8px,1.4vw,12px);
     }
 
@@ -562,9 +586,7 @@
       border-radius: clamp(8px,1.4vw,14px);
       display: grid; place-items: center;
       background: rgba(255,255,255,.08);
-      box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,.18),
-        0 6px 14px rgba(0,0,0,.30);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
     }
 
     .tileIcon img {
@@ -573,9 +595,7 @@
       pointer-events: none;
       user-select: none;
       -webkit-user-drag: none;
-      filter:
-        drop-shadow(0 0 8px rgba(255,255,255,.35))
-        drop-shadow(0 0 16px rgba(255,255,255,.18));
+      filter: drop-shadow(0 0 8px rgba(255,255,255,.35));
       transition: transform 200ms ease;
     }
     .pickTile:hover .tileIcon img { transform: scale(1.10); }
@@ -592,9 +612,6 @@
       color: rgba(255,255,255,.65);
     }
 
-    /* hide hint text in vertical layout */
-    .tileHint { display: none; }
-
     .pickerNote {
       margin-top: clamp(8px,1.4vw,12px);
       font-size: clamp(9px,1.1vw,11px);
@@ -605,26 +622,25 @@
 
     /* ══ REDUCED MOTION ══ */
     @media (prefers-reduced-motion: reduce) {
-      .ghostWrap         { animation: none; }
-      #fade              { transition: none; }
-      .weekCard          { animation: none; }
-      .weekCard::before  { animation: none; }
-      .pickerPanel       { animation: none; }
-      .pickerPanel::before { animation: none; }
-      .rotate-icon       { animation: none; }
+      .ghostWrap, .ls-phone { animation: none; }
+      #fade { transition: none; }
+      .weekCard, .weekCard::before,
+      .pickerPanel, .pickerPanel::before { animation: none; }
     }
   </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- Landscape required overlay -->
+  <!-- Landscape overlay: only shown on start/video in portrait -->
   <div id="landscapeOverlay" aria-hidden="true">
-    <div class="card">
-      <span class="rotate-icon">📱</span>
-      <h2>Rotate to Landscape</h2>
-      <p>Please turn your device sideways to play Booha Adventure.</p>
-    </div>
+    <span class="ls-phone">📱</span>
+    <p class="ls-main-jp">よこむきにしてね！</p>
+    <p class="ls-sub-jp">
+      スマホをよこにむけると<br>
+      ブーハアドベンチャーが<br>
+      はじまるよ！
+    </p>
   </div>
 
   <!-- ── START ── -->
@@ -650,11 +666,7 @@
     <div class="hubScroll">
       <div class="hub">
         <div class="hubHeading">BOOHA ADVENTURE</div>
-
-        <div class="hubRow" id="weekCards">
-          <!-- injected by JS -->
-        </div>
-
+        <div class="hubRow" id="weekCards"></div>
         <div class="hubBottom">
           <button id="mazeBtn" class="btn btnSmall" type="button">めいろへ（Maze）</button>
         </div>
@@ -666,44 +678,35 @@
   <div id="picker" class="picker" aria-hidden="true">
     <div class="pickerPanel" role="dialog" aria-modal="true" aria-label="Choose Curriculum">
       <div class="pickerTop">
-        <div style="width:52px; flex-shrink:0;"></div>
+        <div style="width:52px;flex-shrink:0;"></div>
         <div class="pickerTitle" id="pickerTitle">THIS WEEK（今週）</div>
-        <button id="pickerClose" class="ghostBtn" type="button" aria-label="Back">戻る</button>
+        <button id="pickerClose" class="ghostBtn" type="button">戻る</button>
       </div>
-
-      <div class="pickerSub" id="pickerDates">Mar 1 – Mar 7（3月1日–3月7日）</div>
-      <div class="pickerSub2">Choose your curriculum</div>
+      <div class="pickerSub" id="pickerDates"></div>
+      <div class="pickerSub2">カリキュラムをえらんでね</div>
 
       <div class="pickerGrid">
         <button class="pickTile" type="button" data-curr="preboo">
           <div class="tileTop">
-            <div class="tileIcon">
-              <img src="assets/img/pre-boo.png" alt="Pre-Boo" />
-            </div>
+            <div class="tileIcon"><img src="assets/img/pre-boo.png" alt="Pre-Boo" /></div>
             <div>
               <div class="tileName">Pre-Boo</div>
               <span class="tileJp">プレブー</span>
             </div>
           </div>
         </button>
-
         <button class="pickTile" type="button" data-curr="booriculum">
           <div class="tileTop">
-            <div class="tileIcon">
-              <img src="assets/img/boo-tree.png" alt="Boo-riculum" />
-            </div>
+            <div class="tileIcon"><img src="assets/img/boo-tree.png" alt="Boo-riculum" /></div>
             <div>
               <div class="tileName">Boo-riculum</div>
               <span class="tileJp">ブーリキュラム</span>
             </div>
           </div>
         </button>
-
         <button class="pickTile" type="button" data-curr="boocontinuum">
           <div class="tileTop">
-            <div class="tileIcon">
-              <img src="assets/img/cont-tree.png" alt="Boo-continuum" />
-            </div>
+            <div class="tileIcon"><img src="assets/img/cont-tree.png" alt="Boo-continuum" /></div>
             <div>
               <div class="tileName">Boo-continuum</div>
               <span class="tileJp">ブーコンティニューム</span>
@@ -720,371 +723,289 @@
 </div>
 
 <script>
-  /* ── Element refs ── */
-  const startScene  = document.getElementById('startScene');
-  const videoScene  = document.getElementById('videoScene');
-  const hubScene    = document.getElementById('hubScene');
-  const startBtn    = document.getElementById('startBtn');
-  const introVideo  = document.getElementById('introVideo');
-  const fade        = document.getElementById('fade');
-  const ghostWrap   = document.querySelector('.ghostWrap');
-  const sparkleField = document.querySelector('.sparkleField');
-  const lsOverlay   = document.getElementById('landscapeOverlay');
+/* ════════════════════════════════════════════════════════════
+   WEEK CALCULATION — always based on real Japan time (JST)
 
-  /* ══════════════════════════════════
-     LANDSCAPE ENFORCEMENT
-     Show overlay whenever portrait on
-     any screen size.
-  ══════════════════════════════════ */
-  function checkOrientation(){
-    const isPortrait = window.matchMedia('(orientation: portrait)').matches;
-    lsOverlay.classList.toggle('show', isPortrait);
-    lsOverlay.setAttribute('aria-hidden', isPortrait ? 'false' : 'true');
+   • Weeks run Sunday → Saturday.
+   • "This week" = the Sun–Sat block containing today in JST.
+   • Week label = "Month Week N" where N is which Sunday of
+     the month (1st–4th). A 5th Sunday reuses "Week 4".
+   • This is entirely date-driven — no cycle offset needed
+     for displaying the correct current week.
+════════════════════════════════════════════════════════════ */
+
+const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun',
+                    'Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTH_JP   = ['1月','2月','3月','4月','5月','6月',
+                    '7月','8月','9月','10月','11月','12月'];
+const MONTH_FULL = ['January','February','March','April','May','June',
+                    'July','August','September','October','November','December'];
+
+/** Get today's date in JST as {y, m, d} */
+function tokyoToday() {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  }).formatToParts(new Date());
+  const map = {};
+  parts.forEach(p => { if (p.type !== 'literal') map[p.type] = +p.value; });
+  return { y: map.year, m: map.month, d: map.day };
+}
+
+/** {y,m,d} → UTC milliseconds (treated as midnight UTC) */
+function toMs({ y, m, d }) { return Date.UTC(y, m - 1, d); }
+
+/** Add n days to {y,m,d} */
+function addDays(ymd, n) {
+  const dt = new Date(toMs(ymd) + n * 86400000);
+  return { y: dt.getUTCFullYear(), m: dt.getUTCMonth() + 1, d: dt.getUTCDate() };
+}
+
+/** Day of week for {y,m,d}: 0=Sun, 1=Mon … 6=Sat */
+function dow(ymd) { return new Date(toMs(ymd)).getUTCDay(); }
+
+/** Return the Sunday that starts the week containing ymd */
+function weekSunday(ymd) { return addDays(ymd, -dow(ymd)); }
+
+/** Format Sun–Sat range: "Mar 1 – Mar 7（3月1日–3月7日）" */
+function fmtRange(sun, sat) {
+  const en = d => `${MONTH_ABBR[d.m - 1]} ${d.d}`;
+  const jp = d => `${MONTH_JP[d.m - 1]}${d.d}日`;
+  return `${en(sun)} – ${en(sat)}（${jp(sun)}–${jp(sat)}）`;
+}
+
+/**
+ * Given the Sunday that opens a week, return a label like
+ * "March Week 1". Count which Sunday of the month it is;
+ * cap at 4 (5th Sunday → "Week 4").
+ */
+function weekLabel(sun) {
+  // Walk from the 1st of the month up to sun, counting Sundays
+  let count = 0;
+  let cur = { y: sun.y, m: sun.m, d: 1 };
+  const sunMs = toMs(sun);
+  while (toMs(cur) <= sunMs) {
+    if (dow(cur) === 0) count++;
+    cur = addDays(cur, 1);
   }
-  window.addEventListener('resize',          checkOrientation, { passive: true });
-  window.addEventListener('orientationchange', checkOrientation, { passive: true });
-  checkOrientation();
+  return `${MONTH_FULL[sun.m - 1]} Week ${Math.min(count, 4)}`;
+}
 
-  /* ── Scene helpers ── */
-  function showScene(el){
-    [startScene, videoScene, hubScene].forEach(s => s.classList.remove('active'));
-    el.classList.add('active');
-    if (el === hubScene) hubScene.scrollTop = 0;
+/**
+ * Stable week ID string, e.g. "2026_mar_w1".
+ * Used as a key when navigating to lesson pages.
+ */
+function weekIdFor(sun) {
+  const mo = ['jan','feb','mar','apr','may','jun',
+              'jul','aug','sep','oct','nov','dec'][sun.m - 1];
+  let count = 0;
+  let cur = { y: sun.y, m: sun.m, d: 1 };
+  const sunMs = toMs(sun);
+  while (toMs(cur) <= sunMs) {
+    if (dow(cur) === 0) count++;
+    cur = addDays(cur, 1);
   }
-  function fadeToBlack(on){
-    fade.classList.toggle('on', !!on);
+  return `${sun.y}_${mo}_w${Math.min(count, 4)}`;
+}
+
+/** Build the three card data objects */
+function buildWeekData() {
+  const today   = tokyoToday();
+  const thisSun = weekSunday(today);
+  const thisSat = addDays(thisSun, 6);
+  const lastSun = addDays(thisSun, -7);
+  const lastSat = addDays(lastSun, 6);
+  const nextSun = addDays(thisSun,  7);
+  const nextSat = addDays(nextSun,  6);
+  return [
+    { tagEn:'LAST WEEK', tagJp:'先週', title:weekLabel(lastSun), range:fmtRange(lastSun,lastSat), weekId:weekIdFor(lastSun) },
+    { tagEn:'THIS WEEK', tagJp:'今週', title:weekLabel(thisSun), range:fmtRange(thisSun,thisSat), weekId:weekIdFor(thisSun) },
+    { tagEn:'NEXT WEEK', tagJp:'来週', title:weekLabel(nextSun), range:fmtRange(nextSun,nextSat), weekId:weekIdFor(nextSun) }
+  ];
+}
+
+/* ════════════════════════════════════════════════════════════
+   ORIENTATION  —  landscape overlay only for start & video
+════════════════════════════════════════════════════════════ */
+const lsOverlay  = document.getElementById('landscapeOverlay');
+const startScene = document.getElementById('startScene');
+const videoScene = document.getElementById('videoScene');
+const hubScene   = document.getElementById('hubScene');
+
+function checkOrientation() {
+  const portrait = window.matchMedia('(orientation: portrait)').matches;
+  // Only block in portrait when start or video is active
+  const onBlockedScene =
+    startScene.classList.contains('active') ||
+    videoScene.classList.contains('active');
+  const show = portrait && onBlockedScene;
+  lsOverlay.classList.toggle('show', show);
+  lsOverlay.setAttribute('aria-hidden', show ? 'false' : 'true');
+}
+
+window.addEventListener('resize',            checkOrientation, { passive: true });
+window.addEventListener('orientationchange', checkOrientation, { passive: true });
+
+function showScene(el) {
+  [startScene, videoScene, hubScene].forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  if (el === hubScene) hubScene.scrollTop = 0;
+  checkOrientation(); // re-evaluate after scene change
+}
+
+const fade = document.getElementById('fade');
+function fadeToBlack(on) { fade.classList.toggle('on', !!on); }
+
+checkOrientation();
+
+/* ════════════════════════════════════════════════════════════
+   SPARKLES
+════════════════════════════════════════════════════════════ */
+(function () {
+  const field = document.querySelector('.sparkleField');
+  if (!field) return;
+  for (let i = 0; i < 32; i++) {
+    const sp = document.createElement('div');
+    sp.className = 'sp';
+    const angle  = (i / 32) * Math.PI * 2;
+    const r      = 28 + Math.random() * 22;
+    const cx     = 50 + Math.cos(angle) * r;
+    const cy     = 50 + Math.sin(angle) * r;
+    const size   = 2 + Math.random() * 3;
+    const dur    = 1.4 + Math.random() * 2;
+    const delay  = -(Math.random() * dur);
+    sp.style.cssText = `--size:${size}px;--x:${cx}%;--y:${cy}%;--dur:${dur}s;--delay:${delay}s;`;
+    field.appendChild(sp);
   }
+})();
 
-  /* ── Sparkles ── */
-  (function initSparkles(){
-    if (!sparkleField) return;
-    const COUNT = 32;
-    sparkleField.innerHTML = '';
-    for (let i = 0; i < COUNT; i++){
-      const sp   = document.createElement('div');
-      sp.className = 'sp';
-      const angle  = (i / COUNT) * Math.PI * 2;
-      const radius = 28 + Math.random() * 22;
-      const cx     = 50 + Math.cos(angle) * radius;
-      const cy     = 50 + Math.sin(angle) * radius;
-      const size   = 2 + Math.random() * 3;
-      const dur    = 1.4 + Math.random() * 2.0;
-      const delay  = -(Math.random() * dur);
-      sp.style.cssText = `--size:${size}px;--x:${cx}%;--y:${cy}%;--dur:${dur}s;--delay:${delay}s;`;
-      sparkleField.appendChild(sp);
-    }
-  })();
-
-  /* ══════════════════════════════════
-     DATE / WEEK LOGIC
-     Locked to Japan time (Asia/Tokyo).
-     Cycle starts 2027-01-03 (Sunday).
-     Each week is Mon–Sun.
-     Week 1 of the cycle = Jan 3–9 2027.
-
-     Current real date context:
-       This week  = Mar 1–7
-       Last week  = Feb 22–28
-       Next week  = Mar 8–14
-
-     We determine the correct week by
-     computing which Mon-anchored week
-     "today" (Tokyo) falls in relative
-     to the cycle start.
-  ══════════════════════════════════ */
-
-  const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun',
-                      'Jul','Aug','Sep','Oct','Nov','Dec'];
-  const MONTH_NAME = {
-    jan:'January', feb:'February', mar:'March',     apr:'April',
-    may:'May',     jun:'June',     jul:'July',       aug:'August',
-    sep:'September', oct:'October', nov:'November', dec:'December'
-  };
-
-  // Set to null for production — will use real Tokyo time
-  const DEV_DATE = null; // production: uses real Japan time
-
-  function tokyoTodayYMD(){
-    if (DEV_DATE){
-      const [y,m,d] = DEV_DATE.split('-').map(Number);
-      return {y, m, d};
-    }
-    const parts = new Intl.DateTimeFormat('en-US', {
-      timeZone:'Asia/Tokyo',
-      year:'numeric', month:'2-digit', day:'2-digit'
-    }).formatToParts(new Date());
-    const map = Object.fromEntries(
-      parts.filter(p => p.type !== 'literal').map(p => [p.type, p.value])
-    );
-    return { y:+map.year, m:+map.month, d:+map.day };
-  }
-
-  function ymdToMs(y,m,d){ return Date.UTC(y,m-1,d); }
-  function parseYMD(str){ const [y,m,d]=str.split('-').map(Number); return {y,m,d}; }
-
-  function addDays(ymd,n){
-    const ms = ymdToMs(ymd.y,ymd.m,ymd.d) + n*86400000;
-    const dt = new Date(ms);
-    return {y:dt.getUTCFullYear(), m:dt.getUTCMonth()+1, d:dt.getUTCDate()};
-  }
-
-  function fmtRange(s,e){
-    const en  = ymd => `${MONTH_ABBR[ymd.m-1]} ${ymd.d}`;
-    const jp  = ymd => `${ymd.m}月${ymd.d}日`;
-    return `${en(s)} – ${en(e)}（${jp(s)}–${jp(e)}）`;
-  }
-
-  function labelFromWeekId(id){
-    if (!id) return '—';
-    if (id === 'dec_w4_pre') return 'December Week 4';
-    if (id.includes('_') && id.split('_').length >= 4){
-      const p = id.split('_');
-      const mn = p[2] || '';
-      return `${MONTH_NAME[mn] || mn} Week ${(p[3]||'w1').replace('w','')}`;
-    }
-    if (id.startsWith('week_')) return `Week ${id.replace('week_','')}`;
-    return id;
-  }
-
-  function buildCard({tagEn, tagJp, weekId, title, rangeText, hint, locked}){
-    const div = document.createElement('div');
-    div.className = 'weekCard';
-    if (locked) div.classList.add('lockedCard');
-    div.dataset.weekId = weekId || '';
-    div.dataset.tagEn  = tagEn;
-    div.dataset.tagJp  = tagJp;
-    div.innerHTML = `
+/* ════════════════════════════════════════════════════════════
+   HUB CARDS
+════════════════════════════════════════════════════════════ */
+function renderHub() {
+  const container = document.getElementById('weekCards');
+  container.innerHTML = '';
+  buildWeekData().forEach(wk => {
+    const card = document.createElement('div');
+    card.className   = 'weekCard';
+    card.dataset.weekId = wk.weekId;
+    card.innerHTML = `
       <div>
-        <div class="weekTag">${tagEn}<span>（${tagJp}）</span></div>
-        <div class="weekTitle">${title}</div>
-        <div class="weekDates">${rangeText}</div>
+        <div class="weekTag">${wk.tagEn}<span>（${wk.tagJp}）</span></div>
+        <div class="weekTitle">${wk.title}</div>
+        <div class="weekDates">${wk.range}</div>
       </div>
-      <div class="weekHint">${hint||'TAP TO OPEN'}</div>
-    `;
-    return div;
-  }
-
-  /* ── Picker ── */
-  const picker      = document.getElementById('picker');
-  const pickerTitle = document.getElementById('pickerTitle');
-  const pickerDates = document.getElementById('pickerDates');
-  const pickerClose = document.getElementById('pickerClose');
-  const mazeBtn     = document.getElementById('mazeBtn');
-
-  let currentPickerWeekId = '';
-
-  function openPicker(tagEn, tagJp, dates, weekId){
-    if (!weekId) return;
-    currentPickerWeekId = weekId;
-    pickerTitle.textContent = `${tagEn}（${tagJp}）`;
-    pickerDates.textContent = dates;
-    picker.scrollTop = 0;
-    picker.classList.add('show');
-    picker.setAttribute('aria-hidden','false');
-  }
-
-  function closePicker(){
-    currentPickerWeekId = '';
-    picker.classList.remove('show');
-    picker.setAttribute('aria-hidden','true');
-  }
-
-  pickerClose.addEventListener('click', closePicker);
-  picker.addEventListener('click', e => { if (e.target === picker) closePicker(); });
-
-  document.querySelectorAll('.pickTile').forEach(btn => {
-    btn.addEventListener('click', () => {
-      alert(`PLACEHOLDER\nweek: ${currentPickerWeekId}\ncurriculum: ${btn.dataset.curr}`);
-    });
+      <div class="weekHint">TAP TO OPEN</div>`;
+    card.addEventListener('click', () =>
+      openPicker(wk.tagEn, wk.tagJp, wk.range, wk.weekId));
+    container.appendChild(card);
   });
+}
 
-  if (mazeBtn){
-    mazeBtn.addEventListener('click', () => {
-      fadeToBlack(true);
-      setTimeout(() => { window.location.href = 'maze.html'; }, 520);
-    });
-  }
+/* ════════════════════════════════════════════════════════════
+   PICKER
+════════════════════════════════════════════════════════════ */
+const picker      = document.getElementById('picker');
+const pickerTitle = document.getElementById('pickerTitle');
+const pickerDates = document.getElementById('pickerDates');
+const pickerClose = document.getElementById('pickerClose');
 
-  /* ── Render hub cards ── */
-  async function renderHub(){
-    const weekCards = document.getElementById('weekCards');
-    weekCards.innerHTML = '';
+let currentWeekId = '';
 
-    let year = null;
-    try {
-      const res = await fetch(`data/year.json?v=${Date.now()}`);
-      if (res.ok) year = await res.json();
-    } catch(e){}
+function openPicker(tagEn, tagJp, dates, weekId) {
+  if (!weekId) return;
+  currentWeekId = weekId;
+  pickerTitle.textContent = `${tagEn}（${tagJp}）`;
+  pickerDates.textContent = dates;
+  picker.scrollTop = 0;
+  picker.classList.add('show');
+  picker.setAttribute('aria-hidden', 'false');
+}
 
-    // Cycle starts on 2027-01-03 (Sunday).
-    // Weeks run Sun–Sat to align with the cycle anchor.
-    // Adjust: the first "week" is Jan 3–9 (Sun–Sat).
-    const CYCLE_START_STR = (year && year.cycleStart) || '2027-01-03';
-    const cycleStart      = parseYMD(CYCLE_START_STR);
-    const cycleStartMs    = ymdToMs(cycleStart.y, cycleStart.m, cycleStart.d);
-    const cycleLength     = (year && year.cycleLength) || 48;
-    const weeks           = (year && year.weeks)       || [];
+function closePicker() {
+  currentWeekId = '';
+  picker.classList.remove('show');
+  picker.setAttribute('aria-hidden', 'true');
+}
 
-    const today   = tokyoTodayYMD();
-    const todayMs = ymdToMs(today.y, today.m, today.d);
-    const diffDays = Math.floor((todayMs - cycleStartMs) / 86400000);
+pickerClose.addEventListener('click', closePicker);
+picker.addEventListener('click', e => { if (e.target === picker) closePicker(); });
 
-    let thisIdx, thisWeekId, thisStart;
+document.querySelectorAll('.pickTile').forEach(btn => {
+  btn.addEventListener('click', () => {
+    alert(`PLACEHOLDER\nweek: ${currentWeekId}\ncurriculum: ${btn.dataset.curr}`);
+  });
+});
 
-    if (diffDays < 0){
-      // Before cycle starts
-      thisIdx    = -1;
-      thisWeekId = (year && year.preStartWeek) || 'dec_w4_pre';
-      thisStart  = addDays(cycleStart, -14);
-    } else {
-      thisIdx    = Math.floor(diffDays / 7) % cycleLength;
-      thisWeekId = weeks[thisIdx] || `week_${thisIdx+1}`;
-      thisStart  = addDays(cycleStart, thisIdx * 7);
-    }
-    const thisEnd = addDays(thisStart, 6);
-
-    // Last week
-    let lastWeekId=null, lastStart=null, lastEnd=null;
-    if (thisIdx === -1){
-      lastWeekId = null;
-    } else if (thisIdx === 0){
-      lastWeekId = 'dec_w4_pre';
-      lastStart  = addDays(cycleStart, -7);
-      lastEnd    = addDays(lastStart, 6);
-    } else {
-      const lIdx = (thisIdx-1+cycleLength) % cycleLength;
-      lastWeekId = weeks[lIdx] || `week_${lIdx+1}`;
-      lastStart  = addDays(cycleStart, lIdx*7);
-      lastEnd    = addDays(lastStart, 6);
-    }
-
-    // Next week
-    let nextWeekId=null, nextStart=null, nextEnd=null;
-    if (thisIdx === -1){
-      nextWeekId = weeks[0] || 'week_1';
-      nextStart  = cycleStart;
-      nextEnd    = addDays(nextStart, 6);
-    } else {
-      const nIdx = (thisIdx+1) % cycleLength;
-      nextWeekId = weeks[nIdx] || `week_${nIdx+1}`;
-      nextStart  = addDays(cycleStart, nIdx*7);
-      nextEnd    = addDays(nextStart, 6);
-    }
-
-    // LAST WEEK card
-    if (lastWeekId){
-      weekCards.appendChild(buildCard({
-        tagEn:'LAST WEEK', tagJp:'先週',
-        weekId:lastWeekId, title:labelFromWeekId(lastWeekId),
-        rangeText:fmtRange(lastStart, lastEnd)
-      }));
-    } else {
-      weekCards.appendChild(buildCard({
-        tagEn:'LAST WEEK', tagJp:'先週',
-        weekId:'', title:'—', rangeText:'—', hint:'LOCKED', locked:true
-      }));
-    }
-
-    // THIS WEEK card
-    weekCards.appendChild(buildCard({
-      tagEn:'THIS WEEK', tagJp:'今週',
-      weekId:thisWeekId, title:labelFromWeekId(thisWeekId),
-      rangeText:fmtRange(thisStart, thisEnd)
-    }));
-
-    // NEXT WEEK card
-    weekCards.appendChild(buildCard({
-      tagEn:'NEXT WEEK', tagJp:'来週',
-      weekId:nextWeekId||'',
-      title:nextWeekId ? labelFromWeekId(nextWeekId) : '—',
-      rangeText:nextWeekId ? fmtRange(nextStart, nextEnd) : '—',
-      hint:nextWeekId ? 'TAP TO OPEN' : 'LOCKED',
-      locked:!nextWeekId
-    }));
-
-    // Bind card click → picker
-    weekCards.querySelectorAll('.weekCard').forEach(card => {
-      card.addEventListener('click', () => {
-        const wid  = card.dataset.weekId;
-        if (!wid) return;
-        const dates = card.querySelector('.weekDates')?.textContent || '';
-        const tagEn = card.dataset.tagEn || '';
-        const tagJp = card.dataset.tagJp || '';
-        openPicker(tagEn, tagJp, dates, wid);
-      });
-    });
-  }
-
-  /* ── Start flow ── */
-  let started   = false;
-  let fadingOut = false;
-
-  async function startIntro(){
-    if (started) return;
-    started = true;
-    ghostWrap.classList.add('flyAway');
+const mazeBtn = document.getElementById('mazeBtn');
+if (mazeBtn) {
+  mazeBtn.addEventListener('click', () => {
     fadeToBlack(true);
-    await new Promise(r => setTimeout(r, 900));
-    showScene(videoScene);
-    try { introVideo.currentTime = 0; } catch(e){}
-    // Use rAF to ensure scene swap is painted before fading in
-    requestAnimationFrame(() => requestAnimationFrame(() => fadeToBlack(false)));
-    try {
-      await introVideo.play();
-    } catch(err){
-      started   = false;
-      fadingOut = false;
-      ghostWrap.classList.remove('flyAway');
-      showScene(startScene);
-      fadeToBlack(false);
-      alert('もう一度「スタート」をタップしてください。');
-    }
-  }
-
-  startBtn.addEventListener('click', startIntro);
-
-  /* ── Video → Hub transition (no flicker) ── */
-  const FADE_MS = 520;
-  let hubRendered = false;
-
-  // Pre-render hub data as soon as page loads so transition is instant
-  (async function preloadHub(){
-    try {
-      await renderHub();
-      hubRendered = true;
-    } catch(e){ console.error(e); }
-  })();
-
-  async function goToHub(){
-    if (fadingOut) return;
-    fadingOut = true;
-    fadeToBlack(true);
-
-    await new Promise(r => setTimeout(r, FADE_MS));
-    try { introVideo.pause(); } catch(e){}
-
-    showScene(hubScene);
-
-    // If not pre-rendered yet, render now
-    if (!hubRendered){
-      try { await renderHub(); hubRendered = true; } catch(e){ console.error(e); }
-    }
-
-    // Double rAF ensures DOM is fully painted before revealing
-    requestAnimationFrame(() => requestAnimationFrame(() => fadeToBlack(false)));
-  }
-
-  introVideo.addEventListener('timeupdate', () => {
-    const d = introVideo.duration;
-    if (!isFinite(d) || d <= 0) return;
-    if (d - introVideo.currentTime <= 0.85) goToHub();
+    setTimeout(() => { window.location.href = 'maze.html'; }, 520);
   });
-  introVideo.addEventListener('ended', goToHub);
-  introVideo.addEventListener('error', goToHub);
+}
 
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) try { introVideo.pause(); } catch(e){}
-  });
+/* ════════════════════════════════════════════════════════════
+   START FLOW
+════════════════════════════════════════════════════════════ */
+const startBtn  = document.getElementById('startBtn');
+const introVideo = document.getElementById('introVideo');
+const ghostWrap  = document.querySelector('.ghostWrap');
+
+let started = false, fadingOut = false;
+
+async function startIntro() {
+  if (started) return;
+  started = true;
+  ghostWrap.classList.add('flyAway');
+  fadeToBlack(true);
+  await new Promise(r => setTimeout(r, 900));
+  showScene(videoScene);
+  try { introVideo.currentTime = 0; } catch(e) {}
+  requestAnimationFrame(() => requestAnimationFrame(() => fadeToBlack(false)));
+  try {
+    await introVideo.play();
+  } catch (err) {
+    started = false; fadingOut = false;
+    ghostWrap.classList.remove('flyAway');
+    showScene(startScene);
+    fadeToBlack(false);
+    alert('もう一度「スタート」をタップしてください。');
+  }
+}
+
+startBtn.addEventListener('click', startIntro);
+
+/* ════════════════════════════════════════════════════════════
+   VIDEO → HUB  (pre-render to prevent flicker)
+════════════════════════════════════════════════════════════ */
+const FADE_MS = 520;
+let hubRendered = false;
+
+// Render hub immediately on page load so transition is instant
+try { renderHub(); hubRendered = true; } catch(e) { console.error(e); }
+
+async function goToHub() {
+  if (fadingOut) return;
+  fadingOut = true;
+  fadeToBlack(true);
+  await new Promise(r => setTimeout(r, FADE_MS));
+  try { introVideo.pause(); } catch(e) {}
+  showScene(hubScene);
+  if (!hubRendered) { try { renderHub(); hubRendered = true; } catch(e) {} }
+  requestAnimationFrame(() => requestAnimationFrame(() => fadeToBlack(false)));
+}
+
+introVideo.addEventListener('timeupdate', () => {
+  const d = introVideo.duration;
+  if (!isFinite(d) || d <= 0) return;
+  if (d - introVideo.currentTime <= 0.85) goToHub();
+});
+introVideo.addEventListener('ended', goToHub);
+introVideo.addEventListener('error', goToHub);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) try { introVideo.pause(); } catch(e) {}
+});
 </script>
 </body>
 </html>
