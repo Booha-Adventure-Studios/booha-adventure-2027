@@ -611,117 +611,12 @@
       position: relative; z-index: 1;
     }
 
-    /* ══════════════════════════════════════════
-       MAZE CONFIRM OVERLAY
-    ══════════════════════════════════════════ */
-    #mazeConfirm {
-      position: fixed; inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      background: rgba(0,0,0,.88);
-      backdrop-filter: blur(12px) saturate(130%);
-      -webkit-backdrop-filter: blur(12px) saturate(130%);
-      z-index: 80;
-    }
-    #mazeConfirm.show { display: flex; }
-
-    .mazeConfirmPanel {
-      position: relative;
-      width: min(360px, 92%);
-      border-radius: 24px;
-      overflow: hidden;
-      padding: clamp(20px, 3vw, 28px) clamp(18px, 2.8vw, 24px);
-      background: rgba(255,255,255,.09);
-      backdrop-filter: blur(22px) saturate(160%);
-      -webkit-backdrop-filter: blur(22px) saturate(160%);
-      box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,.22),
-        0 26px 70px rgba(0,0,0,.8),
-        0 0 0 2px hsl(var(--hue,0deg) 90% 65% / .7),
-        0 0 34px 8px hsl(var(--hue,0deg) 90% 65% / .3);
-      animation: rainbowHue 5s linear infinite;
-      text-align: center;
-    }
-
-    .mazeConfirmPanel::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(120deg, transparent 35%, rgba(255,255,255,.12) 50%, transparent 65%);
-      transform: translateX(-110%) skewX(-12deg);
-      animation: shimmerSweep 4.2s ease-in-out infinite;
-      pointer-events: none;
-    }
-
-    .mazeConfirmEmoji {
-      font-size: clamp(36px, 10vmin, 56px);
-      line-height: 1;
-      margin-bottom: 10px;
-      display: block;
-      position: relative; z-index: 1;
-    }
-
-    .mazeConfirmTitle {
-      font-family: 'Bowlby One', system-ui, sans-serif;
-      font-size: clamp(16px, 3vw, 22px);
-      letter-spacing: 2px;
-      color: #fff;
-      text-shadow: 0 0 24px rgba(255,140,255,.55), 0 2px 10px rgba(0,0,0,.85);
-      margin-bottom: 6px;
-      position: relative; z-index: 1;
-    }
-
-    .mazeConfirmSub {
-      font-size: clamp(12px, 1.8vw, 15px);
-      color: rgba(255,255,255,.65);
-      margin-bottom: 20px;
-      line-height: 1.5;
-      position: relative; z-index: 1;
-    }
-
-    .mazeConfirmBtns {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      position: relative; z-index: 1;
-    }
-
-    .mazeYes {
-      appearance: none; border: 0;
-      border-radius: 999px;
-      padding: 11px 24px;
-      font-size: clamp(13px, 1.8vw, 16px);
-      font-weight: 900; letter-spacing: .5px;
-      cursor: pointer; color: #000;
-      background: linear-gradient(180deg, var(--pink2), var(--pink));
-      box-shadow: 0 8px 18px rgba(255,59,189,.3), 0 0 22px rgba(255,59,189,.25);
-      -webkit-tap-highlight-color: transparent;
-    }
-    .mazeYes:active { transform: scale(.98); }
-
-    .mazeNo {
-      appearance: none;
-      border: 1px solid rgba(255,255,255,.25);
-      border-radius: 999px;
-      padding: 11px 24px;
-      font-size: clamp(13px, 1.8vw, 16px);
-      font-weight: 900; letter-spacing: .5px;
-      cursor: pointer; color: rgba(255,255,255,.9);
-      background: rgba(0,0,0,.25);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.10), 0 8px 18px rgba(0,0,0,.3);
-      -webkit-tap-highlight-color: transparent;
-    }
-    .mazeNo:hover  { background: rgba(255,255,255,.10); }
-    .mazeNo:active { transform: scale(.98); }
-
     /* ══ REDUCED MOTION ══ */
     @media (prefers-reduced-motion: reduce) {
       .ghostWrap, .ls-phone { animation: none; }
       #fade { transition: none; }
       .weekCard, .weekCard::before,
-      .pickerPanel, .pickerPanel::before,
-      .mazeConfirmPanel, .mazeConfirmPanel::before { animation: none; }
+      .pickerPanel, .pickerPanel::before { animation: none; }
     }
   </style>
 </head>
@@ -812,22 +707,6 @@
       </div>
 
       <div class="pickerNote">※ 利用できる週のみリンクが有効です</div>
-    </div>
-  </div>
-
-  <!-- ── Maze confirm overlay ── -->
-  <div id="mazeConfirm" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Go to Maze?">
-    <div class="mazeConfirmPanel">
-      <span class="mazeConfirmEmoji">🌀</span>
-      <div class="mazeConfirmTitle">MAZE（めいろ）</div>
-      <div class="mazeConfirmSub">
-        めいろに行きますか？<br>
-        <span style="font-size:.9em;color:rgba(255,255,255,.5)">Go to the maze?</span>
-      </div>
-      <div class="mazeConfirmBtns">
-        <button class="mazeNo"  id="mazeNo"  type="button">いいえ（No）</button>
-        <button class="mazeYes" id="mazeYes" type="button">はい（Yes）</button>
-      </div>
     </div>
   </div>
 
@@ -1125,37 +1004,10 @@ document.querySelectorAll('.pickTile').forEach(btn => {
 });
 
 /* ════════════════════════════════════════════════════════════
-   MAZE CONFIRM OVERLAY
-   Yes → fade to maze.html
-   No  → just close the overlay (stay on hub)
+   MAZE BUTTON — direct navigation
 ════════════════════════════════════════════════════════════ */
-const mazeConfirm = document.getElementById('mazeConfirm');
-const mazeYes     = document.getElementById('mazeYes');
-const mazeNo      = document.getElementById('mazeNo');
-const mazeBtn     = document.getElementById('mazeBtn');
-
-function openMazeConfirm() {
-  mazeConfirm.classList.add('show');
-  mazeConfirm.setAttribute('aria-hidden', 'false');
-}
-function closeMazeConfirm() {
-  mazeConfirm.classList.remove('show');
-  mazeConfirm.setAttribute('aria-hidden', 'true');
-}
-
-mazeBtn.addEventListener('click', openMazeConfirm);
-
-/* No → close only, stay on hub */
-mazeNo.addEventListener('click', closeMazeConfirm);
-
-/* Tap backdrop → close */
-mazeConfirm.addEventListener('click', e => {
-  if (e.target === mazeConfirm) closeMazeConfirm();
-});
-
-/* Yes → navigate to maze */
-mazeYes.addEventListener('click', () => {
-  closeMazeConfirm();
+const mazeBtn = document.getElementById('mazeBtn');
+mazeBtn.addEventListener('click', () => {
   fadeToBlack(true);
   setTimeout(() => { window.location.href = 'maze.html'; }, 520);
 });
