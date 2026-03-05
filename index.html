@@ -52,9 +52,6 @@
 
     /* ══════════════════════════════════════════
        LANDSCAPE OVERLAY
-       Only shown when start/video scenes are
-       active AND device is in portrait mode.
-       Hub and picker allow both orientations.
     ══════════════════════════════════════════ */
     #landscapeOverlay {
       position: fixed; inset: 0;
@@ -200,7 +197,7 @@
     }
 
     /* ══════════════════════════════════════════
-       HUB — works in portrait AND landscape
+       HUB
     ══════════════════════════════════════════ */
     #hubScene {
       background: transparent;
@@ -245,11 +242,6 @@
       line-height: 1.1;
     }
 
-    /*
-      Hub row:
-        landscape / wide  → 3 columns side by side
-        portrait / narrow → 1 column stacked
-    */
     .hubRow {
       display: grid;
       grid-template-columns: repeat(3, minmax(0,1fr));
@@ -422,7 +414,7 @@
     #fade.on { opacity: 1; pointer-events: all; }
 
     /* ══════════════════════════════════════════
-       PICKER — works in portrait AND landscape
+       PICKER
     ══════════════════════════════════════════ */
     .picker {
       position: absolute; inset: 0;
@@ -535,7 +527,6 @@
       position: relative; z-index: 1;
     }
 
-    /* Vertical stacked tiles */
     .pickerGrid {
       display: flex;
       flex-direction: column;
@@ -620,19 +611,124 @@
       position: relative; z-index: 1;
     }
 
+    /* ══════════════════════════════════════════
+       MAZE CONFIRM OVERLAY
+    ══════════════════════════════════════════ */
+    #mazeConfirm {
+      position: fixed; inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(0,0,0,.88);
+      backdrop-filter: blur(12px) saturate(130%);
+      -webkit-backdrop-filter: blur(12px) saturate(130%);
+      z-index: 80;
+    }
+    #mazeConfirm.show { display: flex; }
+
+    .mazeConfirmPanel {
+      position: relative;
+      width: min(360px, 92%);
+      border-radius: 24px;
+      overflow: hidden;
+      padding: clamp(20px, 3vw, 28px) clamp(18px, 2.8vw, 24px);
+      background: rgba(255,255,255,.09);
+      backdrop-filter: blur(22px) saturate(160%);
+      -webkit-backdrop-filter: blur(22px) saturate(160%);
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.22),
+        0 26px 70px rgba(0,0,0,.8),
+        0 0 0 2px hsl(var(--hue,0deg) 90% 65% / .7),
+        0 0 34px 8px hsl(var(--hue,0deg) 90% 65% / .3);
+      animation: rainbowHue 5s linear infinite;
+      text-align: center;
+    }
+
+    .mazeConfirmPanel::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(120deg, transparent 35%, rgba(255,255,255,.12) 50%, transparent 65%);
+      transform: translateX(-110%) skewX(-12deg);
+      animation: shimmerSweep 4.2s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .mazeConfirmEmoji {
+      font-size: clamp(36px, 10vmin, 56px);
+      line-height: 1;
+      margin-bottom: 10px;
+      display: block;
+      position: relative; z-index: 1;
+    }
+
+    .mazeConfirmTitle {
+      font-family: 'Bowlby One', system-ui, sans-serif;
+      font-size: clamp(16px, 3vw, 22px);
+      letter-spacing: 2px;
+      color: #fff;
+      text-shadow: 0 0 24px rgba(255,140,255,.55), 0 2px 10px rgba(0,0,0,.85);
+      margin-bottom: 6px;
+      position: relative; z-index: 1;
+    }
+
+    .mazeConfirmSub {
+      font-size: clamp(12px, 1.8vw, 15px);
+      color: rgba(255,255,255,.65);
+      margin-bottom: 20px;
+      line-height: 1.5;
+      position: relative; z-index: 1;
+    }
+
+    .mazeConfirmBtns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      position: relative; z-index: 1;
+    }
+
+    .mazeYes {
+      appearance: none; border: 0;
+      border-radius: 999px;
+      padding: 11px 24px;
+      font-size: clamp(13px, 1.8vw, 16px);
+      font-weight: 900; letter-spacing: .5px;
+      cursor: pointer; color: #000;
+      background: linear-gradient(180deg, var(--pink2), var(--pink));
+      box-shadow: 0 8px 18px rgba(255,59,189,.3), 0 0 22px rgba(255,59,189,.25);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .mazeYes:active { transform: scale(.98); }
+
+    .mazeNo {
+      appearance: none;
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 999px;
+      padding: 11px 24px;
+      font-size: clamp(13px, 1.8vw, 16px);
+      font-weight: 900; letter-spacing: .5px;
+      cursor: pointer; color: rgba(255,255,255,.9);
+      background: rgba(0,0,0,.25);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.10), 0 8px 18px rgba(0,0,0,.3);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .mazeNo:hover  { background: rgba(255,255,255,.10); }
+    .mazeNo:active { transform: scale(.98); }
+
     /* ══ REDUCED MOTION ══ */
     @media (prefers-reduced-motion: reduce) {
       .ghostWrap, .ls-phone { animation: none; }
       #fade { transition: none; }
       .weekCard, .weekCard::before,
-      .pickerPanel, .pickerPanel::before { animation: none; }
+      .pickerPanel, .pickerPanel::before,
+      .mazeConfirmPanel, .mazeConfirmPanel::before { animation: none; }
     }
   </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- Landscape overlay: only shown on start/video in portrait -->
+  <!-- Landscape overlay -->
   <div id="landscapeOverlay" aria-hidden="true">
     <span class="ls-phone">📱</span>
     <p class="ls-main-jp">よこむきにしてね！</p>
@@ -715,7 +811,23 @@
         </button>
       </div>
 
-      <div class="pickerNote">※ ここはプレースホルダーです（後でリンクします）</div>
+      <div class="pickerNote">※ 利用できる週のみリンクが有効です</div>
+    </div>
+  </div>
+
+  <!-- ── Maze confirm overlay ── -->
+  <div id="mazeConfirm" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Go to Maze?">
+    <div class="mazeConfirmPanel">
+      <span class="mazeConfirmEmoji">🌀</span>
+      <div class="mazeConfirmTitle">MAZE（めいろ）</div>
+      <div class="mazeConfirmSub">
+        めいろに行きますか？<br>
+        <span style="font-size:.9em;color:rgba(255,255,255,.5)">Go to the maze?</span>
+      </div>
+      <div class="mazeConfirmBtns">
+        <button class="mazeNo"  id="mazeNo"  type="button">いいえ（No）</button>
+        <button class="mazeYes" id="mazeYes" type="button">はい（Yes）</button>
+      </div>
     </div>
   </div>
 
@@ -724,16 +836,110 @@
 
 <script>
 /* ════════════════════════════════════════════════════════════
-   WEEK CALCULATION — always based on real Japan time (JST)
-
-   • Weeks run Sunday → Saturday.
-   • "This week" = the Sun–Sat block containing today in JST.
-   • Week label = "Month Week N" where N is which Sunday of
-     the month (1st–4th). A 5th Sunday reuses "Week 4".
-   • This is entirely date-driven — no cycle offset needed
-     for displaying the correct current week.
+   WEEK FOLDER MAPPING
+   48 weeks per year: Jan w1 = w01 … Dec w4 = w48
+   Folder format: YYYY_wNN_mmm_wN
+   (year is the academic year, currently 2027)
 ════════════════════════════════════════════════════════════ */
+const ACADEMIC_YEAR = 2027; // ★ UPDATE EACH ACADEMIC YEAR ★
 
+const WEEK_FOLDERS = {
+  'jan_w1': `${ACADEMIC_YEAR}_w01_jan_w1`,
+  'jan_w2': `${ACADEMIC_YEAR}_w02_jan_w2`,
+  'jan_w3': `${ACADEMIC_YEAR}_w03_jan_w3`,
+  'jan_w4': `${ACADEMIC_YEAR}_w04_jan_w4`,
+  'feb_w1': `${ACADEMIC_YEAR}_w05_feb_w1`,
+  'feb_w2': `${ACADEMIC_YEAR}_w06_feb_w2`,
+  'feb_w3': `${ACADEMIC_YEAR}_w07_feb_w3`,
+  'feb_w4': `${ACADEMIC_YEAR}_w08_feb_w4`,
+  'mar_w1': `${ACADEMIC_YEAR}_w09_mar_w1`,
+  'mar_w2': `${ACADEMIC_YEAR}_w10_mar_w2`,
+  'mar_w3': `${ACADEMIC_YEAR}_w11_mar_w3`,
+  'mar_w4': `${ACADEMIC_YEAR}_w12_mar_w4`,
+  'apr_w1': `${ACADEMIC_YEAR}_w13_apr_w1`,
+  'apr_w2': `${ACADEMIC_YEAR}_w14_apr_w2`,
+  'apr_w3': `${ACADEMIC_YEAR}_w15_apr_w3`,
+  'apr_w4': `${ACADEMIC_YEAR}_w16_apr_w4`,
+  'may_w1': `${ACADEMIC_YEAR}_w17_may_w1`,
+  'may_w2': `${ACADEMIC_YEAR}_w18_may_w2`,
+  'may_w3': `${ACADEMIC_YEAR}_w19_may_w3`,
+  'may_w4': `${ACADEMIC_YEAR}_w20_may_w4`,
+  'jun_w1': `${ACADEMIC_YEAR}_w21_jun_w1`,
+  'jun_w2': `${ACADEMIC_YEAR}_w22_jun_w2`,
+  'jun_w3': `${ACADEMIC_YEAR}_w23_jun_w3`,
+  'jun_w4': `${ACADEMIC_YEAR}_w24_jun_w4`,
+  'jul_w1': `${ACADEMIC_YEAR}_w25_jul_w1`,
+  'jul_w2': `${ACADEMIC_YEAR}_w26_jul_w2`,
+  'jul_w3': `${ACADEMIC_YEAR}_w27_jul_w3`,
+  'jul_w4': `${ACADEMIC_YEAR}_w28_jul_w4`,
+  'aug_w1': `${ACADEMIC_YEAR}_w29_aug_w1`,
+  'aug_w2': `${ACADEMIC_YEAR}_w30_aug_w2`,
+  'aug_w3': `${ACADEMIC_YEAR}_w31_aug_w3`,
+  'aug_w4': `${ACADEMIC_YEAR}_w32_aug_w4`,
+  'sep_w1': `${ACADEMIC_YEAR}_w33_sep_w1`,
+  'sep_w2': `${ACADEMIC_YEAR}_w34_sep_w2`,
+  'sep_w3': `${ACADEMIC_YEAR}_w35_sep_w3`,
+  'sep_w4': `${ACADEMIC_YEAR}_w36_sep_w4`,
+  'oct_w1': `${ACADEMIC_YEAR}_w37_oct_w1`,
+  'oct_w2': `${ACADEMIC_YEAR}_w38_oct_w2`,
+  'oct_w3': `${ACADEMIC_YEAR}_w39_oct_w3`,
+  'oct_w4': `${ACADEMIC_YEAR}_w40_oct_w4`,
+  'nov_w1': `${ACADEMIC_YEAR}_w41_nov_w1`,
+  'nov_w2': `${ACADEMIC_YEAR}_w42_nov_w2`,
+  'nov_w3': `${ACADEMIC_YEAR}_w43_nov_w3`,
+  'nov_w4': `${ACADEMIC_YEAR}_w44_nov_w4`,
+  'dec_w1': `${ACADEMIC_YEAR}_w45_dec_w1`,
+  'dec_w2': `${ACADEMIC_YEAR}_w46_dec_w2`,
+  'dec_w3': `${ACADEMIC_YEAR}_w47_dec_w3`,
+  'dec_w4': `${ACADEMIC_YEAR}_w48_dec_w4`,
+};
+
+/*
+  Index file names per curriculum:
+    preboo       → pb_index.html
+    booriculum   → br_index.html
+    boocontinuum → bc_index.html
+*/
+const CURR_INDEX = {
+  preboo:       'pb_index.html',
+  booriculum:   'br_index.html',
+  boocontinuum: 'bc_index.html',
+};
+
+/**
+ * Convert a weekId (e.g. "2026_mar_w1") to the folder key used
+ * in WEEK_FOLDERS (e.g. "mar_w1"). The weekId from buildWeekData()
+ * is formatted as "YYYY_mmm_wN".
+ */
+function weekIdToFolderKey(weekId) {
+  // weekId = "2026_mar_w1" → strip the year prefix → "mar_w1"
+  return weekId.replace(/^\d{4}_/, '');
+}
+
+/**
+ * Navigate to a curriculum index for a given weekId.
+ * Path: weeks/FOLDER_NAME/CURR_INDEX_FILE
+ * If the folder mapping doesn't exist, shows a polite message.
+ */
+function navigateToCurriculum(weekId, curr) {
+  const key    = weekIdToFolderKey(weekId);
+  const folder = WEEK_FOLDERS[key];
+  const file   = CURR_INDEX[curr];
+
+  if (!folder || !file) {
+    // Friendly message — week or curriculum not yet available
+    alert('このコンテンツはまだ準備中です。\nThis content isn\'t available yet.');
+    return;
+  }
+
+  const url = `weeks/${folder}/${file}`;
+  fadeToBlack(true);
+  setTimeout(() => { window.location.href = url; }, 520);
+}
+
+/* ════════════════════════════════════════════════════════════
+   WEEK CALCULATION — always based on real Japan time (JST)
+════════════════════════════════════════════════════════════ */
 const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun',
                     'Jul','Aug','Sep','Oct','Nov','Dec'];
 const MONTH_JP   = ['1月','2月','3月','4月','5月','6月',
@@ -741,7 +947,6 @@ const MONTH_JP   = ['1月','2月','3月','4月','5月','6月',
 const MONTH_FULL = ['January','February','March','April','May','June',
                     'July','August','September','October','November','December'];
 
-/** Get today's date in JST as {y, m, d} */
 function tokyoToday() {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: 'Asia/Tokyo',
@@ -752,35 +957,21 @@ function tokyoToday() {
   return { y: map.year, m: map.month, d: map.day };
 }
 
-/** {y,m,d} → UTC milliseconds (treated as midnight UTC) */
 function toMs({ y, m, d }) { return Date.UTC(y, m - 1, d); }
-
-/** Add n days to {y,m,d} */
 function addDays(ymd, n) {
   const dt = new Date(toMs(ymd) + n * 86400000);
   return { y: dt.getUTCFullYear(), m: dt.getUTCMonth() + 1, d: dt.getUTCDate() };
 }
-
-/** Day of week for {y,m,d}: 0=Sun, 1=Mon … 6=Sat */
 function dow(ymd) { return new Date(toMs(ymd)).getUTCDay(); }
-
-/** Return the Sunday that starts the week containing ymd */
 function weekSunday(ymd) { return addDays(ymd, -dow(ymd)); }
 
-/** Format Sun–Sat range: "Mar 1 – Mar 7（3月1日–3月7日）" */
 function fmtRange(sun, sat) {
   const en = d => `${MONTH_ABBR[d.m - 1]} ${d.d}`;
   const jp = d => `${MONTH_JP[d.m - 1]}${d.d}日`;
   return `${en(sun)} – ${en(sat)}（${jp(sun)}–${jp(sat)}）`;
 }
 
-/**
- * Given the Sunday that opens a week, return a label like
- * "March Week 1". Count which Sunday of the month it is;
- * cap at 4 (5th Sunday → "Week 4").
- */
 function weekLabel(sun) {
-  // Walk from the 1st of the month up to sun, counting Sundays
   let count = 0;
   let cur = { y: sun.y, m: sun.m, d: 1 };
   const sunMs = toMs(sun);
@@ -791,10 +982,6 @@ function weekLabel(sun) {
   return `${MONTH_FULL[sun.m - 1]} Week ${Math.min(count, 4)}`;
 }
 
-/**
- * Stable week ID string, e.g. "2026_mar_w1".
- * Used as a key when navigating to lesson pages.
- */
 function weekIdFor(sun) {
   const mo = ['jan','feb','mar','apr','may','jun',
               'jul','aug','sep','oct','nov','dec'][sun.m - 1];
@@ -808,7 +995,6 @@ function weekIdFor(sun) {
   return `${sun.y}_${mo}_w${Math.min(count, 4)}`;
 }
 
-/** Build the three card data objects */
 function buildWeekData() {
   const today   = tokyoToday();
   const thisSun = weekSunday(today);
@@ -825,7 +1011,7 @@ function buildWeekData() {
 }
 
 /* ════════════════════════════════════════════════════════════
-   ORIENTATION  —  landscape overlay only for start & video
+   ORIENTATION
 ════════════════════════════════════════════════════════════ */
 const lsOverlay  = document.getElementById('landscapeOverlay');
 const startScene = document.getElementById('startScene');
@@ -834,7 +1020,6 @@ const hubScene   = document.getElementById('hubScene');
 
 function checkOrientation() {
   const portrait = window.matchMedia('(orientation: portrait)').matches;
-  // Only block in portrait when start or video is active
   const onBlockedScene =
     startScene.classList.contains('active') ||
     videoScene.classList.contains('active');
@@ -850,7 +1035,7 @@ function showScene(el) {
   [startScene, videoScene, hubScene].forEach(s => s.classList.remove('active'));
   el.classList.add('active');
   if (el === hubScene) hubScene.scrollTop = 0;
-  checkOrientation(); // re-evaluate after scene change
+  checkOrientation();
 }
 
 const fade = document.getElementById('fade');
@@ -887,7 +1072,7 @@ function renderHub() {
   container.innerHTML = '';
   buildWeekData().forEach(wk => {
     const card = document.createElement('div');
-    card.className   = 'weekCard';
+    card.className      = 'weekCard';
     card.dataset.weekId = wk.weekId;
     card.innerHTML = `
       <div>
@@ -903,7 +1088,7 @@ function renderHub() {
 }
 
 /* ════════════════════════════════════════════════════════════
-   PICKER
+   PICKER — opens curriculum selector for a week
 ════════════════════════════════════════════════════════════ */
 const picker      = document.getElementById('picker');
 const pickerTitle = document.getElementById('pickerTitle');
@@ -931,24 +1116,54 @@ function closePicker() {
 pickerClose.addEventListener('click', closePicker);
 picker.addEventListener('click', e => { if (e.target === picker) closePicker(); });
 
+/* Curriculum tile → navigate to the correct week folder */
 document.querySelectorAll('.pickTile').forEach(btn => {
   btn.addEventListener('click', () => {
-    alert(`PLACEHOLDER\nweek: ${currentWeekId}\ncurriculum: ${btn.dataset.curr}`);
+    closePicker();
+    navigateToCurriculum(currentWeekId, btn.dataset.curr);
   });
 });
 
-const mazeBtn = document.getElementById('mazeBtn');
-if (mazeBtn) {
-  mazeBtn.addEventListener('click', () => {
-    fadeToBlack(true);
-    setTimeout(() => { window.location.href = 'maze.html'; }, 520);
-  });
+/* ════════════════════════════════════════════════════════════
+   MAZE CONFIRM OVERLAY
+   Yes → fade to maze.html
+   No  → just close the overlay (stay on hub)
+════════════════════════════════════════════════════════════ */
+const mazeConfirm = document.getElementById('mazeConfirm');
+const mazeYes     = document.getElementById('mazeYes');
+const mazeNo      = document.getElementById('mazeNo');
+const mazeBtn     = document.getElementById('mazeBtn');
+
+function openMazeConfirm() {
+  mazeConfirm.classList.add('show');
+  mazeConfirm.setAttribute('aria-hidden', 'false');
 }
+function closeMazeConfirm() {
+  mazeConfirm.classList.remove('show');
+  mazeConfirm.setAttribute('aria-hidden', 'true');
+}
+
+mazeBtn.addEventListener('click', openMazeConfirm);
+
+/* No → close only, stay on hub */
+mazeNo.addEventListener('click', closeMazeConfirm);
+
+/* Tap backdrop → close */
+mazeConfirm.addEventListener('click', e => {
+  if (e.target === mazeConfirm) closeMazeConfirm();
+});
+
+/* Yes → navigate to maze */
+mazeYes.addEventListener('click', () => {
+  closeMazeConfirm();
+  fadeToBlack(true);
+  setTimeout(() => { window.location.href = 'maze.html'; }, 520);
+});
 
 /* ════════════════════════════════════════════════════════════
    START FLOW
 ════════════════════════════════════════════════════════════ */
-const startBtn  = document.getElementById('startBtn');
+const startBtn   = document.getElementById('startBtn');
 const introVideo = document.getElementById('introVideo');
 const ghostWrap  = document.querySelector('.ghostWrap');
 
@@ -977,12 +1192,11 @@ async function startIntro() {
 startBtn.addEventListener('click', startIntro);
 
 /* ════════════════════════════════════════════════════════════
-   VIDEO → HUB  (pre-render to prevent flicker)
+   VIDEO → HUB
 ════════════════════════════════════════════════════════════ */
 const FADE_MS = 520;
 let hubRendered = false;
 
-// Render hub immediately on page load so transition is instant
 try { renderHub(); hubRendered = true; } catch(e) { console.error(e); }
 
 async function goToHub() {
