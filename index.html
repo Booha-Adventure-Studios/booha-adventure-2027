@@ -773,18 +773,6 @@ const WEEK_FOLDERS = {
   'dec_w4': `${ACADEMIC_YEAR}_w48_dec_w4`,
 };
 
-/*
-  Index file names per curriculum:
-    preboo       → pb_index.html
-    booriculum   → br_index.html
-    boocontinuum → bc_index.html
-*/
-const CURR_INDEX = {
-  preboo:       'pb_index.html',
-  booriculum:   'br_index.html',
-  boocontinuum: 'bc_index.html',
-};
-
 /**
  * Convert a weekId (e.g. "2026_mar_w1") to the folder key used
  * in WEEK_FOLDERS (e.g. "mar_w1"). The weekId from buildWeekData()
@@ -796,22 +784,20 @@ function weekIdToFolderKey(weekId) {
 }
 
 /**
- * Navigate to a curriculum index for a given weekId.
- * Path: weeks/FOLDER_NAME/CURR_INDEX_FILE
- * If the folder mapping doesn't exist, shows a polite message.
+ * Navigate to the shared curriculum template, passing the week folder
+ * as a query param. The template wires up the deck links dynamically.
+ * Path: template/CURR.html?week=FOLDER_NAME
  */
 function navigateToCurriculum(weekId, curr) {
   const key    = weekIdToFolderKey(weekId);
   const folder = WEEK_FOLDERS[key];
-  const file   = CURR_INDEX[curr];
 
-  if (!folder || !file) {
-    // Friendly message — week or curriculum not yet available
+  if (!folder) {
     alert('このコンテンツはまだ準備中です。\nThis content isn\'t available yet.');
     return;
   }
 
-  const url = `weeks/${folder}/${file}`;
+  const url = `template/${curr}.html?week=${folder}`;
   fadeToBlack(true);
   setTimeout(() => { window.location.href = url; }, 520);
 }
