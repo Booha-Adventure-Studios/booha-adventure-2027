@@ -703,22 +703,14 @@ function makeStripe(colors) {
   return `repeating-linear-gradient(180deg, ${doubled.join(', ')})`;
 }
 
-/* ── Sentence auto-size: shrink until it fits the card height ── */
-function fitSentence(el) {
-  const container = el.closest('.content');
-  if (!container) return;
-
-  /* Reset */
+/* ── Fit a single element (front English sentence) ── */
+function fitSingle(el, container) {
   el.style.fontSize = '';
-
-  /* Available height = card height minus padding */
-  const cardH    = scene.offsetHeight;
-  const padV     = parseFloat(getComputedStyle(container).paddingTop) * 2;
-  const available = cardH - padV - 12; /* 12px breathing room */
-
-  const maxPx = Math.min(48, cardH * 0.13);
-  const minPx = 14;
-
+  const cardH     = scene.offsetHeight;
+  const padV      = parseFloat(getComputedStyle(container).paddingTop) * 2;
+  const available = cardH - padV - 16;
+  const maxPx     = Math.min(48, cardH * 0.13);
+  const minPx     = 14;
   let lo = minPx, hi = maxPx, best = minPx;
   for (let step = 0; step < 14; step++) {
     const mid = Math.round((lo + hi) / 2);
@@ -727,6 +719,37 @@ function fitSentence(el) {
     else { hi = mid - 1; }
   }
   el.style.fontSize = best + 'px';
+}
+
+/* ── Fit kanji + hira TOGETHER so their combined height never overflows ── */
+function fitJapanesePair(kanjiEl, hiraEl, container) {
+  /* Kanji:hira ratio stays fixed at ~1.7 : 1 */
+  const RATIO = 1.7;
+
+  const cardH     = scene.offsetHeight;
+  const padV      = parseFloat(getComputedStyle(container).paddingTop) * 2;
+  const gapPx     = parseFloat(getComputedStyle(container).gap) || 12;
+  const available = cardH - padV - gapPx - 20; /* 20px safety margin */
+
+  const maxKanji = Math.min(46, cardH * 0.125);
+  const minKanji = 13;
+
+  let lo = minKanji, hi = maxKanji, bestK = minKanji;
+
+  for (let step = 0; step < 16; step++) {
+    const midK = Math.round((lo + hi) / 2);
+    const midH = Math.max(11, Math.round(midK / RATIO));
+
+    kanjiEl.style.fontSize = midK + 'px';
+    hiraEl.style.fontSize  = midH + 'px';
+
+    const totalH = kanjiEl.scrollHeight + hiraEl.scrollHeight + gapPx;
+    if (totalH <= available) { bestK = midK; lo = midK + 1; }
+    else { hi = midK - 1; }
+  }
+
+  kanjiEl.style.fontSize = bestK + 'px';
+  hiraEl.style.fontSize  = Math.max(11, Math.round(bestK / RATIO)) + 'px';
 }
 
 /* ── Wrap each word in a span for dancing ── */
@@ -756,9 +779,13 @@ function showCard() {
 
   /* Fit after DOM settles */
   requestAnimationFrame(() => {
-    fitSentence(enEl);
-    fitSentence(kanjiEl);
-    fitSentence(hiraEl);
+    /* Front: fit English sentence solo */
+    const frontContent = document.querySelector('.card-front .content');
+    if (frontContent) fitSingle(enEl, frontContent);
+
+    /* Back: fit kanji + hira as a unit so they never overflow together */
+    const backContent = document.querySelector('.card-back .content');
+    if (backContent) fitJapanesePair(kanjiEl, hiraEl, backContent);
   });
 }
 
