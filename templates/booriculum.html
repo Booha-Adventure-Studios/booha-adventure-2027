@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Boo-riculum Study Decks</title>
 <meta name="theme-color" content="#0d1f0a">
-<link rel="icon" type="image/png" href="../../boo-tree.png">
+<link rel="icon" type="image/png" href="../assets/img/boo-tree.png">
 <link href="https://fonts.googleapis.com/css2?family=Chau+Philomene+One&display=swap" rel="stylesheet" />
 
 <style>
@@ -466,7 +465,7 @@ a.deck.playing .inner { animation:pulseInner 1.1s ease-in-out infinite; }
 
 <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
-<button id="btn-close" aria-label="Close" onclick="history.back()">
+<button id="btn-close" aria-label="Close" onclick="window.location.href='../index.html'">
   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <line x1="5" y1="5" x2="19" y2="19"/>
     <line x1="19" y1="5" x2="5" y2="19"/>
@@ -479,18 +478,18 @@ a.deck.playing .inner { animation:pulseInner 1.1s ease-in-out infinite; }
 
 <section id="welcome">
 
-  <img class="boo-icon" src="../../boo-tree.png" alt="Boo-tree" onerror="this.style.display='none'">
+  <img class="boo-icon" src="../assets/img/boo-tree.png" alt="Boo-tree" onerror="this.style.display='none'">
 
   <h1 class="title-en">Boo-riculum<br>Study Decks</h1>
   <p class="title-jp">ブーリキュラム・スタディデッキ</p>
 
   <div class="divider" aria-hidden="true"></div>
 
-  <p class="subtitle">March Week 1 &middot; 3月第1週</p>
+  <p class="subtitle">July Week 1 &middot; 7月第1週</p>
 
   <div class="deck-links">
 
-    <a class="deck" href="br_vocab.html">
+    <a class="deck" href="#" data-file="br_vocab.html">
       <div class="clip">
         <div class="inner">
           <span class="label">Vocabulary</span>
@@ -500,7 +499,7 @@ a.deck.playing .inner { animation:pulseInner 1.1s ease-in-out infinite; }
       </div>
     </a>
 
-    <a class="deck" href="br_sentences.html">
+    <a class="deck" href="#" data-file="br_sentences.html">
       <div class="clip">
         <div class="inner">
           <span class="label">Sentences</span>
@@ -510,7 +509,7 @@ a.deck.playing .inner { animation:pulseInner 1.1s ease-in-out infinite; }
       </div>
     </a>
 
-    <a class="deck" href="br_questions.html">
+    <a class="deck" href="#" data-file="br_questions.html">
       <div class="clip">
         <div class="inner">
           <span class="label">Questions</span>
@@ -520,7 +519,7 @@ a.deck.playing .inner { animation:pulseInner 1.1s ease-in-out infinite; }
       </div>
     </a>
 
-    <a class="deck" href="br_stream.html">
+    <a class="deck" href="#" data-file="br_stream.html">
       <div class="clip">
         <div class="inner">
           <span class="label">Stream</span>
@@ -586,6 +585,24 @@ a.deck.playing .inner { animation:pulseInner 1.1s ease-in-out infinite; }
     requestAnimationFrame(tick);
   }
   tick();
+})();
+</script>
+
+<!-- ── Week routing ── -->
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const week   = params.get('week');
+
+  if (!week) {
+    window.location.href = '../index.html';
+    return;
+  }
+
+  document.querySelectorAll('a.deck').forEach(deck => {
+    const file = deck.dataset.file;
+    if (file) deck.setAttribute('href', `../weeks/${week}/${file}`);
+  });
 })();
 </script>
 
