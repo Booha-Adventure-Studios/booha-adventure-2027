@@ -857,7 +857,7 @@ function weekIdFor(sun) {
     if (dow(cur) === 0) count++;
     cur = addDays(cur, 1);
   }
-  return `${sun.y}_${mo}_w${Math.min(count, 4)}`;
+  return `${ACADEMIC_YEAR}_${mo}_w${Math.min(count, 4)}`;
 }
 
 function buildWeekData() {
@@ -973,7 +973,6 @@ function openPicker(tagEn, tagJp, dates, weekId) {
 }
 
 function closePicker() {
-  currentWeekId = '';
   picker.classList.remove('show');
   picker.setAttribute('aria-hidden', 'true');
 }
