@@ -4,21 +4,27 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Boo-riculum – Vocabulary</title>
+<title>Boo-riculum – Vocab</title>
 <meta name="theme-color" content="#0d1a09">
-<link rel="icon" type="image/png" href="../assets/img/boo-tree.png">
+<link rel="icon" type="image/png" href="../../assets/img/boo-tree.png">
 <link href="https://fonts.googleapis.com/css2?family=Chau+Philomene+One&family=Nunito:wght@800;900&family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet" />
 
 <style>
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   NATURE PALETTE  (matches br_index.html)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 :root {
-  --bg:        #0d1a09;
-  --font-ui:   'Chau Philomene One', sans-serif;
-  --font-en:   'Nunito', sans-serif;
-  --font-jp:   'Noto Sans JP', sans-serif;
-  --white:     #ffffff;
-  --white-dim: rgba(255,255,255,.65);
-  --card-r:    28px;
+  --bg:         #0d1a09;
+  --font-ui:    'Chau Philomene One', sans-serif;
+  --font-en:    'Nunito', sans-serif;          /* ESL-friendly, clear, rounded */
+  --font-jp:    'Noto Sans JP', sans-serif;
+  --white:      #ffffff;
+  --white-dim:  rgba(255,255,255,.65);
+  --card-r:     28px;
 }
+
+/* ── Nature tile palettes (one per card, cycles) ── */
+/* Each palette = [stripe-a, stripe-b, stripe-c] */
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -27,10 +33,11 @@ html, body {
   font-family: var(--font-ui);
   background: var(--bg);
   color: var(--white);
-  overflow: hidden;
+  overflow: hidden; /* body never scrolls */
 }
 
 #app {
+  /* Real scroll container — works portrait & landscape */
   height: 100dvh;
   max-height: -webkit-fill-available;
   overflow-y: auto;
@@ -43,6 +50,7 @@ html, body {
   padding-bottom: env(safe-area-inset-bottom, 16px);
 }
 
+/* ── Background canvas ── */
 #bg-canvas {
   position: fixed;
   inset: 0;
@@ -50,23 +58,32 @@ html, body {
   pointer-events: none;
 }
 
-/* ── Close button ── */
+/* ── Close / back button ── */
 #btn-close {
   position: fixed;
-  top: 18px; right: 18px;
+  top: 18px;
+  right: 18px;
   z-index: 9999;
-  width: 48px; height: 48px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   border: 2px solid rgba(255,255,255,.35);
   background: rgba(0,0,0,.45);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: transform .18s ease, border-color .18s ease;
+  box-shadow: 0 0 14px rgba(255,255,255,.18), 0 0 28px rgba(255,255,255,.08);
   animation: pulseClose 2.8s ease-in-out infinite;
 }
-#btn-close:hover  { transform: scale(1.15); border-color: rgba(255,255,255,.75); }
+#btn-close:hover {
+  transform: scale(1.15);
+  border-color: rgba(255,255,255,.75);
+  box-shadow: 0 0 20px rgba(255,255,255,.38), 0 0 44px rgba(255,255,255,.15);
+}
 #btn-close:active { transform: scale(.9); }
 #btn-close svg {
   width: 22px; height: 22px;
@@ -119,21 +136,6 @@ header {
   margin: 8px auto 0;
 }
 
-/* ── Preload status bar ── */
-#preload-bar {
-  position: relative;
-  z-index: 1;
-  font-family: var(--font-ui);
-  font-size: clamp(10px, 1.5vw, 13px);
-  color: rgba(255,255,255,.4);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-top: 6px;
-  height: 16px;
-  transition: opacity .4s ease;
-}
-#preload-bar.done { opacity: 0; pointer-events: none; }
-
 /* ── Card counter ── */
 .card-counter {
   position: relative;
@@ -167,6 +169,7 @@ header {
 }
 .card-scene.flipped { transform: rotateY(180deg); }
 
+/* Both faces share this */
 .card-face {
   position: absolute;
   inset: 0;
@@ -176,20 +179,26 @@ header {
   overflow: hidden;
   border: 3px solid rgba(255,255,255,.22);
   box-shadow: 0 20px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.07) inset;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Ensure each face is fully opaque — prevents bleed-through */
   background: #111;
   isolation: isolate;
   will-change: transform;
 }
 
+/* Back face is flipped 180 */
 .card-back { transform: rotateY(180deg); }
 
+/* Animated stripe background on both faces */
 .card-face .stripe-layer {
   position: absolute;
   inset: 0;
   border-radius: inherit;
   background-size: 100% 240px;
   animation: stripeScroll 7s linear infinite;
+  opacity: 1;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
@@ -198,13 +207,16 @@ header {
   to   { background-position: 0 240px; }
 }
 
+/* Frosted overlay for readability */
 .card-face .frosted {
   position: absolute;
   inset: 0;
   border-radius: inherit;
   background: rgba(0,0,0,.28);
+  backdrop-filter: blur(0px);
 }
 
+/* Content layer */
 .card-face .content {
   position: relative;
   z-index: 2;
@@ -212,7 +224,8 @@ header {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
   padding: clamp(16px, 3.5vw, 32px);
   gap: clamp(6px, 1.5vw, 12px);
   text-align: center;
@@ -227,21 +240,28 @@ header {
   line-height: 1.0;
   letter-spacing: 1px;
   text-shadow: 0 2px 10px rgba(0,0,0,.75);
+  /* size set by JS fitOneLine */
 }
-.en-word .letter { display: inline-block; }
+
+/* Dancing letter spans (JS wraps each letter) */
+.en-word .letter {
+  display: inline-block;
+}
 .en-word.dancing .letter {
   animation: letterDance var(--dance-dur, .5s) ease-in-out infinite alternate;
   animation-delay: var(--dance-delay, 0s);
 }
 @keyframes letterDance {
-  0%   { transform: translateY(0)    rotate(0deg)  scale(1); }
+  0%   { transform: translateY(0) rotate(0deg) scale(1); }
   40%  { transform: translateY(-12px) rotate(-4deg) scale(1.08); }
-  100% { transform: translateY(-18px) rotate(4deg)  scale(1.12); }
+  100% { transform: translateY(-18px) rotate(4deg) scale(1.12); }
 }
 
+/* Flip hint on front */
 .flip-hint {
   position: absolute;
-  bottom: 14px; right: 18px;
+  bottom: 14px;
+  right: 18px;
   font-family: var(--font-ui);
   font-size: clamp(10px, 1.4vw, 13px);
   color: rgba(255,255,255,.45);
@@ -311,7 +331,7 @@ header {
 }
 
 .btn {
-  width:  clamp(64px, 11vw, 82px);
+  width: clamp(64px, 11vw, 82px);
   height: clamp(64px, 11vw, 82px);
   border-radius: 20px;
   border: 3px solid rgba(255,255,255,.25);
@@ -322,14 +342,20 @@ header {
   font-family: var(--font-ui);
   font-size: clamp(22px, 4vw, 34px);
   cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: transform .15s ease, border-color .15s ease, background .15s ease;
   box-shadow: 0 8px 24px rgba(0,0,0,.4);
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   touch-action: manipulation;
 }
-.btn:hover  { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.55); transform: scale(1.06); }
+.btn:hover {
+  background: rgba(255,255,255,.18);
+  border-color: rgba(255,255,255,.55);
+  transform: scale(1.06);
+}
 .btn:active { transform: scale(.92); }
 
 /* Play button — nature green glow */
@@ -343,23 +369,16 @@ header {
   border-color: #88ffaa;
   box-shadow: 0 0 28px rgba(94,232,122,.65), 0 8px 24px rgba(0,0,0,.4);
 }
-
-/*
- * LOCKED state — shown while audio is playing.
- * Visually grayed + no pointer events. Students cannot re-tap.
- */
-#btn-play.locked {
-  opacity: .42;
+#btn-play.cooling {
+  opacity: .55;
   pointer-events: none;
-  cursor: not-allowed;
-  box-shadow: none;
-  filter: grayscale(.7);
 }
 
-/* ── Warning toast ── */
+/* ── Warning toast (button-smashing) ── */
 #warning-toast {
   position: fixed;
-  bottom: 24px; left: 50%;
+  bottom: 24px;
+  left: 50%;
   transform: translateX(-50%) translateY(80px);
   z-index: 9999;
   background: rgba(10,10,10,.92);
@@ -399,31 +418,31 @@ header {
   from { opacity:0; transform:translateY(18px); }
   to   { opacity:1; transform:translateY(0); }
 }
-.card-area { animation: fadeUp .8s cubic-bezier(.22,.8,.36,1) .15s both; }
-.controls  { animation: fadeUp .8s cubic-bezier(.22,.8,.36,1) .28s both; }
+.card-area   { animation: fadeUp .8s cubic-bezier(.22,.8,.36,1) .15s both; }
+.controls    { animation: fadeUp .8s cubic-bezier(.22,.8,.36,1) .28s both; }
 
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
-  .card-scene { transition: none; }
+  .card-scene  { transition: none; }
   .stripe-layer { animation: none; }
   .en-word.dancing .letter { animation: none; }
   .mote { animation: none; opacity: 0; }
 }
 
-/* ── Landscape compact ── */
+/* ── Landscape phone: compact layout, card + controls side by side ── */
 @media (orientation: landscape) and (max-height: 520px) {
-  header        { padding: 16px 70px 6px; }
-  .hdr-title    { font-size: clamp(14px, 3vw, 22px); }
-  .hdr-jp       { font-size: clamp(10px, 1.6vw, 13px); }
-  .hdr-sub      { font-size: clamp(11px, 1.6vw, 14px); margin-top: 3px; }
-  .divider      { margin: 4px auto 0; }
-  .card-counter { margin-top: 4px; font-size: 11px; }
-  .card-area    { width: min(58vw, 480px); margin-top: 6px; }
-  .controls     { margin-top: 8px; gap: 10px; }
-  .btn          { width: 52px; height: 52px; font-size: 20px; border-radius: 14px; }
+  header          { padding: 16px 70px 6px; }
+  .hdr-title      { font-size: clamp(14px, 3vw, 22px); }
+  .hdr-jp         { font-size: clamp(10px, 1.6vw, 13px); }
+  .hdr-sub        { font-size: clamp(11px, 1.6vw, 14px); margin-top: 3px; }
+  .divider        { margin: 4px auto 0; }
+  .card-counter   { margin-top: 4px; font-size: 11px; }
+  .card-area      { width: min(58vw, 480px); margin-top: 6px; }
+  .controls       { margin-top: 8px; gap: 10px; }
+  .btn            { width: 52px; height: 52px; font-size: 20px; border-radius: 14px; }
 }
 
-/* ── Small portrait ── */
+/* ── Small portrait phones ── */
 @media (max-width: 380px) {
   .card-area { width: 94vw; }
   .btn       { width: 58px; height: 58px; font-size: 20px; }
@@ -436,19 +455,21 @@ header {
 
   <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
-  <button id="btn-close" aria-label="Back to menu"
-          onclick="sessionStorage.setItem('booha_deck_open','1'); history.back()">
+  <!-- Close button -->
+  <button id="btn-close" aria-label="Back to menu" onclick="sessionStorage.setItem('booha_deck_open','1'); history.back()">
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <line x1="5" y1="5" x2="19" y2="19"/>
       <line x1="19" y1="5" x2="5" y2="19"/>
     </svg>
   </button>
 
+  <!-- Warning toast -->
   <div id="warning-toast" role="alert" aria-live="assertive">
-    <div class="warn-jp">まだ再生中です！<br>終わってから押してね。</div>
-    <div class="warn-en">Wait for the audio to finish.</div>
+    <div class="warn-jp">ボタンを連打しないでください！<br>少し待ってから押してね。</div>
+    <div class="warn-en">Please wait before pressing again.</div>
   </div>
 
+  <!-- ══ HEADER ══ -->
   <header>
     <div class="hdr-title">Boo-riculum Vocab</div>
     <div class="hdr-jp">ブーリキュラム・語彙</div>
@@ -456,12 +477,13 @@ header {
     <div class="hdr-sub" id="week-label">Loading…</div>
   </header>
 
-  <div id="preload-bar">Loading audio…</div>
-  <div class="card-counter" id="card-counter">– / –</div>
+  <div class="card-counter" id="card-counter">1 / 15</div>
 
+  <!-- ══ CARD ══ -->
   <div class="card-area">
     <div class="card-scene" id="card-scene">
 
+      <!-- Front: English -->
       <div class="card-face card-front">
         <div class="stripe-layer" id="stripe-front"></div>
         <div class="frosted"></div>
@@ -471,6 +493,7 @@ header {
         <div class="flip-hint">Tap to flip</div>
       </div>
 
+      <!-- Back: Japanese -->
       <div class="card-face card-back">
         <div class="stripe-layer" id="stripe-back"></div>
         <div class="frosted"></div>
@@ -480,10 +503,13 @@ header {
         </div>
       </div>
 
-    </div>
-    <div id="sparkle-layer" aria-hidden="true"></div>
-  </div>
+    </div><!-- /card-scene -->
 
+    <!-- Sparkle layer sits over entire card area -->
+    <div id="sparkle-layer" aria-hidden="true"></div>
+  </div><!-- /card-area -->
+
+  <!-- ══ CONTROLS ══ -->
   <div class="controls">
     <button class="btn" id="btn-prev" aria-label="Previous card">&#10094;</button>
     <button class="btn" id="btn-flip" aria-label="Flip card">&#8635;</button>
@@ -491,21 +517,27 @@ header {
     <button class="btn" id="btn-play" aria-label="Play audio">&#9654;</button>
   </div>
 
-</div>
+</div><!-- /app -->
 
-<!-- ══ BACKGROUND PARTICLES ══ -->
+<!-- ══════════════════════════════════════════════
+     BACKGROUND PARTICLES
+     ══════════════════════════════════════════════ -->
 <script>
 (function () {
   const canvas = document.getElementById('bg-canvas');
-  const ctx    = canvas.getContext('2d');
-  const COLORS = ['#30d050','#4df070','#20a8f0','#60d8ff','#f0aa00','#ffe060','#28c890','#b0f040','#ff9040','#e8e080'];
+  const ctx = canvas.getContext('2d');
+  const COLORS = [
+    '#30d050','#4df070','#20a8f0','#60d8ff',
+    '#f0aa00','#ffe060','#28c890','#b0f040',
+    '#ff9040','#e8e080'
+  ];
   function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
   resize();
   window.addEventListener('resize', resize);
   const PARTS = [];
   function makePart(scatter) {
     return {
-      x: Math.random() * (canvas.width  || 400),
+      x: Math.random() * (canvas.width || 400),
       y: scatter ? Math.random() * (canvas.height || 700) : (canvas.height || 700) + 10,
       r: .7 + Math.random() * 2,
       vx: (Math.random() - .5) * .2,
@@ -523,8 +555,11 @@ header {
       p.x += p.vx; p.y += p.vy; p.life += .0032;
       if (p.y < -10 || p.life > 1) { PARTS[i] = makePart(false); continue; }
       const a = p.alpha * Math.sin(p.life * Math.PI);
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = p.color; ctx.globalAlpha = a; ctx.fill();
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = a;
+      ctx.fill();
     }
     ctx.globalAlpha = 1;
     requestAnimationFrame(tick);
@@ -533,37 +568,63 @@ header {
 })();
 </script>
 
-<!-- ══ FLASHCARD LOGIC ══ -->
+<!-- ══════════════════════════════════════════════
+     FLASHCARD LOGIC
+     ══════════════════════════════════════════════ -->
 <script>
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   AUDIO STRUCTURE:
-   assets/audio/march/boo_riculum/vocab/br_v01_***.mp3
-   Week 1 → cards n=1–15  (files br_v01–br_v15)
-   Week 2 → cards n=16–30 (files br_v16–br_v30)
-   Week 3 → cards n=31–45 (files br_v31–br_v45)
-   Week 4 → cards n=46–60 (files br_v46–br_v60)
-   Cards shuffle on every visit. No fixed order.
+   ★★★  WEEKLY CONTENT — CHANGE THIS EACH WEEK  ★★★
+
+   AUDIO PATH: assets/audio/march/boo_riculum/vocab/
+   Files:      br_v01_****.mp3  →  br_v60_****.mp3
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const AUDIO_BASE = '../../assets/audio/march/boo_riculum/vocab/';
+
+const CARDS = [
+  { en: 'job',            jp: '仕事',              hira: 'しごと',                    mp3: 'br_v01_job.mp3' },
+  { en: 'worker',         jp: '働く人・労働者',     hira: 'はたらく ひと・ろうどうしゃ', mp3: 'br_v02_worker.mp3' },
+  { en: 'teacher',        jp: '先生',              hira: 'せんせい',                   mp3: 'br_v03_teacher.mp3' },
+  { en: 'doctor',         jp: '医者',              hira: 'いしゃ',                    mp3: 'br_v04_doctor.mp3' },
+  { en: 'nurse',          jp: '看護師',             hira: 'かんごし',                  mp3: 'br_v05_nurse.mp3' },
+  { en: 'chef',           jp: '料理人・コック',      hira: 'りょうりにん・こっく',        mp3: 'br_v06_chef.mp3' },
+  { en: 'artist',         jp: '芸術家・アーティスト', hira: 'げいじゅつか・あーてぃすと',  mp3: 'br_v07_artist.mp3' },
+  { en: 'scientist',      jp: '科学者',             hira: 'かがくしゃ',                mp3: 'br_v08_scientist.mp3' },
+  { en: 'police officer', jp: '警察官',             hira: 'けいさつかん',               mp3: 'br_v09_police_officer.mp3' },
+  { en: 'pilot',          jp: 'パイロット',          hira: 'ぱいろっと',                mp3: 'br_v10_pilot.mp3' },
+  { en: 'engineer',       jp: 'エンジニア',          hira: 'えんじにあ',                mp3: 'br_v11_engineer.mp3' },
+  { en: 'farmer',         jp: '農家',              hira: 'のうか',                    mp3: 'br_v12_farmer.mp3' },
+  { en: 'office',         jp: '事務所・オフィス',    hira: 'じむしょ・おふぃす',          mp3: 'br_v13_office.mp3' },
+  { en: 'company',        jp: '会社',              hira: 'かいしゃ',                  mp3: 'br_v14_company.mp3' },
+  { en: 'career',         jp: '職業・キャリア',      hira: 'しょくぎょう・きゃりあ',      mp3: 'br_v15_career.mp3' },
+];
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   END OF WEEKLY CONTENT
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-const AUDIO_BASE = '../assets/audio/march/boo_riculum/vocab/';
-const JSON_URL   = 'br_vocab.json';  /* same folder as this html */
-
-/* ── Week ranges ── */
-const WEEK_RANGES = { w1:[1,15], w2:[16,30], w3:[31,45], w4:[46,60] };
-
-/* ── Nature stripe palettes ── */
+/* ── Nature stripe palettes (cycle through cards) ── */
 const PALETTES = [
-  ['#1a7a2e','#2ecc50','#6ee88a'],
-  ['#0d5fa8','#1a8fe0','#60c4ff'],
-  ['#a06200','#d98c00','#ffc532'],
-  ['#5a1a8a','#8e3dcc','#c87aff'],
-  ['#8a1a1a','#cc3d3d','#ff8a7a'],
-  ['#0a6060','#18a8a8','#5cf0e0'],
-  ['#3a5a00','#6a9a00','#b8f040'],
-  ['#5a3a00','#a07000','#f0c040'],
+  ['#1a7a2e','#2ecc50','#6ee88a'],   /* forest green   */
+  ['#0d5fa8','#1a8fe0','#60c4ff'],   /* sky blue       */
+  ['#a06200','#d98c00','#ffc532'],   /* sunflower gold */
+  ['#5a1a8a','#8e3dcc','#c87aff'],   /* wildflower purple */
+  ['#8a1a1a','#cc3d3d','#ff8a7a'],   /* autumn berry   */
+  ['#0a6060','#18a8a8','#5cf0e0'],   /* ocean teal     */
+  ['#3a5a00','#6a9a00','#b8f040'],   /* lime leaf      */
+  ['#5a3a00','#a07000','#f0c040'],   /* warm amber     */
 ];
 
-const MOTE_COLORS = ['#c0ffcc','#c0eeff','#ffeeaa','#ffccdd','#fff','#b0f040'];
+/* ── Shuffle deck ── */
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+shuffle(CARDS);
+
+/* ── State ── */
+let idx      = 0;
+let flipped  = false;
 
 /* ── DOM refs ── */
 const scene    = document.getElementById('card-scene');
@@ -574,110 +635,27 @@ const sfEl     = document.getElementById('stripe-front');
 const sbEl     = document.getElementById('stripe-back');
 const counter  = document.getElementById('card-counter');
 const sparkL   = document.getElementById('sparkle-layer');
-const preloadBar = document.getElementById('preload-bar');
-const btnPlay  = document.getElementById('btn-play');
-const toast    = document.getElementById('warning-toast');
 
-/* ── State ── */
-let CARDS    = [];          /* active 15-card shuffled deck */
-let audioCache = {};        /* mp3 filename → HTMLAudioElement */
-let idx      = 0;
-let flipped  = false;
-let playLocked = false;     /* true while audio is playing */
-let toastTimer = null;
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   WEEK LABEL (from folder path)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-function prettyWeek(folder) {
-  const m = folder.match(/_([a-z]{3})_w(\d)$/i);
-  if (!m) return '';
-  const MONTHS    = { jan:'January',feb:'February',mar:'March',apr:'April',may:'May',jun:'June',jul:'July',aug:'August',sep:'September',oct:'October',nov:'November',dec:'December' };
-  const MONTHS_JP = { jan:'1月',feb:'2月',mar:'3月',apr:'4月',may:'5月',jun:'6月',jul:'7月',aug:'8月',sep:'9月',oct:'10月',nov:'11月',dec:'12月' };
-  const mo = m[1].toLowerCase(), wn = m[2];
-  return (MONTHS[mo]||mo)+' Week '+wn+' &middot; '+(MONTHS_JP[mo]||mo)+'第'+wn+'週';
-}
-
-/* ── Derive week key (w1/w2/w3/w4) from URL path ──
-   This file lives at march/br_vocab.html
-   It is linked from weeks/FOLDER/br_vocab.html which
-   passes ?week=FOLDER so we also check that param.     */
-function getWeekKey() {
-  /* Check ?week= param first (linked via template) */
-  const params = new URLSearchParams(window.location.search);
-  const weekParam = params.get('week') || '';
-  const label = prettyWeek(weekParam);
-  if (label) {
-    document.getElementById('week-label').innerHTML = label;
-    const m = weekParam.match(/_w(\d)$/i);
-    return m ? 'w' + m[1] : 'w1';
-  }
-  /* Fallback: derive from path */
-  const parts = window.location.pathname.split('/');
-  const folder = parts[parts.length - 2] || '';
-  const lbl = prettyWeek(folder);
-  if (lbl) document.getElementById('week-label').innerHTML = lbl;
-  const m2 = folder.match(/_w(\d)$/i);
-  return m2 ? 'w' + m2[1] : 'w1';
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   SHUFFLE
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   AUDIO PRELOAD
-   All 15 week-cards are loaded into Audio objects immediately.
-   The browser buffers them so the first tap plays instantly.
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-function preloadAudio(cards) {
-  let loaded = 0;
-  const total = cards.length;
-  audioCache = {};
-
-  cards.forEach(card => {
-    const a = new Audio();
-    a.preload = 'auto';
-    a.src = AUDIO_BASE + card.mp3;
-
-    const done = () => {
-      loaded++;
-      preloadBar.textContent = 'Audio ' + loaded + ' / ' + total;
-      if (loaded >= total) {
-        preloadBar.classList.add('done');
-      }
-    };
-    a.addEventListener('canplaythrough', done, { once: true });
-    a.addEventListener('error', done, { once: true }); /* missing file still counts */
-    a.load();
-    audioCache[card.mp3] = a;
-  });
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   STRIPE BACKGROUND
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── Stripe background builder ── */
 function makeStripe(colors) {
-  const band = 40, stops = [];
-  colors.forEach((c, i) => { const s = i * band; stops.push(c+' '+s+'px '+(s+band)+'px'); });
-  const doubled = stops.concat(stops.map(s => s.replace(/(\d+)px/g, (_, n) => (+n + band * colors.length) + 'px')));
-  return 'repeating-linear-gradient(180deg, ' + doubled.join(', ') + ')';
+  const band = 40;
+  const stops = [];
+  colors.forEach((c, i) => {
+    const s = i * band;
+    stops.push(`${c} ${s}px ${s + band}px`);
+  });
+  const doubled = stops.concat(
+    stops.map(s => s.replace(/(\d+)px/g, (_, n) => (+n + band * colors.length) + 'px'))
+  );
+  return `repeating-linear-gradient(180deg, ${doubled.join(', ')})`;
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   FIT ENGLISH WORD TO ONE LINE
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── Auto-fit English word to one line ── */
 function fitOneLine(el, maxPx, minPx) {
-  el.style.whiteSpace = 'nowrap';
-  el.style.display    = 'inline-block';
-  el.style.width      = '90%';
-  el.style.maxWidth   = '90%';
+  el.style.whiteSpace  = 'nowrap';
+  el.style.display     = 'inline-block';
+  el.style.width       = '90%';
+  el.style.maxWidth    = '90%';
   let lo = minPx, hi = maxPx, best = minPx;
   for (let step = 0; step < 14; step++) {
     const mid = Math.round((lo + hi) / 2);
@@ -688,125 +666,149 @@ function fitOneLine(el, maxPx, minPx) {
   el.style.fontSize = best + 'px';
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   DANCING LETTERS
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── Wrap each letter in a span for dancing ── */
 function wrapLetters(el, text) {
   el.innerHTML = text.split('').map((ch, i) =>
-    ch === ' ' ? ' '
-    : '<span class="letter" style="--dance-delay:' + (i * 0.06).toFixed(2) + 's;--dance-dur:' + (.45 + Math.random() * .25).toFixed(2) + 's">' + ch + '</span>'
+    ch === ' '
+      ? ' '
+      : `<span class="letter" style="--dance-delay:${(i * 0.06).toFixed(2)}s; --dance-dur:${(.45 + Math.random()*.25).toFixed(2)}s">${ch}</span>`
   ).join('');
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   SHOW CARD
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── Show current card ── */
 function showCard() {
   const card    = CARDS[idx];
   const palette = PALETTES[idx % PALETTES.length];
   const stripe  = makeStripe(palette);
+
   sfEl.style.backgroundImage = stripe;
   sbEl.style.backgroundImage = stripe;
 
+  /* English word — wrap letters, then fit */
   wrapLetters(enEl, card.en);
   enEl.classList.remove('dancing');
 
   const isMobile = window.innerWidth <= 480;
-  requestAnimationFrame(() => fitOneLine(enEl, isMobile ? 80 : 150, isMobile ? 36 : 56));
+  const maxPx = isMobile ? 80 : 150;
+  const minPx = isMobile ? 36 : 56;
+  /* Brief delay so spans are in DOM before measuring */
+  requestAnimationFrame(() => fitOneLine(enEl, maxPx, minPx));
 
   kanjiEl.textContent = card.jp;
   hiraEl.textContent  = card.hira;
-  counter.textContent = (idx + 1) + ' / ' + CARDS.length;
+  counter.textContent = `${idx + 1} / ${CARDS.length}`;
+
+  /* Ensure correct flip state */
   scene.classList.toggle('flipped', flipped);
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   MOTE BURST
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── Mote burst ── */
+const MOTE_COLORS = ['#c0ffcc','#c0eeff','#ffeeaa','#ffccdd','#fff','#b0f040'];
 function burstMotes() {
   sparkL.innerHTML = '';
   for (let i = 0; i < 22; i++) {
-    const m = document.createElement('div');
+    const m  = document.createElement('div');
     m.className = 'mote';
     const sz = 5 + Math.random() * 10;
-    const x  = 8  + Math.random() * 84;
+    const x  = 8 + Math.random() * 84;
     const y  = 20 + Math.random() * 60;
     const tx = (Math.random() - .5) * 80 + 'px';
     const ty = -(20 + Math.random() * 70) + 'px';
     const md = (.5 + Math.random() * .6) + 's';
     const mc = MOTE_COLORS[Math.floor(Math.random() * MOTE_COLORS.length)];
-    m.style.cssText = 'width:'+sz+'px;height:'+sz+'px;left:'+x+'%;top:'+y+'%;--tx:'+tx+';--ty:'+ty+';--md:'+md+';--mc:'+mc+';animation-delay:'+(Math.random()*.12).toFixed(2)+'s';
+    m.style.cssText = `width:${sz}px;height:${sz}px;left:${x}%;top:${y}%;--tx:${tx};--ty:${ty};--md:${md};--mc:${mc};animation-delay:${(Math.random()*.12).toFixed(2)}s`;
     sparkL.appendChild(m);
   }
   setTimeout(() => { sparkL.innerHTML = ''; }, 1400);
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   PLAY AUDIO
-   • Uses preloaded Audio from cache — plays instantly.
-   • Button locked for the full duration of playback.
-   • Extra tap during playback → show warning toast.
-   • Tapping prev/next while playing stops audio cleanly.
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── Audio: single element, primed on first user interaction ── */
+const audio   = new Audio();
+audio.preload = 'auto';
+let audioPrimed = false;
+
+function primeAudio() {
+  if (audioPrimed) return;
+  /* Set a silent src and play immediately to unlock iOS audio */
+  audio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+  audio.play().then(() => {
+    audio.pause();
+    audio.src = '';
+    audioPrimed = true;
+  }).catch(() => {});
+}
+document.addEventListener('touchstart', primeAudio, { once: true, passive: true });
+document.addEventListener('click',      primeAudio, { once: true });
+
+/* ── Button-smash protection ── */
+let playLocked    = false;
+let smashCount    = 0;
+let smashTimer    = null;
+const COOL_MS     = 1800;
+const SMASH_LIMIT = 3;
+const toast       = document.getElementById('warning-toast');
+let toastTimer    = null;
+
 function showWarning() {
   if (toastTimer) clearTimeout(toastTimer);
   toast.classList.add('show');
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
 }
 
-function unlockPlay() {
-  playLocked = false;
-  btnPlay.classList.remove('locked');
-  enEl.classList.remove('dancing');
-}
-
-function stopAudio() {
-  const card = CARDS[idx];
-  if (!card) return;
-  const a = audioCache[card.mp3];
-  if (a) { try { a.pause(); a.currentTime = 0; } catch(e) {} }
-  unlockPlay();
-}
-
-function playAudio() {
-  /* Already playing — warn and do nothing */
-  if (playLocked) { showWarning(); return; }
+async function playAudio() {
+  if (playLocked) {
+    smashCount++;
+    if (smashCount >= SMASH_LIMIT) showWarning();
+    return;
+  }
 
   const card = CARDS[idx];
-  if (!card) return;
+  if (!card || !card.mp3) return;
 
-  const a = audioCache[card.mp3];
-  if (!a) return;
-
-  /* Lock immediately */
   playLocked = true;
-  btnPlay.classList.add('locked');
+  const btnPlay = document.getElementById('btn-play');
+  btnPlay.classList.add('cooling');
+  smashCount = 0;
+
+  /* Start dancing letters */
   enEl.classList.add('dancing');
+
+  audio.src = AUDIO_BASE + card.mp3;
+  try {
+    await audio.play();
+    /* Stop dance when audio ends */
+    audio.onended = () => {
+      enEl.classList.remove('dancing');
+      playLocked = false;
+      btnPlay.classList.remove('cooling');
+    };
+  } catch (e) {
+    console.warn('[br_vocab] audio play failed:', e);
+    enEl.classList.remove('dancing');
+    playLocked = false;
+    btnPlay.classList.remove('cooling');
+  }
+
   burstMotes();
-
-  /* Reset to start in case it was partially played */
-  a.currentTime = 0;
-
-  /* Remove old listeners before adding new ones */
-  a.onended  = unlockPlay;
-  a.onerror  = unlockPlay;
-
-  a.play().catch(() => { unlockPlay(); });
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   NAVIGATION
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── Nav helpers ── */
 function goNext() {
-  stopAudio();
   idx = (idx + 1) % CARDS.length;
   flipped = false;
+  audio.pause();
+  enEl.classList.remove('dancing');
+  playLocked = false;
+  document.getElementById('btn-play').classList.remove('cooling');
   showCard();
 }
 function goPrev() {
-  stopAudio();
   idx = (idx - 1 + CARDS.length) % CARDS.length;
   flipped = false;
+  audio.pause();
+  enEl.classList.remove('dancing');
+  playLocked = false;
+  document.getElementById('btn-play').classList.remove('cooling');
   showCard();
 }
 function doFlip() {
@@ -818,46 +820,35 @@ function doFlip() {
 document.getElementById('btn-prev').addEventListener('click', goPrev);
 document.getElementById('btn-next').addEventListener('click', goNext);
 document.getElementById('btn-flip').addEventListener('click', doFlip);
-btnPlay.addEventListener('click', playAudio);
+document.getElementById('btn-play').addEventListener('click', playAudio);
 scene.addEventListener('click', doFlip);
+
+/* ── Refit on resize ── */
 window.addEventListener('resize', () => showCard());
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   INIT — fetch JSON, pick week, shuffle, preload
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-(async function init() {
-  const weekKey = getWeekKey();
-  const range   = WEEK_RANGES[weekKey] || WEEK_RANGES.w1;
-  const [lo, hi] = range;
+/* ── Init ── */
+showCard();
 
-  let allCards = [];
-  try {
-    const res  = await fetch(JSON_URL);
-    const data = await res.json();
-    allCards   = data.cards || [];
-  } catch (e) {
-    preloadBar.textContent = 'Could not load vocab data.';
-    console.error('[br_vocab] JSON fetch failed:', e);
-    return;
+/* ── Auto week label from URL or parent referrer ── */
+(function () {
+  /* Try to get week from the referring template URL's ?week= param */
+  function prettyWeek(folder) {
+    if (!folder) return '';
+    const m = folder.match(/_([a-z]{3})_w(\d)$/i);
+    if (!m) return folder;
+    const MONTHS    = { jan:'January',feb:'February',mar:'March',apr:'April',may:'May',jun:'June',jul:'July',aug:'August',sep:'September',oct:'October',nov:'November',dec:'December' };
+    const MONTHS_JP = { jan:'1月',feb:'2月',mar:'3月',apr:'4月',may:'5月',jun:'6月',jul:'7月',aug:'8月',sep:'9月',oct:'10月',nov:'11月',dec:'12月' };
+    const mo = m[1].toLowerCase(), wn = m[2];
+    return (MONTHS[mo]||mo) + ' Week ' + wn + ' &middot; ' + (MONTHS_JP[mo]||mo) + '第' + wn + '週';
   }
-
-  /* Pick this week's 15 cards (n is 1-based) */
-  CARDS = allCards.filter(c => c.n >= lo && c.n <= hi);
-
-  if (!CARDS.length) {
-    preloadBar.textContent = 'No cards found for ' + weekKey;
-    return;
-  }
-
-  /* Shuffle — random order every visit */
-  shuffle(CARDS);
-
-  /* Preload all audio files */
-  preloadAudio(CARDS);
-
-  /* Show first card */
-  showCard();
+  /* Derive week folder name from this file's directory path */
+  const pathParts = window.location.pathname.split('/');
+  const folderName = pathParts[pathParts.length - 2] || '';
+  const label = prettyWeek(folderName);
+  const el = document.getElementById('week-label');
+  if (el && label) el.innerHTML = label;
 })();
+
 </script>
 
 </body>
