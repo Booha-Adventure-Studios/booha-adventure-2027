@@ -446,13 +446,12 @@ svg.ring-svg {
 
   <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
- <button id="btn-close" aria-label="Back to menu"
- onclick="sessionStorage.setItem('booha_deck_open','1'); window.location.href='../booriculum.html';">
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <line x1="5" y1="5" x2="19" y2="19"/>
-      <line x1="19" y1="5" x2="5" y2="19"/>
-    </svg>
-  </button>
+ <button id="btn-close" aria-label="Back to menu">
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <line x1="5" y1="5" x2="19" y2="19"/>
+    <line x1="19" y1="5" x2="5" y2="19"/>
+  </svg>
+</button>
 
   <header>
     <div class="hdr-title">Boo-riculum Stream</div>
@@ -605,7 +604,20 @@ function getAudioSrc(mp3) {
   return AUDIO_ROOT + mp3;
 }  
 
+function goBackToBooriculum() {
+  const params = new URLSearchParams(window.location.search);
+  const weekParam = params.get('week') || '';
+  const target =
+    `${window.location.origin}/booha-adventure-2027/template/booriculum.html` +
+    (weekParam ? `?week=${encodeURIComponent(weekParam)}` : '');
 
+  sessionStorage.setItem('booha_deck_open', '1');
+  window.location.assign(target);
+}
+
+document.getElementById('btn-close').addEventListener('click', goBackToBooriculum);
+
+  
 /* ─────────────────────────────
    WEEK LABEL + WEEK NUMBER
 ───────────────────────────── */
@@ -853,9 +865,29 @@ function stopEverything() {
   enTextEl.classList.remove('dancing');
 }
 
+function getPauseSeconds(track) {
+  if (Number.isFinite(track.pause)) return track.pause * (slowMode ? 2 : 1);
+
+  const words = (track.en || '').trim().split(/\s+/).filter(Boolean).length;
+
+  let base;
+  if (track.mp3.startsWith('br_v')) {
+    base = 1.6;
+  } else if (track.mp3.startsWith('br_s')) {
+    base = 2.2 + words * 0.22;
+  } else if (track.mp3.startsWith('br_q')) {
+    base = 2.6 + words * 0.24;
+  } else {
+    base = 2.2 + words * 0.22;
+  }
+
+  if (slowMode) base *= 2;
+
+  return Math.max(1.4, Math.min(base, 8.5));
+}
+
 function startPause(track) {
-  const pauseSeconds = Number.isFinite(track.pause) ? track.pause : DEFAULT_PAUSE;
-  const durationMs = pauseSeconds * (slowMode ? 2 : 1) * 1000;
+  const durationMs = getPauseSeconds(track) * 1000;
 
   pauseRing.classList.add('visible');
   animateRing(durationMs);
