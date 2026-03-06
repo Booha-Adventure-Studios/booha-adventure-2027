@@ -446,7 +446,7 @@ svg.ring-svg {
 
   <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
-  <button id="btn-close" aria-label="Close" onclick="location.href='br_index.html'">
+  <button id="btn-close" aria-label="Close">
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <line x1="5" y1="5" x2="19" y2="19"/>
       <line x1="19" y1="5" x2="5" y2="19"/>
@@ -595,6 +595,10 @@ const preloadBar   = document.getElementById('preload-bar');
 const weekLabelEl  = document.getElementById('week-label');
 const progressLeft = document.getElementById('progress-left');
 const progressRight= document.getElementById('progress-right');
+
+document.getElementById('btn-close').onclick = () => {
+  location.href = '../booriculum.html';
+};  
 
 /* ─────────────────────────────
    WEEK LABEL + WEEK NUMBER
