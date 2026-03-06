@@ -412,7 +412,7 @@ a.deck.playing .clip {
 
 <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
-<button id="btn-close" aria-label="Back to menu" onclick="history.back()">
+<button id="btn-close" aria-label="Back to menu" onclick="window.close()">
   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <line x1="5" y1="5" x2="19" y2="19"/>
     <line x1="19" y1="5" x2="5" y2="19"/>
@@ -580,7 +580,7 @@ function goToDeck(anchor) {
   sessionStorage.setItem('booha_deck_open', '1');
 
   /* 2 seconds of sparkles then navigate */
-  setTimeout(() => { window.location.href = url; }, 2000);
+  setTimeout(() => { window.location.href = url; }, 1000);
 }
 
 document.querySelectorAll('a.deck').forEach(a => {
@@ -610,10 +610,14 @@ document.querySelectorAll('a.deck').forEach(a => {
 
   document.getElementById('week-label').innerHTML = prettyWeek(week);
 
-  document.getElementById('vocab').href     = `../weeks/${week}/bc_vocab.html`;
-  document.getElementById('sentences').href = `../weeks/${week}/bc_sentences.html`;
-  document.getElementById('questions').href = `../weeks/${week}/bc_questions.html`;
-  document.getElementById('stream').href    = `../weeks/${week}/bc_stream.html`;
+    const MONTH_MAP = {jan:'january',feb:'february',mar:'march',apr:'april',may:'may',jun:'june',jul:'july',aug:'august',sep:'september',oct:'october',nov:'november',dec:'december'};
+  const mKey = (week.match(/_([a-z]{3})_w\d$/i)||[])[1] || '';
+  const monthDir = MONTH_MAP[mKey.toLowerCase()] || mKey.toLowerCase();
+
+  document.getElementById('vocab').href     = `${monthDir}/bc_vocab.html?week=${week}`;
+  document.getElementById('sentences').href = `${monthDir}/bc_sentences.html?week=${week}`;
+  document.getElementById('questions').href = `${monthDir}/bc_questions.html?week=${week}`;
+  document.getElementById('stream').href    = `${monthDir}/bc_stream.html?week=${week}`;
 })();
 </script>
 
