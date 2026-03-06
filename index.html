@@ -1060,6 +1060,41 @@ introVideo.addEventListener('error', goToHub);
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) try { introVideo.pause(); } catch(e) {}
 });
+
+/* ════════════════════════════════════════════════════════════
+   BACK-BUTTON / BFCACHE HUB RESTORE
+   Three ways we can return here from a study-deck page:
+   1. bfcache restore  (ev.persisted = true)
+   2. sessionStorage flag set by any deck/index page on load
+   3. #hub hash in URL (legacy/fallback)
+   All three jump straight to the hub scene.
+════════════════════════════════════════════════════════════ */
+function jumpToHub() {
+  try { introVideo.pause(); } catch(e2) {}
+  [startScene, videoScene, hubScene].forEach(s => s.classList.remove('active'));
+  hubScene.classList.add('active');
+  fade.classList.remove('on');
+  fadingOut = false;
+  started   = false;
+  if (!hubRendered) { try { renderHub(); hubRendered = true; } catch(e2) {} }
+  sessionStorage.removeItem('booha_return_to_hub');
+  if (window.location.hash === '#hub') {
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
+}
+
+/* On every page load: check sessionStorage flag */
+if (sessionStorage.getItem('booha_return_to_hub')) {
+  jumpToHub();
+}
+
+/* On bfcache restore or hash-based return */
+window.addEventListener('pageshow', ev => {
+  if (ev.persisted || window.location.hash === '#hub' ||
+      sessionStorage.getItem('booha_return_to_hub')) {
+    jumpToHub();
+  }
+});
 </script>
 </body>
 </html>
