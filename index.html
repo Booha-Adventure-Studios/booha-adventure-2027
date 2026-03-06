@@ -982,9 +982,12 @@ picker.addEventListener('click', e => { if (e.target === picker) closePicker(); 
 
 /* Curriculum tile → navigate to the correct week folder */
 document.querySelectorAll('.pickTile').forEach(btn => {
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', e => {
+    e.stopPropagation();          // prevent backdrop click firing closePicker twice
+    const weekId = currentWeekId; // capture before any state changes
+    const curr   = btn.dataset.curr;
     closePicker();
-    navigateToCurriculum(currentWeekId, btn.dataset.curr);
+    navigateToCurriculum(weekId, curr);
   });
 });
 
