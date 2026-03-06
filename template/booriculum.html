@@ -614,11 +614,11 @@ document.querySelectorAll('a.deck').forEach(a => {
 
   /* No week param → back to index */
   if (!week) {
-    window.location.href = '../index.html';
-    return;
-  }
+  window.location.href = 'https://booha-adventure-studios.github.io/booha-adventure-2027/';
+  return;
+}
 
-  /* Build a human-readable week label from the folder name.
+  /* Build a readable week label from the folder name.
      e.g. "2027_w09_mar_w1" → "Mar Week 1 · 3月第1週" */
   function prettyWeek(folder) {
     const m = folder.match(/_([a-z]{3})_w(\d)$/i);
@@ -653,6 +653,14 @@ document.querySelectorAll('a.deck').forEach(a => {
   document.getElementById("stream").href    = `${monthDir}/br_stream.html?week=${week}`;
 })();
 </script>
+
+<!-- ── Close button routing ── -->
+<script>
+document.getElementById('btn-close').addEventListener('click', () => {
+  window.location.assign('https://booha-adventure-studios.github.io/booha-adventure-2027/');
+});
+</script>
+  
 
 </div>
 </body>
