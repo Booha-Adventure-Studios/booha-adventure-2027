@@ -874,7 +874,8 @@ function playTrack(idx) {
   const track = TRACKS[trackIdx];
   updateUI(track);
 
-  currentAudio = audioCache[track.mp3] || new Audio(getAudioSrc(track.mp3));
+  currentAudio = new Audio(getAudioSrc(track.mp3));
+  currentAudio.preload = 'auto';  
   currentAudio.currentTime = 0;
 
   currentAudio.onended = () => {
