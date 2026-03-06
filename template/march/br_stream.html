@@ -561,7 +561,7 @@ svg.ring-svg {
      STREAM LOGIC
      ══════════════════════════════════ -->
 <script>
-const AUDIO_BASE = '../../assets/audio/march/boo_riculum/stream/';
+const AUDIO_ROOT = '../../assets/audio/march/boo_riculum/';
 const JSON_URL   = 'br_stream.json';
 const DEFAULT_PAUSE = 5.5;
 
@@ -596,6 +596,14 @@ const preloadBar   = document.getElementById('preload-bar');
 const weekLabelEl  = document.getElementById('week-label');
 const progressLeft = document.getElementById('progress-left');
 const progressRight= document.getElementById('progress-right');
+
+
+function getAudioSrc(mp3) {
+  if (mp3.startsWith('br_v')) return AUDIO_ROOT + 'vocab/' + mp3;
+  if (mp3.startsWith('br_s')) return AUDIO_ROOT + 'sentences/' + mp3;
+  if (mp3.startsWith('br_q')) return AUDIO_ROOT + 'questions/' + mp3;
+  return AUDIO_ROOT + mp3;
+}  
 
 
 /* ─────────────────────────────
@@ -764,7 +772,7 @@ function preloadAudio(cards) {
   cards.forEach(card => {
     const a = new Audio();
     a.preload = 'auto';
-    a.src = AUDIO_BASE + card.mp3;
+    a.src = getAudioSrc(card.mp3);
 
     const done = () => {
       loaded++;
@@ -866,7 +874,7 @@ function playTrack(idx) {
   const track = TRACKS[trackIdx];
   updateUI(track);
 
-  currentAudio = audioCache[track.mp3] || new Audio(AUDIO_BASE + track.mp3);
+  currentAudio = audioCache[track.mp3] || new Audio(getAudioSrc(track.mp3));
   currentAudio.currentTime = 0;
 
   currentAudio.onended = () => {
