@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -474,7 +473,7 @@ a.deck.playing .inner { animation:pulseInner 1.1s ease-in-out infinite; }
 </button>
 
 <audio id="clickBgm" preload="auto">
-  <source src="studydeck.mp3" type="audio/mpeg">
+  <source src="../assets/audio/studydeck.mp3" type="audio/mpeg">
 </audio>
 
 <section id="welcome">
@@ -589,17 +588,26 @@ a.deck.playing .inner { animation:pulseInner 1.1s ease-in-out infinite; }
 })();
 </script>
 
-<!-- ── Week routing ── -->
+<!-- ── Week routing + back-button fix ── -->
 <script>
 (function () {
   const params = new URLSearchParams(window.location.search);
   const week   = params.get('week');
 
+  /* No week param → return to hub */
   if (!week) {
-    window.location.href = '../index.html';
+    window.location.replace('../index.html');
     return;
   }
 
+  /* Back-button fix (sessionStorage approach — works on all browsers):
+     When this page loads, set a flag. index.html checks for this flag
+     on every load/pageshow and jumps straight to the hub scene if set.
+     This means hitting browser back from here always lands on the hub,
+     never on the frozen start scene. */
+  sessionStorage.setItem('booha_return_to_hub', '1');
+
+  /* Wire up tile hrefs */
   document.querySelectorAll('a.deck').forEach(deck => {
     const file = deck.dataset.file;
     if (file) deck.setAttribute('href', `../weeks/${week}/${file}`);
