@@ -1,1 +1,940 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Boo-riculum – Stream</title>
+<meta name="theme-color" content="#0d1a09">
+<link rel="icon" type="image/png" href="../../boo-tree.png">
+<link href="https://fonts.googleapis.com/css2?family=Chau+Philomene+One&family=Nunito:wght@800;900&family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet" />
+
+<style>
+:root {
+  --bg:       #0d1a09;
+  --font-ui:  'Chau Philomene One', sans-serif;
+  --font-en:  'Nunito', sans-serif;
+  --font-jp:  'Noto Sans JP', sans-serif;
+  --white:    #ffffff;
+  --dim:      rgba(255,255,255,.6);
+
+  /* Section accent colours */
+  --col-v:   #2ecc50;   /* vocab  — forest green  */
+  --col-s:   #1a8fe0;   /* sentences — sky blue   */
+  --col-q:   #d98c00;   /* questions — gold       */
+  --col-now: var(--col-v);  /* updated by JS         */
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--white);
+  overflow: hidden;
+}
+
+/* ── Scroll container ── */
+#app {
+  height: 100dvh;
+  max-height: -webkit-fill-available;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+/* ── Background canvas ── */
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── Close button ── */
+#btn-close {
+  position: fixed;
+  top: 18px; right: 18px;
+  z-index: 9999;
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.35);
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .18s ease, border-color .18s ease;
+  animation: pulseClose 2.8s ease-in-out infinite;
+}
+#btn-close:hover { transform: scale(1.15); border-color: rgba(255,255,255,.75); }
+#btn-close:active { transform: scale(.9); }
+#btn-close svg {
+  width: 22px; height: 22px;
+  stroke: #fff; stroke-width: 2.5; stroke-linecap: round;
+  filter: drop-shadow(0 0 5px rgba(255,255,255,.7));
+}
+@keyframes pulseClose {
+  0%,100% { box-shadow: 0 0 12px rgba(255,255,255,.18), 0 0 26px rgba(255,255,255,.07); }
+  50%     { box-shadow: 0 0 22px rgba(255,255,255,.36), 0 0 48px rgba(255,255,255,.14); }
+}
+
+/* ── Header ── */
+header {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 32px 20px 8px;
+  animation: fadeUp .9s cubic-bezier(.22,.8,.36,1) both;
+  width: 100%;
+}
+.hdr-title {
+  font-size: clamp(20px, 4.4vw, 44px);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--white);
+  text-shadow: 0 0 28px rgba(93,212,196,.6), 0 2px 8px rgba(0,0,0,.8);
+  line-height: 1.05;
+}
+.hdr-jp {
+  font-family: var(--font-jp);
+  font-size: clamp(12px, 2vw, 17px);
+  color: var(--dim);
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+.hdr-sub {
+  font-size: clamp(13px, 2vw, 17px);
+  color: var(--white);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 6px;
+  text-shadow: 0 1px 6px rgba(0,0,0,.6);
+}
+.divider {
+  width: clamp(80px, 28vw, 200px);
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.3), transparent);
+  border-radius: 2px;
+  margin: 8px auto 0;
+}
+
+/* ── Section badge ── */
+.section-badge {
+  position: relative;
+  z-index: 1;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: clamp(12px, 1.8vw, 15px);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--dim);
+  animation: fadeUp .7s .1s both;
+}
+.section-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--col-now);
+  box-shadow: 0 0 10px var(--col-now);
+  flex-shrink: 0;
+  transition: background .4s, box-shadow .4s;
+}
+#section-label {
+  transition: color .4s;
+  color: var(--col-now);
+}
+#track-counter {
+  color: var(--dim);
+}
+
+/* ── Main card ── */
+.card-area {
+  position: relative;
+  z-index: 1;
+  width: min(92vw, 740px);
+  margin-top: 10px;
+  animation: fadeUp .8s .15s both;
+  flex-shrink: 0;
+}
+
+.card-face {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 28px;
+  border: 3px solid rgba(255,255,255,.22);
+  box-shadow: 0 20px 60px rgba(0,0,0,.55);
+  overflow: hidden;
+  background: #111;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color .4s;
+}
+.card-face.v-mode { border-color: rgba(46,204,80,.5); }
+.card-face.s-mode { border-color: rgba(26,143,224,.5); }
+.card-face.q-mode { border-color: rgba(217,140,0,.5); }
+
+.stripe-layer {
+  position: absolute;
+  inset: 0;
+  background-size: 100% 240px;
+  animation: stripeScroll 7s linear infinite;
+}
+@keyframes stripeScroll {
+  from { background-position: 0 0; }
+  to   { background-position: 0 240px; }
+}
+
+.frosted {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.38);
+}
+
+.card-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  padding: clamp(18px, 4vw, 36px) clamp(20px, 5vw, 48px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* English text on card */
+.en-text {
+  font-family: var(--font-en);
+  font-weight: 900;
+  font-size: clamp(20px, 4.2vw, 48px);
+  line-height: 1.3;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0,0,0,.75);
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+  max-width: 100%;
+  letter-spacing: .2px;
+  transition: opacity .3s ease;
+}
+
+/* Word-dance when playing */
+.en-text .word {
+  display: inline-block;
+}
+.en-text.dancing .word {
+  animation: wordBounce var(--wd, .55s) ease-in-out infinite alternate;
+  animation-delay: var(--wdel, 0s);
+}
+@keyframes wordBounce {
+  0%   { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-8px) scale(1.04); }
+}
+
+/* Pause countdown ring */
+.pause-ring-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity .25s;
+}
+.pause-ring-wrap.visible { opacity: 1; }
+.pause-label {
+  font-size: clamp(11px, 1.6vw, 14px);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--col-now);
+  text-shadow: 0 0 8px var(--col-now);
+}
+svg.ring-svg {
+  width: 44px; height: 44px;
+  transform: rotate(-90deg);
+}
+.ring-bg {
+  fill: none;
+  stroke: rgba(255,255,255,.12);
+  stroke-width: 4;
+}
+.ring-fg {
+  fill: none;
+  stroke: var(--col-now);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 113;
+  stroke-dashoffset: 0;
+  transition: stroke .4s, stroke-dashoffset linear;
+  filter: drop-shadow(0 0 4px var(--col-now));
+}
+
+/* ── Sparkle motes ── */
+#sparkle-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 10;
+}
+.mote {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  background: radial-gradient(circle, var(--mc, #fff) 0%, transparent 70%);
+  animation: motePop var(--md, .9s) ease-out forwards;
+}
+@keyframes motePop {
+  0%   { opacity: 0; transform: translate(-50%,-50%) scale(.3); }
+  15%  { opacity: 1; transform: translate(-50%,-50%) scale(1.15); }
+  100% { opacity: 0; transform: translate(var(--tx,0), var(--ty,-50px)) scale(.4); }
+}
+
+/* ── Progress bar ── */
+.progress-wrap {
+  position: relative;
+  z-index: 1;
+  width: min(92vw, 740px);
+  margin-top: 10px;
+  animation: fadeUp .8s .22s both;
+  flex-shrink: 0;
+}
+.progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,.12);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--col-now);
+  border-radius: 99px;
+  width: 0%;
+  transition: width .5s ease, background .4s;
+  box-shadow: 0 0 8px var(--col-now);
+}
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: clamp(10px, 1.5vw, 12px);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.prog-v { color: var(--col-v); }
+.prog-s { color: var(--col-s); }
+.prog-q { color: var(--col-q); }
+
+/* ── Controls ── */
+.controls {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: clamp(12px, 2.8vw, 22px);
+  justify-content: center;
+  align-items: center;
+  margin-top: clamp(10px, 1.8vh, 20px);
+  padding: 0 16px 20px;
+  flex-shrink: 0;
+  animation: fadeUp .8s .3s both;
+}
+
+.btn {
+  width: clamp(62px, 10.5vw, 80px);
+  height: clamp(62px, 10.5vw, 80px);
+  border-radius: 20px;
+  border: 3px solid rgba(255,255,255,.25);
+  background: rgba(255,255,255,.10);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--white);
+  font-family: var(--font-ui);
+  font-size: clamp(20px, 3.8vw, 32px);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .15s ease, border-color .15s, background .15s;
+  box-shadow: 0 8px 24px rgba(0,0,0,.4);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
+}
+.btn:hover { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.55); transform: scale(1.06); }
+.btn:active { transform: scale(.92); }
+
+/* Big play/pause — teal glow (stream tile colour) */
+#btn-playpause {
+  width: clamp(80px, 14vw, 100px);
+  height: clamp(80px, 14vw, 100px);
+  border-radius: 24px;
+  font-size: clamp(28px, 5vw, 42px);
+  background: linear-gradient(145deg, #0e3030, #071a1a);
+  border-color: #5dd4c4;
+  box-shadow: 0 0 22px rgba(93,212,196,.5), 0 8px 24px rgba(0,0,0,.4);
+}
+#btn-playpause:hover {
+  background: linear-gradient(145deg, #154444, #0a2828);
+  border-color: #8de8dc;
+  box-shadow: 0 0 34px rgba(93,212,196,.7), 0 8px 24px rgba(0,0,0,.4);
+}
+#btn-playpause.playing {
+  animation: pulsePlay 1.8s ease-in-out infinite;
+}
+@keyframes pulsePlay {
+  0%,100% { box-shadow: 0 0 20px rgba(93,212,196,.45), 0 8px 24px rgba(0,0,0,.4); }
+  50%     { box-shadow: 0 0 40px rgba(93,212,196,.75), 0 8px 24px rgba(0,0,0,.4); }
+}
+
+/* Slow toggle */
+#btn-slow {
+  font-size: clamp(14px, 2.4vw, 20px);
+  letter-spacing: .5px;
+}
+#btn-slow.active {
+  background: linear-gradient(145deg, #5a2a00, #2a1000);
+  border-color: #ffaa44;
+  color: #ffaa44;
+  box-shadow: 0 0 16px rgba(255,170,68,.4), 0 8px 24px rgba(0,0,0,.4);
+}
+
+/* Skip back/forward */
+#btn-prev, #btn-next {
+  font-size: clamp(18px, 3.2vw, 28px);
+}
+
+/* ── Entrance animations ── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(18px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .stripe-layer { animation: none; }
+  .en-text.dancing .word { animation: none; }
+  .mote { animation: none; opacity: 0; }
+  #btn-playpause.playing { animation: none; }
+}
+
+/* ── Landscape compact ── */
+@media (orientation: landscape) and (max-height: 520px) {
+  header          { padding: 14px 70px 4px; }
+  .hdr-title      { font-size: clamp(13px, 2.8vw, 20px); }
+  .hdr-jp         { font-size: clamp(10px, 1.5vw, 13px); }
+  .hdr-sub        { font-size: clamp(11px, 1.5vw, 13px); margin-top: 2px; }
+  .divider        { margin: 3px auto 0; }
+  .section-badge  { margin-top: 6px; }
+  .card-area      { width: min(60vw, 480px); margin-top: 4px; }
+  .progress-wrap  { width: min(60vw, 480px); }
+  .controls       { margin-top: 6px; gap: 9px; padding-bottom: 12px; }
+  .btn            { width: 50px; height: 50px; font-size: 18px; border-radius: 13px; }
+  #btn-playpause  { width: 66px; height: 66px; font-size: 26px; }
+}
+
+/* ── Small portrait ── */
+@media (max-width: 380px) {
+  .card-area, .progress-wrap { width: 94vw; }
+  .btn { width: 56px; height: 56px; font-size: 18px; }
+  #btn-playpause { width: 74px; height: 74px; }
+}
+</style>
+</head>
+
+<body>
+<div id="app">
+
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+  <button id="btn-close" aria-label="Back to menu" onclick="history.back()">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <line x1="5" y1="5" x2="19" y2="19"/>
+      <line x1="19" y1="5" x2="5" y2="19"/>
+    </svg>
+  </button>
+
+  <!-- ══ HEADER ══ -->
+  <header>
+    <div class="hdr-title">Boo-riculum Stream</div>
+    <div class="hdr-jp">ブーリキュラム・ストリーム</div>
+    <div class="divider" aria-hidden="true"></div>
+    <!-- ★ CHANGE WEEK LABEL HERE ★ -->
+    <div class="hdr-sub">March Week 1 &middot; 3月第1週</div>
+  </header>
+
+  <!-- Section indicator -->
+  <div class="section-badge">
+    <div class="section-dot" id="section-dot"></div>
+    <span id="section-label">Vocab</span>
+    <span id="track-counter">1 / 45</span>
+  </div>
+
+  <!-- ══ CARD ══ -->
+  <div class="card-area">
+    <div class="card-face" id="card-face">
+      <div class="stripe-layer" id="stripe-layer"></div>
+      <div class="frosted"></div>
+      <div class="card-content">
+        <div class="en-text" id="en-text">Press play to begin</div>
+        <div class="pause-ring-wrap" id="pause-ring">
+          <div class="pause-label">Your turn</div>
+          <svg class="ring-svg" viewBox="0 0 40 40" aria-hidden="true">
+            <circle class="ring-bg" cx="20" cy="20" r="18"/>
+            <circle class="ring-fg" id="ring-fg" cx="20" cy="20" r="18"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div id="sparkle-layer" aria-hidden="true"></div>
+  </div>
+
+  <!-- ══ PROGRESS ══ -->
+  <div class="progress-wrap">
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <div class="progress-labels">
+      <span class="prog-v">Vocab 1–15</span>
+      <span class="prog-s">Sentences 16–30</span>
+      <span class="prog-q">Questions 31–45</span>
+    </div>
+  </div>
+
+  <!-- ══ CONTROLS ══ -->
+  <div class="controls">
+    <button class="btn" id="btn-prev"  aria-label="Previous track">&#10094;</button>
+    <button class="btn" id="btn-playpause" aria-label="Play / Pause">&#9654;</button>
+    <button class="btn" id="btn-next"  aria-label="Next track">&#10095;</button>
+    <button class="btn" id="btn-slow"  aria-label="Slow mode">SLOW</button>
+  </div>
+
+</div><!-- /app -->
+
+<!-- ══════════════════════════════════
+     BACKGROUND PARTICLES
+     ══════════════════════════════════ -->
+<script>
+(function () {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx    = canvas.getContext('2d');
+  const COLORS = [
+    '#5dd4c4','#8de8dc','#30d050','#4df070',
+    '#20a8f0','#60d8ff','#f0aa00','#ffe060',
+    '#b0f040','#ff9040'
+  ];
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+  const PARTS = [];
+  function makePart(scatter) {
+    return {
+      x:     Math.random() * (canvas.width || 400),
+      y:     scatter ? Math.random() * (canvas.height || 700) : (canvas.height || 700) + 10,
+      r:     .7 + Math.random() * 2,
+      vx:    (Math.random() - .5) * .2,
+      vy:    -.06 - Math.random() * .16,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      alpha: .08 + Math.random() * .22,
+      life:  scatter ? Math.random() : 0,
+    };
+  }
+  for (let i = 0; i < 55; i++) PARTS.push(makePart(true));
+  function tick() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < PARTS.length; i++) {
+      const p = PARTS[i];
+      p.x += p.vx; p.y += p.vy; p.life += .0032;
+      if (p.y < -10 || p.life > 1) { PARTS[i] = makePart(false); continue; }
+      const a = p.alpha * Math.sin(p.life * Math.PI);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = a;
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+</script>
+
+<!-- ══════════════════════════════════
+     STREAM LOGIC
+     ══════════════════════════════════ -->
+<script>
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ★★★  WEEKLY CONTENT — CHANGE THIS EACH WEEK  ★★★
+
+   AUDIO PATH: assets/audio/march/
+   Naming:
+     Vocab     → br_v01_****.mp3  …  br_v15_****.mp3
+     Sentences → br_s01_****.mp3  …  br_s15_****.mp3
+     Questions → br_q01_****.mp3  …  br_q15_****.mp3
+
+   PAUSE TIMES (seconds a student hears the prompt before next):
+     PAUSE_V = pause after each vocab word
+     PAUSE_S = pause after each sentence
+     PAUSE_Q = pause after each question
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const AUDIO_BASE = 'assets/audio/march/';
+
+const PAUSE_V = 2.5;   /* seconds — vocab  (short word, quick repeat)   */
+const PAUSE_S = 4.5;   /* seconds — sentence (longer, more think time)  */
+const PAUSE_Q = 5.5;   /* seconds — question (needs a real answer)      */
+
+/* Each track: { en, mp3, pause, section } */
+/* section: 'v' | 's' | 'q' */
+const TRACKS = [
+  /* ── VOCAB ── */
+  { en: 'job',            mp3: 'br_v01_job.mp3',           pause: PAUSE_V, section: 'v' },
+  { en: 'worker',         mp3: 'br_v02_worker.mp3',        pause: PAUSE_V, section: 'v' },
+  { en: 'teacher',        mp3: 'br_v03_teacher.mp3',       pause: PAUSE_V, section: 'v' },
+  { en: 'doctor',         mp3: 'br_v04_doctor.mp3',        pause: PAUSE_V, section: 'v' },
+  { en: 'nurse',          mp3: 'br_v05_nurse.mp3',         pause: PAUSE_V, section: 'v' },
+  { en: 'chef',           mp3: 'br_v06_chef.mp3',          pause: PAUSE_V, section: 'v' },
+  { en: 'artist',         mp3: 'br_v07_artist.mp3',        pause: PAUSE_V, section: 'v' },
+  { en: 'scientist',      mp3: 'br_v08_scientist.mp3',     pause: PAUSE_V, section: 'v' },
+  { en: 'police officer', mp3: 'br_v09_police_officer.mp3',pause: PAUSE_V, section: 'v' },
+  { en: 'pilot',          mp3: 'br_v10_pilot.mp3',         pause: PAUSE_V, section: 'v' },
+  { en: 'engineer',       mp3: 'br_v11_engineer.mp3',      pause: PAUSE_V, section: 'v' },
+  { en: 'farmer',         mp3: 'br_v12_farmer.mp3',        pause: PAUSE_V, section: 'v' },
+  { en: 'office',         mp3: 'br_v13_office.mp3',        pause: PAUSE_V, section: 'v' },
+  { en: 'company',        mp3: 'br_v14_company.mp3',       pause: PAUSE_V, section: 'v' },
+  { en: 'career',         mp3: 'br_v15_career.mp3',        pause: PAUSE_V, section: 'v' },
+
+  /* ── SENTENCES ── */
+  { en: 'I want to be a teacher.',                                      mp3: 'br_s01_i_want_to_be_a_teacher.mp3',  pause: PAUSE_S, section: 's' },
+  { en: 'I want to be a doctor because I like helping people.',         mp3: 'br_s02_i_want_to_be_a_doctor.mp3',   pause: PAUSE_S, section: 's' },
+  { en: 'I want to be a pilot and travel the world.',                   mp3: 'br_s03_i_want_to_be_a_pilot.mp3',    pause: PAUSE_S, section: 's' },
+  { en: 'I want to be an artist because I love drawing.',               mp3: 'br_s04_i_want_to_be_an_artist.mp3',  pause: PAUSE_S, section: 's' },
+  { en: 'I want to work in an office.',                                 mp3: 'br_s05_i_want_to_work_in_an_office.mp3', pause: PAUSE_S, section: 's' },
+  { en: 'I want to help my town.',                                      mp3: 'br_s06_i_want_to_help_my_town.mp3',  pause: PAUSE_S, section: 's' },
+  { en: 'I want to cook in a restaurant.',                              mp3: 'br_s07_i_want_to_cook_in_a_restaurant.mp3', pause: PAUSE_S, section: 's' },
+  { en: 'I want to study science in the future.',                       mp3: 'br_s08_i_want_to_study_science.mp3', pause: PAUSE_S, section: 's' },
+  { en: 'I want to be a nurse like my mother.',                         mp3: 'br_s09_i_want_to_be_a_nurse.mp3',    pause: PAUSE_S, section: 's' },
+  { en: 'I want to design games someday.',                              mp3: 'br_s10_i_want_to_design_games.mp3',  pause: PAUSE_S, section: 's' },
+  { en: 'I want to work outside.',                                      mp3: 'br_s11_i_want_to_work_outside.mp3',  pause: PAUSE_S, section: 's' },
+  { en: 'I want to use English in my job.',                             mp3: 'br_s12_i_want_to_use_english.mp3',   pause: PAUSE_S, section: 's' },
+  { en: 'I want to help children learn.',                               mp3: 'br_s13_i_want_to_help_children.mp3', pause: PAUSE_S, section: 's' },
+  { en: 'I want to work hard and be happy.',                            mp3: 'br_s14_i_want_to_work_hard.mp3',    pause: PAUSE_S, section: 's' },
+  { en: "I don't know yet, but I want to try many things.",             mp3: 'br_s15_i_dont_know_yet.mp3',         pause: PAUSE_S, section: 's' },
+
+  /* ── QUESTIONS ── */
+  { en: 'What do you want to be in the future?',          mp3: 'br_q01_what_do_you_want_to_be.mp3',      pause: PAUSE_Q, section: 'q' },
+  { en: 'Why do you want that job?',                      mp3: 'br_q02_why_do_you_want_that_job.mp3',    pause: PAUSE_Q, section: 'q' },
+  { en: 'Who inspires your dream?',                       mp3: 'br_q03_who_inspires_your_dream.mp3',     pause: PAUSE_Q, section: 'q' },
+  { en: 'Do you know anyone with your dream job?',        mp3: 'br_q04_do_you_know_anyone.mp3',          pause: PAUSE_Q, section: 'q' },
+  { en: 'What job looks fun to you?',                     mp3: 'br_q05_what_job_looks_fun.mp3',          pause: PAUSE_Q, section: 'q' },
+  { en: 'Do you want to work in Japan or abroad?',        mp3: 'br_q06_japan_or_abroad.mp3',             pause: PAUSE_Q, section: 'q' },
+  { en: 'Do you think your dream job is difficult?',      mp3: 'br_q07_is_your_dream_job_difficult.mp3', pause: PAUSE_Q, section: 'q' },
+  { en: 'What do you want to learn for your future?',     mp3: 'br_q08_what_do_you_want_to_learn.mp3',   pause: PAUSE_Q, section: 'q' },
+  { en: 'What job helps people?',                         mp3: 'br_q09_what_job_helps_people.mp3',       pause: PAUSE_Q, section: 'q' },
+  { en: 'Do you like working in a team?',                 mp3: 'br_q10_do_you_like_working_in_a_team.mp3', pause: PAUSE_Q, section: 'q' },
+  { en: 'What job uses English?',                         mp3: 'br_q11_what_job_uses_english.mp3',       pause: PAUSE_Q, section: 'q' },
+  { en: 'What do you think is an easy job?',              mp3: 'br_q12_what_is_an_easy_job.mp3',         pause: PAUSE_Q, section: 'q' },
+  { en: 'What do your parents do?',                       mp3: 'br_q13_what_do_your_parents_do.mp3',     pause: PAUSE_Q, section: 'q' },
+  { en: 'Would you like the same job as them?',           mp3: 'br_q14_same_job_as_parents.mp3',         pause: PAUSE_Q, section: 'q' },
+  { en: 'What job do you think I have?',                  mp3: 'br_q15_what_job_do_i_have.mp3',          pause: PAUSE_Q, section: 'q' },
+];
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   END OF WEEKLY CONTENT
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ── Section display config ── */
+const SECTION_CFG = {
+  v: { label: 'Vocab',     col: '#2ecc50', card: 'v-mode', palettes: [
+    ['#1a7a2e','#2ecc50','#6ee88a'], ['#3a5a00','#6a9a00','#b8f040'],
+    ['#0a6060','#18a8a8','#5cf0e0'], ['#5a3a00','#a07000','#f0c040'],
+  ]},
+  s: { label: 'Sentences', col: '#1a8fe0', card: 's-mode', palettes: [
+    ['#0d5fa8','#1a8fe0','#60c4ff'], ['#0a6060','#18a8a8','#5cf0e0'],
+    ['#5a1a8a','#8e3dcc','#c87aff'], ['#1a7a2e','#2ecc50','#6ee88a'],
+  ]},
+  q: { label: 'Questions', col: '#d98c00', card: 'q-mode', palettes: [
+    ['#a06200','#d98c00','#ffc532'], ['#8a1a1a','#cc3d3d','#ff8a7a'],
+    ['#5a3a00','#a07000','#f0c040'], ['#5a1a8a','#8e3dcc','#c87aff'],
+  ]},
+};
+
+/* ── Stripe builder ── */
+function makeStripe(colors) {
+  const band = 40, stops = [];
+  colors.forEach((c, i) => { const s = i * band; stops.push(`${c} ${s}px ${s+band}px`); });
+  const doubled = stops.concat(stops.map(s => s.replace(/(\d+)px/g, (_, n) => (+n + band * colors.length) + 'px')));
+  return `repeating-linear-gradient(180deg, ${doubled.join(', ')})`;
+}
+
+/* ── Auto-size text to fit card ── */
+function fitText(el) {
+  el.style.fontSize = '';
+  const content = el.closest('.card-content');
+  if (!content) return;
+  const cardH   = document.getElementById('card-face').offsetHeight;
+  const padV    = parseFloat(getComputedStyle(content).paddingTop) * 2;
+  const ringH   = document.getElementById('pause-ring').offsetHeight + 10;
+  const avail   = cardH - padV - ringH - 16;
+  const maxPx   = Math.min(48, cardH * 0.13);
+  const minPx   = 15;
+  let lo = minPx, hi = maxPx, best = minPx;
+  for (let step = 0; step < 14; step++) {
+    const mid = Math.round((lo + hi) / 2);
+    el.style.fontSize = mid + 'px';
+    if (el.scrollHeight <= avail) { best = mid; lo = mid + 1; }
+    else { hi = mid - 1; }
+  }
+  el.style.fontSize = best + 'px';
+}
+
+/* ── Word-wrap for dancing ── */
+function wrapWords(el, text) {
+  el.innerHTML = text.split(' ').map((w, i) =>
+    `<span class="word" style="--wdel:${(i*.07).toFixed(2)}s;--wd:${(.4+Math.random()*.2).toFixed(2)}s">${w}</span>`
+  ).join(' ');
+}
+
+/* ── Motes ── */
+const MOTE_COLORS = ['#c0ffcc','#c0eeff','#ffeeaa','#b0f0ff','#fff','#8de8dc'];
+const sparkL = document.getElementById('sparkle-layer');
+function burstMotes() {
+  sparkL.innerHTML = '';
+  for (let i = 0; i < 18; i++) {
+    const m = document.createElement('div');
+    m.className = 'mote';
+    const sz = 5 + Math.random() * 9;
+    const x  = 10 + Math.random() * 80;
+    const y  = 15 + Math.random() * 65;
+    const tx = (Math.random() - .5) * 70 + 'px';
+    const ty = -(18 + Math.random() * 55) + 'px';
+    const md = (.45 + Math.random() * .55) + 's';
+    const mc = MOTE_COLORS[Math.floor(Math.random() * MOTE_COLORS.length)];
+    m.style.cssText = `width:${sz}px;height:${sz}px;left:${x}%;top:${y}%;--tx:${tx};--ty:${ty};--md:${md};--mc:${mc};animation-delay:${(Math.random()*.1).toFixed(2)}s`;
+    sparkL.appendChild(m);
+  }
+  setTimeout(() => { sparkL.innerHTML = ''; }, 1400);
+}
+
+/* ── DOM refs ── */
+const enTextEl       = document.getElementById('en-text');
+const cardFace       = document.getElementById('card-face');
+const stripeEl       = document.getElementById('stripe-layer');
+const sectionDot     = document.getElementById('section-dot');
+const sectionLabel   = document.getElementById('section-label');
+const trackCounter   = document.getElementById('track-counter');
+const progressFill   = document.getElementById('progress-fill');
+const pauseRing      = document.getElementById('pause-ring');
+const ringFg         = document.getElementById('ring-fg');
+const btnPlayPause   = document.getElementById('btn-playpause');
+const btnSlow        = document.getElementById('btn-slow');
+const btnPrev        = document.getElementById('btn-prev');
+const btnNext        = document.getElementById('btn-next');
+
+/* ── State ── */
+let trackIdx    = 0;
+let isPlaying   = false;
+let slowMode    = false;
+let pauseTimer  = null;
+let ringTimer   = null;
+let ringStart   = 0;
+let ringDur     = 0;
+let ringRAF     = null;
+const TOTAL     = TRACKS.length;
+
+/* ── Audio ── */
+const audio = new Audio();
+audio.preload = 'auto';
+let primed = false;
+
+function primeAudio() {
+  if (primed) return;
+  audio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+  audio.play().then(() => { audio.pause(); audio.src = ''; primed = true; }).catch(() => {});
+}
+document.addEventListener('touchstart', primeAudio, { once: true, passive: true });
+document.addEventListener('click', primeAudio, { once: true });
+
+/* ── Apply section colour to CSS variables ── */
+function applyColor(col) {
+  document.documentElement.style.setProperty('--col-now', col);
+}
+
+/* ── Update UI for current track ── */
+function updateUI(track) {
+  const cfg   = SECTION_CFG[track.section];
+  const pals  = cfg.palettes;
+  const pal   = pals[trackIdx % pals.length];
+
+  /* Card stripe */
+  stripeEl.style.backgroundImage = makeStripe(pal);
+
+  /* Card border class */
+  cardFace.className = 'card-face ' + cfg.card;
+
+  /* Section colour */
+  applyColor(cfg.col);
+  sectionDot.style.background  = cfg.col;
+  sectionDot.style.boxShadow   = `0 0 10px ${cfg.col}`;
+  sectionLabel.textContent     = cfg.label;
+  sectionLabel.style.color     = cfg.col;
+
+  /* Counter */
+  trackCounter.textContent = `${trackIdx + 1} / ${TOTAL}`;
+
+  /* Progress bar */
+  progressFill.style.width      = ((trackIdx + 1) / TOTAL * 100).toFixed(1) + '%';
+  progressFill.style.background = cfg.col;
+  progressFill.style.boxShadow  = `0 0 8px ${cfg.col}`;
+
+  /* English text */
+  wrapWords(enTextEl, track.en);
+  enTextEl.classList.remove('dancing');
+  requestAnimationFrame(() => fitText(enTextEl));
+
+  /* Hide pause ring */
+  pauseRing.classList.remove('visible');
+  ringFg.style.strokeDashoffset = '0';
+}
+
+/* ── Countdown ring animation ── */
+function animateRing(durationMs) {
+  const circumference = 113; // 2π × r=18 ≈ 113
+  ringFg.style.transition = 'none';
+  ringFg.style.strokeDashoffset = '0';
+
+  ringStart = performance.now();
+  ringDur   = durationMs;
+
+  function step(now) {
+    const elapsed  = now - ringStart;
+    const fraction = Math.min(elapsed / ringDur, 1);
+    ringFg.style.strokeDashoffset = (circumference * fraction).toFixed(2);
+    if (fraction < 1) {
+      ringRAF = requestAnimationFrame(step);
+    }
+  }
+  cancelAnimationFrame(ringRAF);
+  ringRAF = requestAnimationFrame(step);
+}
+
+/* ── Play a single track ── */
+function playTrack(idx) {
+  clearTimeout(pauseTimer);
+  cancelAnimationFrame(ringRAF);
+
+  trackIdx = ((idx % TOTAL) + TOTAL) % TOTAL;
+  const track = TRACKS[trackIdx];
+  updateUI(track);
+
+  audio.pause();
+  audio.src = AUDIO_BASE + track.mp3;
+
+  audio.play().then(() => {
+    enTextEl.classList.add('dancing');
+    burstMotes();
+
+    audio.onended = () => {
+      enTextEl.classList.remove('dancing');
+      if (!isPlaying) return;
+      startPause(track);
+    };
+  }).catch(err => {
+    console.warn('[br_stream] audio failed:', err);
+    if (isPlaying) startPause(track);
+  });
+}
+
+/* ── Pause window with countdown ring ── */
+function startPause(track) {
+  const mult = slowMode ? 2 : 1;
+  const dur  = track.pause * mult * 1000;
+
+  pauseRing.classList.add('visible');
+  animateRing(dur);
+
+  pauseTimer = setTimeout(() => {
+    pauseRing.classList.remove('visible');
+    if (!isPlaying) return;
+    /* Advance — wrap back to 0 for looping */
+    playTrack((trackIdx + 1) % TOTAL);
+  }, dur);
+}
+
+/* ── Play / Pause toggle ── */
+function togglePlay() {
+  if (isPlaying) {
+    /* Pause everything */
+    isPlaying = false;
+    audio.pause();
+    clearTimeout(pauseTimer);
+    cancelAnimationFrame(ringRAF);
+    pauseRing.classList.remove('visible');
+    enTextEl.classList.remove('dancing');
+    btnPlayPause.innerHTML = '&#9654;';
+    btnPlayPause.classList.remove('playing');
+    btnPlayPause.setAttribute('aria-label', 'Play');
+  } else {
+    /* Start / resume */
+    isPlaying = true;
+    btnPlayPause.innerHTML = '&#9646;&#9646;';
+    btnPlayPause.classList.add('playing');
+    btnPlayPause.setAttribute('aria-label', 'Pause');
+    playTrack(trackIdx);
+  }
+}
+
+/* ── Skip buttons ── */
+btnPrev.addEventListener('click', () => {
+  clearTimeout(pauseTimer);
+  cancelAnimationFrame(ringRAF);
+  enTextEl.classList.remove('dancing');
+  pauseRing.classList.remove('visible');
+  const newIdx = ((trackIdx - 1) + TOTAL) % TOTAL;
+  if (isPlaying) playTrack(newIdx);
+  else { trackIdx = newIdx; updateUI(TRACKS[trackIdx]); }
+});
+
+btnNext.addEventListener('click', () => {
+  clearTimeout(pauseTimer);
+  cancelAnimationFrame(ringRAF);
+  enTextEl.classList.remove('dancing');
+  pauseRing.classList.remove('visible');
+  const newIdx = (trackIdx + 1) % TOTAL;
+  if (isPlaying) playTrack(newIdx);
+  else { trackIdx = newIdx; updateUI(TRACKS[trackIdx]); }
+});
+
+/* ── Play/Pause button ── */
+btnPlayPause.addEventListener('click', togglePlay);
+
+/* ── Slow toggle ── */
+btnSlow.addEventListener('click', () => {
+  slowMode = !slowMode;
+  btnSlow.classList.toggle('active', slowMode);
+  btnSlow.setAttribute('aria-pressed', slowMode);
+});
+
+/* ── Resize refit ── */
+window.addEventListener('resize', () => {
+  if (TRACKS[trackIdx]) requestAnimationFrame(() => fitText(enTextEl));
+});
+
+/* ── Init: show first track idle ── */
+updateUI(TRACKS[0]);
+</script>
+
+</body>
+</html>

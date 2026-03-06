@@ -1,1 +1,894 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Boo-riculum – Sentences</title>
+<meta name="theme-color" content="#0d1a09">
+<link rel="icon" type="image/png" href="../../boo-tree.png">
+<link href="https://fonts.googleapis.com/css2?family=Chau+Philomene+One&family=Nunito:wght@800;900&family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet" />
+
+<style>
+:root {
+  --bg:        #0d1a09;
+  --font-ui:   'Chau Philomene One', sans-serif;
+  --font-en:   'Nunito', sans-serif;
+  --font-jp:   'Noto Sans JP', sans-serif;
+  --white:     #ffffff;
+  --white-dim: rgba(255,255,255,.65);
+  --card-r:    28px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--white);
+  overflow: hidden;
+}
+
+#app {
+  height: 100dvh;
+  max-height: -webkit-fill-available;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+/* ── Background canvas ── */
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── Close button ── */
+#btn-close {
+  position: fixed;
+  top: 18px; right: 18px;
+  z-index: 9999;
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.35);
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .18s ease, border-color .18s ease;
+  animation: pulseClose 2.8s ease-in-out infinite;
+}
+#btn-close:hover {
+  transform: scale(1.15);
+  border-color: rgba(255,255,255,.75);
+  box-shadow: 0 0 20px rgba(255,255,255,.38), 0 0 44px rgba(255,255,255,.15);
+}
+#btn-close:active { transform: scale(.9); }
+#btn-close svg {
+  width: 22px; height: 22px;
+  stroke: #fff; stroke-width: 2.5; stroke-linecap: round;
+  filter: drop-shadow(0 0 5px rgba(255,255,255,.7));
+}
+@keyframes pulseClose {
+  0%,100% { box-shadow: 0 0 12px rgba(255,255,255,.18), 0 0 26px rgba(255,255,255,.07); }
+  50%     { box-shadow: 0 0 22px rgba(255,255,255,.36), 0 0 48px rgba(255,255,255,.14); }
+}
+
+/* ── Header ── */
+header {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 36px 20px 10px;
+  animation: fadeUp .9s cubic-bezier(.22,.8,.36,1) both;
+}
+.hdr-title {
+  font-family: var(--font-ui);
+  font-size: clamp(20px, 4.4vw, 44px);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--white);
+  text-shadow: 0 0 28px rgba(91,163,217,.6), 0 2px 8px rgba(0,0,0,.8);
+  line-height: 1.05;
+}
+.hdr-jp {
+  font-family: var(--font-jp);
+  font-size: clamp(12px, 2vw, 17px);
+  color: var(--white-dim);
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+.hdr-sub {
+  font-family: var(--font-ui);
+  font-size: clamp(13px, 2vw, 17px);
+  color: var(--white);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 6px;
+  text-shadow: 0 1px 6px rgba(0,0,0,.6);
+}
+.divider {
+  width: clamp(80px, 28vw, 200px);
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.3), transparent);
+  border-radius: 2px;
+  margin: 8px auto 0;
+}
+
+/* ── Card counter ── */
+.card-counter {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-ui);
+  font-size: clamp(12px, 1.8vw, 15px);
+  color: var(--white-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+/* ── Card wrapper ── */
+/* Sentences need more vertical room — use 4:3 ratio instead of 3:2 */
+.card-area {
+  position: relative;
+  z-index: 1;
+  width: min(92vw, 740px);
+  flex-shrink: 0;
+  margin-top: 10px;
+  perspective: 1200px;
+}
+
+.card-scene {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform .55s cubic-bezier(.4,0,.2,1);
+  cursor: pointer;
+}
+.card-scene.flipped { transform: rotateY(180deg); }
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--card-r);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+  border: 3px solid rgba(255,255,255,.22);
+  box-shadow: 0 20px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.07) inset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #111;
+  isolation: isolate;
+  will-change: transform;
+}
+.card-back { transform: rotateY(180deg); }
+
+.card-face .stripe-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-size: 100% 240px;
+  animation: stripeScroll 7s linear infinite;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+@keyframes stripeScroll {
+  from { background-position: 0 0; }
+  to   { background-position: 0 240px; }
+}
+
+/* Frosted overlay — slightly stronger for sentences readability */
+.card-face .frosted {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(0,0,0,.38);
+}
+
+.card-face .content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: clamp(18px, 4vw, 36px) clamp(20px, 5vw, 48px);
+  gap: clamp(8px, 1.8vw, 16px);
+  text-align: center;
+}
+
+/* ── FRONT: English sentence ── */
+/* Sentences wrap naturally — size scales to fit via JS, never breaks mid-word */
+.en-sentence {
+  font-family: var(--font-en);
+  font-weight: 900;
+  font-size: clamp(20px, 4.2vw, 48px);
+  line-height: 1.3;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0,0,0,.75);
+  /* Allow wrapping, but prefer balanced natural breaks */
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+  max-width: 100%;
+  letter-spacing: .2px;
+}
+
+/* Word-level dancing spans */
+.en-sentence .word {
+  display: inline-block;
+  /* space between words preserved by a trailing space in JS */
+}
+.en-sentence.dancing .word {
+  animation: wordBounce var(--wd, .55s) ease-in-out infinite alternate;
+  animation-delay: var(--wdel, 0s);
+}
+@keyframes wordBounce {
+  0%   { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-10px) scale(1.05); }
+}
+
+/* Flip hint */
+.flip-hint {
+  position: absolute;
+  bottom: 12px; right: 16px;
+  font-family: var(--font-ui);
+  font-size: clamp(10px, 1.3vw, 12px);
+  color: rgba(255,255,255,.4);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* ── BACK: Kanji + Hiragana ── */
+.jp-kanji {
+  font-family: var(--font-jp);
+  font-weight: 900;
+  font-size: clamp(20px, 4.2vw, 46px);
+  line-height: 1.45;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0,0,0,.75);
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+  max-width: 95%;
+}
+.jp-hira {
+  font-family: var(--font-jp);
+  font-weight: 500;
+  font-size: clamp(13px, 2.6vw, 26px);
+  color: rgba(255,255,255,.82);
+  line-height: 1.55;
+  text-shadow: 0 1px 6px rgba(0,0,0,.7);
+  max-width: 95%;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+  margin-top: clamp(4px, 1vw, 10px);
+  /* clearly secondary to kanji */
+  letter-spacing: .03em;
+}
+
+/* ── Sparkle motes ── */
+#sparkle-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--card-r);
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 10;
+}
+.mote {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  background: radial-gradient(circle, var(--mc, #fff) 0%, transparent 70%);
+  animation: motePop var(--md, .9s) ease-out forwards;
+}
+@keyframes motePop {
+  0%   { opacity: 0; transform: translate(-50%,-50%) scale(.3); }
+  15%  { opacity: 1; transform: translate(-50%,-50%) scale(1.15); }
+  100% { opacity: 0; transform: translate(var(--tx,0), var(--ty,-50px)) scale(.4); }
+}
+
+/* ── Controls ── */
+.controls {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: clamp(12px, 2.8vw, 22px);
+  justify-content: center;
+  align-items: center;
+  margin-top: clamp(10px, 1.8vh, 22px);
+  padding: 0 16px 20px;
+  flex-shrink: 0;
+}
+
+.btn {
+  width: clamp(62px, 10.5vw, 80px);
+  height: clamp(62px, 10.5vw, 80px);
+  border-radius: 20px;
+  border: 3px solid rgba(255,255,255,.25);
+  background: rgba(255,255,255,.10);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--white);
+  font-family: var(--font-ui);
+  font-size: clamp(20px, 3.8vw, 32px);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .15s ease, border-color .15s ease, background .15s ease;
+  box-shadow: 0 8px 24px rgba(0,0,0,.4);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
+}
+.btn:hover {
+  background: rgba(255,255,255,.18);
+  border-color: rgba(255,255,255,.55);
+  transform: scale(1.06);
+}
+.btn:active { transform: scale(.92); }
+
+/* Play — sky blue glow (matches sentences tile on index) */
+#btn-play {
+  background: linear-gradient(145deg, #1070c0, #073568);
+  border-color: #4ab8ff;
+  box-shadow: 0 0 18px rgba(74,184,255,.45), 0 8px 24px rgba(0,0,0,.4);
+}
+#btn-play:hover {
+  background: linear-gradient(145deg, #1a8fe0, #0d5090);
+  border-color: #88d8ff;
+  box-shadow: 0 0 28px rgba(74,184,255,.65), 0 8px 24px rgba(0,0,0,.4);
+}
+#btn-play.cooling {
+  opacity: .55;
+  pointer-events: none;
+}
+
+/* ── Warning toast ── */
+#warning-toast {
+  position: fixed;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  z-index: 9999;
+  background: rgba(10,10,10,.92);
+  border: 2px solid rgba(255,100,100,.6);
+  border-radius: 16px;
+  padding: 14px 22px;
+  text-align: center;
+  font-family: var(--font-jp);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 30px rgba(255,80,80,.3);
+  transition: transform .35s cubic-bezier(.34,1.56,.64,1), opacity .35s ease;
+  opacity: 0;
+  pointer-events: none;
+  max-width: min(90vw, 360px);
+}
+#warning-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+#warning-toast .warn-jp {
+  font-size: clamp(14px, 3vw, 18px);
+  font-weight: 700; color: #ff8888; line-height: 1.5;
+}
+#warning-toast .warn-en {
+  font-size: clamp(11px, 2vw, 13px);
+  color: rgba(255,255,255,.55);
+  margin-top: 4px;
+  font-family: var(--font-ui);
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+/* ── Entrance animations ── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(18px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.card-area { animation: fadeUp .8s cubic-bezier(.22,.8,.36,1) .15s both; }
+.controls  { animation: fadeUp .8s cubic-bezier(.22,.8,.36,1) .28s both; }
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .card-scene { transition: none; }
+  .stripe-layer { animation: none; }
+  .en-sentence.dancing .word { animation: none; }
+  .mote { animation: none; opacity: 0; }
+}
+
+/* ── Landscape phone ── */
+@media (orientation: landscape) and (max-height: 520px) {
+  header        { padding: 14px 70px 4px; }
+  .hdr-title    { font-size: clamp(13px, 2.8vw, 20px); }
+  .hdr-jp       { font-size: clamp(10px, 1.5vw, 13px); }
+  .hdr-sub      { font-size: clamp(11px, 1.5vw, 13px); margin-top: 2px; }
+  .divider      { margin: 3px auto 0; }
+  .card-counter { margin-top: 4px; font-size: 11px; }
+  .card-area    { width: min(62vw, 520px); margin-top: 4px; }
+  .controls     { margin-top: 6px; gap: 9px; padding-bottom: 12px; }
+  .btn          { width: 50px; height: 50px; font-size: 19px; border-radius: 13px; }
+}
+
+/* ── Small portrait ── */
+@media (max-width: 380px) {
+  .card-area { width: 94vw; }
+  .btn       { width: 56px; height: 56px; font-size: 19px; }
+}
+</style>
+</head>
+
+<body>
+<div id="app">
+
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+  <button id="btn-close" aria-label="Back to menu" onclick="history.back()">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <line x1="5" y1="5" x2="19" y2="19"/>
+      <line x1="19" y1="5" x2="5" y2="19"/>
+    </svg>
+  </button>
+
+  <div id="warning-toast" role="alert" aria-live="assertive">
+    <div class="warn-jp">ボタンを連打しないでください！<br>少し待ってから押してね。</div>
+    <div class="warn-en">Please wait before pressing again.</div>
+  </div>
+
+  <!-- ══ HEADER ══ -->
+  <header>
+    <div class="hdr-title">Boo-riculum Sentences</div>
+    <div class="hdr-jp">ブーリキュラム・文</div>
+    <div class="divider" aria-hidden="true"></div>
+    <!-- ★ CHANGE WEEK LABEL HERE ★ -->
+    <div class="hdr-sub">March Week 1 &middot; 3月第1週</div>
+  </header>
+
+  <div class="card-counter" id="card-counter">1 / 15</div>
+
+  <!-- ══ CARD ══ -->
+  <div class="card-area">
+    <div class="card-scene" id="card-scene">
+
+      <!-- Front: English sentence -->
+      <div class="card-face card-front">
+        <div class="stripe-layer" id="stripe-front"></div>
+        <div class="frosted"></div>
+        <div class="content">
+          <div class="en-sentence" id="en-sentence"></div>
+        </div>
+        <div class="flip-hint">Tap to flip</div>
+      </div>
+
+      <!-- Back: Japanese -->
+      <div class="card-face card-back">
+        <div class="stripe-layer" id="stripe-back"></div>
+        <div class="frosted"></div>
+        <div class="content">
+          <div class="jp-kanji" id="jp-kanji"></div>
+          <div class="jp-hira"  id="jp-hira"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="sparkle-layer" aria-hidden="true"></div>
+  </div>
+
+  <!-- ══ CONTROLS ══ -->
+  <div class="controls">
+    <button class="btn" id="btn-prev" aria-label="Previous card">&#10094;</button>
+    <button class="btn" id="btn-flip" aria-label="Flip card">&#8635;</button>
+    <button class="btn" id="btn-next" aria-label="Next card">&#10095;</button>
+    <button class="btn" id="btn-play" aria-label="Play audio">&#9654;</button>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════
+     BACKGROUND PARTICLES
+     ══════════════════════════════════════ -->
+<script>
+(function () {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  const COLORS = [
+    '#20a8f0','#60d8ff','#30d050','#4df070',
+    '#f0aa00','#ffe060','#28c890','#b0f040',
+    '#ff9040','#a8e8ff'
+  ];
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+  const PARTS = [];
+  function makePart(scatter) {
+    return {
+      x: Math.random() * (canvas.width || 400),
+      y: scatter ? Math.random() * (canvas.height || 700) : (canvas.height || 700) + 10,
+      r: .7 + Math.random() * 2,
+      vx: (Math.random() - .5) * .2,
+      vy: -.06 - Math.random() * .16,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      alpha: .08 + Math.random() * .22,
+      life: scatter ? Math.random() : 0,
+    };
+  }
+  for (let i = 0; i < 55; i++) PARTS.push(makePart(true));
+  function tick() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < PARTS.length; i++) {
+      const p = PARTS[i];
+      p.x += p.vx; p.y += p.vy; p.life += .0032;
+      if (p.y < -10 || p.life > 1) { PARTS[i] = makePart(false); continue; }
+      const a = p.alpha * Math.sin(p.life * Math.PI);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = a;
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+</script>
+
+<!-- ══════════════════════════════════════
+     FLASHCARD LOGIC
+     ══════════════════════════════════════ -->
+<script>
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ★★★  WEEKLY CONTENT — CHANGE THIS EACH WEEK  ★★★
+
+   AUDIO PATH: assets/audio/march/
+   Files:      br_s01_****.mp3  →  br_s15_****.mp3
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const AUDIO_BASE = 'assets/audio/march/';
+
+const CARDS = [
+  {
+    en:   'I want to be a teacher.',
+    jp:   '先生になりたいです。',
+    hira: 'せんせい に なりたい です',
+    mp3:  'br_s01_i_want_to_be_a_teacher.mp3'
+  },
+  {
+    en:   'I want to be a doctor because I like helping people.',
+    jp:   '人を助けるのが好きなので医者になりたいです。',
+    hira: 'ひと を たすける の が すき なので いしゃ に なりたい です',
+    mp3:  'br_s02_i_want_to_be_a_doctor.mp3'
+  },
+  {
+    en:   'I want to be a pilot and travel the world.',
+    jp:   'パイロットになって世界を旅したいです。',
+    hira: 'ぱいろっと に なって せかい を たび したい です',
+    mp3:  'br_s03_i_want_to_be_a_pilot.mp3'
+  },
+  {
+    en:   'I want to be an artist because I love drawing.',
+    jp:   '絵を描くのが大好きなので芸術家になりたいです。',
+    hira: 'え を かく の が だいすき なので げいじゅつか に なりたい です',
+    mp3:  'br_s04_i_want_to_be_an_artist.mp3'
+  },
+  {
+    en:   'I want to work in an office.',
+    jp:   'オフィスで働きたいです。',
+    hira: 'おふぃす で はたらきたい です',
+    mp3:  'br_s05_i_want_to_work_in_an_office.mp3'
+  },
+  {
+    en:   'I want to help my town.',
+    jp:   '町の役に立ちたいです。',
+    hira: 'まち の やく に たちたい です',
+    mp3:  'br_s06_i_want_to_help_my_town.mp3'
+  },
+  {
+    en:   'I want to cook in a restaurant.',
+    jp:   'レストランで料理をしたいです。',
+    hira: 'れすとらん で りょうり を したい です',
+    mp3:  'br_s07_i_want_to_cook_in_a_restaurant.mp3'
+  },
+  {
+    en:   'I want to study science in the future.',
+    jp:   '将来は科学を勉強したいです。',
+    hira: 'しょうらい は かがく を べんきょう したい です',
+    mp3:  'br_s08_i_want_to_study_science.mp3'
+  },
+  {
+    en:   'I want to be a nurse like my mother.',
+    jp:   '母のように看護師になりたいです。',
+    hira: 'はは の よう に かんごし に なりたい です',
+    mp3:  'br_s09_i_want_to_be_a_nurse.mp3'
+  },
+  {
+    en:   'I want to design games someday.',
+    jp:   'いつかゲームを作りたいです。',
+    hira: 'いつか げーむ を つくりたい です',
+    mp3:  'br_s10_i_want_to_design_games.mp3'
+  },
+  {
+    en:   'I want to work outside.',
+    jp:   '外で働きたいです。',
+    hira: 'そと で はたらきたい です',
+    mp3:  'br_s11_i_want_to_work_outside.mp3'
+  },
+  {
+    en:   'I want to use English in my job.',
+    jp:   '仕事で英語を使いたいです。',
+    hira: 'しごと で えいご を つかいたい です',
+    mp3:  'br_s12_i_want_to_use_english.mp3'
+  },
+  {
+    en:   'I want to help children learn.',
+    jp:   '子どもたちが学ぶのを助けたいです。',
+    hira: 'こどもたち が まなぶ の を たすけたい です',
+    mp3:  'br_s13_i_want_to_help_children.mp3'
+  },
+  {
+    en:   'I want to work hard and be happy.',
+    jp:   '一生懸命働いて幸せになりたいです。',
+    hira: 'いっしょうけんめい はたらいて しあわせ に なりたい です',
+    mp3:  'br_s14_i_want_to_work_hard.mp3'
+  },
+  {
+    en:   "I don't know yet, but I want to try many things.",
+    jp:   'まだ分かりませんが、いろいろなことに挑戦したいです。',
+    hira: 'まだ わかりません が、いろいろな こと に ちょうせん したい です',
+    mp3:  'br_s15_i_dont_know_yet.mp3'
+  },
+];
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   END OF WEEKLY CONTENT
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ── Nature stripe palettes ── */
+const PALETTES = [
+  ['#0d5fa8','#1a8fe0','#60c4ff'],   /* sky blue       */
+  ['#1a7a2e','#2ecc50','#6ee88a'],   /* forest green   */
+  ['#a06200','#d98c00','#ffc532'],   /* sunflower gold */
+  ['#0a6060','#18a8a8','#5cf0e0'],   /* ocean teal     */
+  ['#5a1a8a','#8e3dcc','#c87aff'],   /* wildflower     */
+  ['#8a1a1a','#cc3d3d','#ff8a7a'],   /* autumn berry   */
+  ['#3a5a00','#6a9a00','#b8f040'],   /* lime leaf      */
+  ['#5a3a00','#a07000','#f0c040'],   /* warm amber     */
+];
+
+/* ── Shuffle ── */
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+shuffle(CARDS);
+
+/* ── State ── */
+let idx     = 0;
+let flipped = false;
+
+/* ── DOM refs ── */
+const scene   = document.getElementById('card-scene');
+const enEl    = document.getElementById('en-sentence');
+const kanjiEl = document.getElementById('jp-kanji');
+const hiraEl  = document.getElementById('jp-hira');
+const sfEl    = document.getElementById('stripe-front');
+const sbEl    = document.getElementById('stripe-back');
+const counter = document.getElementById('card-counter');
+const sparkL  = document.getElementById('sparkle-layer');
+
+/* ── Stripe builder ── */
+function makeStripe(colors) {
+  const band = 40, stops = [];
+  colors.forEach((c, i) => {
+    const s = i * band;
+    stops.push(`${c} ${s}px ${s + band}px`);
+  });
+  const doubled = stops.concat(
+    stops.map(s => s.replace(/(\d+)px/g, (_, n) => (+n + band * colors.length) + 'px'))
+  );
+  return `repeating-linear-gradient(180deg, ${doubled.join(', ')})`;
+}
+
+/* ── Fit a single element (front English sentence) ── */
+function fitSingle(el, container) {
+  el.style.fontSize = '';
+  const cardH     = scene.offsetHeight;
+  const padV      = parseFloat(getComputedStyle(container).paddingTop) * 2;
+  const available = cardH - padV - 16;
+  const maxPx     = Math.min(48, cardH * 0.13);
+  const minPx     = 14;
+  let lo = minPx, hi = maxPx, best = minPx;
+  for (let step = 0; step < 14; step++) {
+    const mid = Math.round((lo + hi) / 2);
+    el.style.fontSize = mid + 'px';
+    if (el.scrollHeight <= available) { best = mid; lo = mid + 1; }
+    else { hi = mid - 1; }
+  }
+  el.style.fontSize = best + 'px';
+}
+
+/* ── Fit kanji + hira TOGETHER so their combined height never overflows ── */
+function fitJapanesePair(kanjiEl, hiraEl, container) {
+  /* Kanji:hira ratio stays fixed at ~1.7 : 1 */
+  const RATIO = 1.7;
+
+  const cardH     = scene.offsetHeight;
+  const padV      = parseFloat(getComputedStyle(container).paddingTop) * 2;
+  const gapPx     = parseFloat(getComputedStyle(container).gap) || 12;
+  const available = cardH - padV - gapPx - 20; /* 20px safety margin */
+
+  const maxKanji = Math.min(46, cardH * 0.125);
+  const minKanji = 13;
+
+  let lo = minKanji, hi = maxKanji, bestK = minKanji;
+
+  for (let step = 0; step < 16; step++) {
+    const midK = Math.round((lo + hi) / 2);
+    const midH = Math.max(11, Math.round(midK / RATIO));
+
+    kanjiEl.style.fontSize = midK + 'px';
+    hiraEl.style.fontSize  = midH + 'px';
+
+    const totalH = kanjiEl.scrollHeight + hiraEl.scrollHeight + gapPx;
+    if (totalH <= available) { bestK = midK; lo = midK + 1; }
+    else { hi = midK - 1; }
+  }
+
+  kanjiEl.style.fontSize = bestK + 'px';
+  hiraEl.style.fontSize  = Math.max(11, Math.round(bestK / RATIO)) + 'px';
+}
+
+/* ── Wrap each word in a span for dancing ── */
+function wrapWords(el, text) {
+  el.innerHTML = text.split(' ').map((word, i) =>
+    `<span class="word" style="--wdel:${(i * 0.07).toFixed(2)}s;--wd:${(.42 + Math.random()*.22).toFixed(2)}s">${word}</span>`
+  ).join(' ');
+}
+
+/* ── Show current card ── */
+function showCard() {
+  const card    = CARDS[idx];
+  const palette = PALETTES[idx % PALETTES.length];
+  const stripe  = makeStripe(palette);
+
+  sfEl.style.backgroundImage = stripe;
+  sbEl.style.backgroundImage = stripe;
+
+  wrapWords(enEl, card.en);
+  enEl.classList.remove('dancing');
+
+  kanjiEl.textContent = card.jp;
+  hiraEl.textContent  = card.hira;
+  counter.textContent = `${idx + 1} / ${CARDS.length}`;
+
+  scene.classList.toggle('flipped', flipped);
+
+  /* Fit after DOM settles */
+  requestAnimationFrame(() => {
+    /* Front: fit English sentence solo */
+    const frontContent = document.querySelector('.card-front .content');
+    if (frontContent) fitSingle(enEl, frontContent);
+
+    /* Back: fit kanji + hira as a unit so they never overflow together */
+    const backContent = document.querySelector('.card-back .content');
+    if (backContent) fitJapanesePair(kanjiEl, hiraEl, backContent);
+  });
+}
+
+/* ── Mote burst ── */
+const MOTE_COLORS = ['#c0eeff','#a8e8ff','#c0ffcc','#ffeeaa','#fff','#b0f0ff'];
+function burstMotes() {
+  sparkL.innerHTML = '';
+  for (let i = 0; i < 22; i++) {
+    const m = document.createElement('div');
+    m.className = 'mote';
+    const sz = 5 + Math.random() * 10;
+    const x  = 8 + Math.random() * 84;
+    const y  = 20 + Math.random() * 60;
+    const tx = (Math.random() - .5) * 80 + 'px';
+    const ty = -(20 + Math.random() * 70) + 'px';
+    const md = (.5 + Math.random() * .6) + 's';
+    const mc = MOTE_COLORS[Math.floor(Math.random() * MOTE_COLORS.length)];
+    m.style.cssText = `width:${sz}px;height:${sz}px;left:${x}%;top:${y}%;--tx:${tx};--ty:${ty};--md:${md};--mc:${mc};animation-delay:${(Math.random()*.12).toFixed(2)}s`;
+    sparkL.appendChild(m);
+  }
+  setTimeout(() => { sparkL.innerHTML = ''; }, 1400);
+}
+
+/* ── Audio ── */
+const audio = new Audio();
+audio.preload = 'auto';
+let audioPrimed = false;
+
+function primeAudio() {
+  if (audioPrimed) return;
+  audio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+  audio.play().then(() => { audio.pause(); audio.src = ''; audioPrimed = true; }).catch(() => {});
+}
+document.addEventListener('touchstart', primeAudio, { once: true, passive: true });
+document.addEventListener('click',      primeAudio, { once: true });
+
+/* ── Button-smash protection ── */
+let playLocked  = false;
+let smashCount  = 0;
+const SMASH_LIM = 3;
+const toast     = document.getElementById('warning-toast');
+let toastTimer  = null;
+
+function showWarning() {
+  if (toastTimer) clearTimeout(toastTimer);
+  toast.classList.add('show');
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
+}
+
+async function playAudio() {
+  if (playLocked) {
+    smashCount++;
+    if (smashCount >= SMASH_LIM) showWarning();
+    return;
+  }
+  const card = CARDS[idx];
+  if (!card?.mp3) return;
+
+  playLocked = true;
+  const btnPlay = document.getElementById('btn-play');
+  btnPlay.classList.add('cooling');
+  smashCount = 0;
+
+  enEl.classList.add('dancing');
+
+  audio.src = AUDIO_BASE + card.mp3;
+  try {
+    await audio.play();
+    audio.onended = () => {
+      enEl.classList.remove('dancing');
+      playLocked = false;
+      btnPlay.classList.remove('cooling');
+    };
+  } catch (e) {
+    console.warn('[br_sentences] audio play failed:', e);
+    enEl.classList.remove('dancing');
+    playLocked = false;
+    btnPlay.classList.remove('cooling');
+  }
+  burstMotes();
+}
+
+/* ── Nav ── */
+function resetPlay() {
+  audio.pause();
+  enEl.classList.remove('dancing');
+  playLocked = false;
+  document.getElementById('btn-play').classList.remove('cooling');
+}
+function goNext() { idx = (idx + 1) % CARDS.length; flipped = false; resetPlay(); showCard(); }
+function goPrev() { idx = (idx - 1 + CARDS.length) % CARDS.length; flipped = false; resetPlay(); showCard(); }
+function doFlip() { flipped = !flipped; scene.classList.toggle('flipped', flipped); }
+
+document.getElementById('btn-prev').addEventListener('click', goPrev);
+document.getElementById('btn-next').addEventListener('click', goNext);
+document.getElementById('btn-flip').addEventListener('click', doFlip);
+document.getElementById('btn-play').addEventListener('click', playAudio);
+scene.addEventListener('click', doFlip);
+
+window.addEventListener('resize', () => showCard());
+
+showCard();
+</script>
+
+</body>
+</html>
