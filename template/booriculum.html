@@ -1,0 +1,676 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Boo-riculum Study Decks</title>
+<meta name="theme-color" content="#0d1f0a">
+<link rel="icon" type="image/png" href="../assets/img/boo-tree.png">
+<link href="https://fonts.googleapis.com/css2?family=Chau+Philomene+One&display=swap" rel="stylesheet" />
+
+<style>
+/* ── Nature palette — Deck 1 of 3 ──
+   Tile 1: Canopy Green  |  Tile 2: Sky Blue  |  Tile 3: Sunflower Gold */
+:root {
+  --bg:  #0d1a09;
+
+  /* Tile 1 — Canopy Green */
+  --c1-bg:     linear-gradient(145deg, #1f8f35 0%, #0e4019 55%, #165c25 100%);
+  --c1-border: #5ee87a;
+  --c1-halo:   rgba(94,232,122,.6);
+  --c1-ring-a: #30d050;
+  --c1-ring-b: #aaff88;
+  --c1-mote:   #c0ffcc;
+
+  /* Tile 2 — Sky Blue */
+  --c2-bg:     linear-gradient(145deg, #1070c0 0%, #073568 55%, #0d5090 100%);
+  --c2-border: #55c8ff;
+  --c2-halo:   rgba(85,200,255,.6);
+  --c2-ring-a: #20a8f0;
+  --c2-ring-b: #a8e8ff;
+  --c2-mote:   #c0eeff;
+
+  /* Tile 3 — Sunflower Gold */
+  --c3-bg:     linear-gradient(145deg, #b87000 0%, #542e00 55%, #7a4400 100%);
+  --c3-border: #ffcc44;
+  --c3-halo:   rgba(255,204,68,.6);
+  --c3-ring-a: #f0aa00;
+  --c3-ring-b: #ffe878;
+  --c3-mote:   #ffeeaa;
+
+  /* Tile 4 — Wild Berry */
+  --c4-bg:     linear-gradient(145deg, #a01858 0%, #500828 55%, #780c3c 100%);
+  --c4-border: #ff6aaa;
+  --c4-halo:   rgba(255,106,170,.6);
+  --c4-ring-a: #ee3888;
+  --c4-ring-b: #ffaacc;
+  --c4-mote:   #ffccdd;
+
+  --white:     #ffffff;
+  --white-dim: rgba(255,255,255,.62);
+
+  --tile-w: 158px;
+  --tile-h: 158px;
+  --tile-r: 26px;
+  --font:   'Chau Philomene One', sans-serif;
+}
+
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--white);
+  overflow: hidden;
+}
+
+/* ── Scroll container ── */
+#app {
+  position: relative;
+  z-index: 1;
+  height: 100dvh;
+  max-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* ── Background canvas ── */
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── Page layout ── */
+#welcome {
+  position: relative;
+  z-index: 1;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px 20px 32px;
+  gap: 8px;
+  animation: fadeUp 1.2s cubic-bezier(.22,.8,.36,1) both;
+}
+
+/* ── Boo-tree icon ── */
+.boo-icon {
+  width: clamp(58px, 12vw, 88px);
+  height: auto;
+  filter:
+    drop-shadow(0 0 22px rgba(48,208,80,.65))
+    drop-shadow(0 0 8px rgba(48,208,80,.4));
+  animation: floatIcon 4.5s ease-in-out infinite;
+  margin-bottom: 2px;
+}
+@keyframes floatIcon {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-9px); }
+}
+
+/* ── Titles ── */
+.title-en {
+  font-size: clamp(28px, 5.8vw, 60px);
+  letter-spacing: 1.5px;
+  line-height: 1.06;
+  color: var(--white);
+  text-transform: uppercase;
+  text-shadow:
+    0 0 32px rgba(48,208,80,.45),
+    0 2px 10px rgba(0,0,0,.8);
+  margin-top: 4px;
+}
+
+.title-jp {
+  font-size: clamp(12px, 2.3vw, 19px);
+  color: var(--white-dim);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+
+/* ── Divider ── */
+.divider {
+  width: clamp(90px, 32vw, 220px);
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.3), transparent);
+  border-radius: 2px;
+  margin: 8px 0 4px;
+}
+
+/* ── Subtitle ── */
+.subtitle {
+  font-size: clamp(13px, 2.4vw, 19px);
+  color: var(--white);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  text-shadow: 0 1px 8px rgba(0,0,0,.65);
+  margin-bottom: 4px;
+}
+
+/* ── 2x2 grid (3rd tile centered) ── */
+.deck-links {
+  display: grid;
+  grid-template-columns: repeat(2, var(--tile-w));
+  gap: 1rem;
+  padding: 14px 0 6px;
+}
+
+/* ── Single tile ── */
+a.deck {
+  width: var(--tile-w);
+  height: var(--tile-h);
+  border-radius: var(--tile-r);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  overflow: visible;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: pan-y manipulation;
+  transition: transform .22s cubic-bezier(.34,1.56,.64,1);
+  transform: translateZ(0);
+  z-index: 1;
+}
+
+/* Spinning ring */
+a.deck::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: calc(var(--tile-r) + 5px);
+  background: conic-gradient(
+    from var(--angle, 0deg),
+    var(--ring-a) 0%, var(--ring-b) 25%,
+    var(--ring-a) 50%, var(--ring-b) 75%,
+    var(--ring-a) 100%
+  );
+  opacity: .5;
+  z-index: -1;
+  filter: blur(2.5px);
+  animation: spinRing 7s linear infinite;
+  pointer-events: none;
+}
+
+/* Bloom halo */
+a.deck::after {
+  content: "";
+  position: absolute;
+  inset: -46px;
+  border-radius: 50%;
+  z-index: -2;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(.6) translateZ(0);
+  transition: opacity .28s, transform .28s;
+  background: radial-gradient(circle, var(--halo) 0%, transparent 70%);
+}
+
+/* Tile face */
+a.deck .clip {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  z-index: 2;
+  border: 3px solid var(--border-c);
+  box-shadow:
+    0 14px 40px rgba(0,0,0,.7),
+    0 0 0 1px rgba(255,255,255,.08) inset,
+    0 1px 0 rgba(255,255,255,.18) inset;
+}
+
+/* Tile fill */
+a.deck .inner {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 10px;
+  gap: 5px;
+  background: var(--tile-bg);
+  text-align: center;
+  line-height: 1.1;
+  transition: filter .2s;
+}
+
+/* Shimmer on hover */
+a.deck .inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(115deg, transparent 25%, rgba(255,255,255,.1) 50%, transparent 75%);
+  background-size: 200% 200%;
+  background-position: 160% 0;
+  pointer-events: none;
+  transition: background-position .45s ease;
+}
+a.deck:hover .inner::after { background-position: -60% 100%; }
+
+/* Text */
+a.deck .label {
+  display: block;
+  font-size: clamp(15px, 1.9vw, 18px);
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--white);
+  text-shadow: 0 1px 8px rgba(0,0,0,.75);
+  text-wrap: balance;
+}
+a.deck .jp {
+  display: block;
+  font-size: clamp(11px, 1.3vw, 13px);
+  color: rgba(255,255,255,.72);
+  letter-spacing: 1px;
+  text-shadow: 0 1px 4px rgba(0,0,0,.6);
+}
+
+/* Motes */
+a.deck .sparkles {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  border-radius: inherit;
+  overflow: hidden;
+}
+.mote {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  animation: moteFly var(--dur, .8s) ease-out forwards;
+  background: radial-gradient(circle, var(--mote-c, #fff) 0%, transparent 70%);
+}
+@keyframes moteFly {
+  0%   { opacity:0; transform:translate(-50%,-50%) scale(.3); }
+  18%  { opacity:1; transform:translate(-50%,-50%) scale(1.1); }
+  100% { opacity:0; transform:translate(var(--tx,0), var(--ty,-44px)) scale(.5); }
+}
+
+/* ── Per-tile color tokens ── */
+a.deck:nth-child(1) {
+  --tile-bg:  var(--c1-bg);
+  --border-c: var(--c1-border);
+  --halo:     var(--c1-halo);
+  --ring-a:   var(--c1-ring-a);
+  --ring-b:   var(--c1-ring-b);
+  --mote-c:   var(--c1-mote);
+}
+a.deck:nth-child(2) {
+  --tile-bg:  var(--c2-bg);
+  --border-c: var(--c2-border);
+  --halo:     var(--c2-halo);
+  --ring-a:   var(--c2-ring-a);
+  --ring-b:   var(--c2-ring-b);
+  --mote-c:   var(--c2-mote);
+}
+a.deck:nth-child(3) {
+  --tile-bg:  var(--c3-bg);
+  --border-c: var(--c3-border);
+  --halo:     var(--c3-halo);
+  --ring-a:   var(--c3-ring-a);
+  --ring-b:   var(--c3-ring-b);
+  --mote-c:   var(--c3-mote);
+}
+a.deck:nth-child(4) {
+  --tile-bg:  var(--c4-bg);
+  --border-c: var(--c4-border);
+  --halo:     var(--c4-halo);
+  --ring-a:   var(--c4-ring-a);
+  --ring-b:   var(--c4-ring-b);
+  --mote-c:   var(--c4-mote);
+}
+
+/* ── Hover ── */
+a.deck:hover {
+  transform: scale(1.06) translateY(-3px);
+  z-index: 10;
+}
+a.deck:hover::before { opacity: .85; }
+
+/* ── Playing / tap ── */
+a.deck.tap {
+  transform: scale(.92);
+  transition: transform .1s ease;
+}
+a.deck.playing {
+  transform: scale(1.1) translateY(-5px);
+  z-index: 999;
+  animation: bloom .45s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+a.deck.playing::after { opacity:1; transform:scale(1.2) translateZ(0); }
+a.deck.playing::before { opacity:1; animation:spinRing 1.1s linear infinite; }
+a.deck.playing .inner { animation:pulseInner 1.1s ease-in-out infinite; }
+
+@keyframes bloom {
+  0%   { transform: scale(1); }
+  60%  { transform: scale(1.13) translateY(-6px); }
+  100% { transform: scale(1.1)  translateY(-5px); }
+}
+@keyframes pulseInner {
+  0%,100% { filter: brightness(1); }
+  50%     { filter: brightness(1.3) saturate(1.25); }
+}
+@keyframes spinRing { to { --angle: 360deg; } }
+
+/* ── Entrance stagger ── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes tileIn {
+  from { opacity:0; transform:translateY(22px) scale(.88); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+.deck-links a.deck            { animation: tileIn .65s cubic-bezier(.22,.8,.36,1) both; }
+.deck-links a.deck:nth-child(1) { animation-delay: .22s; }
+.deck-links a.deck:nth-child(2) { animation-delay: .34s; }
+.deck-links a.deck:nth-child(3) { animation-delay: .46s; }
+.deck-links a.deck:nth-child(4) { animation-delay: .58s; }
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .boo-icon, a.deck::before, a.deck.playing { animation: none !important; }
+  a.deck.playing .inner { animation: none !important; }
+  .mote { animation: none !important; opacity: 0; }
+}
+
+/* ── Small portrait ── */
+@media (max-width: 390px) {
+  :root { --tile-w: 140px; --tile-h: 140px; --tile-r: 22px; }
+}
+
+/* ── Landscape phone: all 3 in a row ── */
+@media (orientation: landscape) and (max-height: 500px) {
+  :root { --tile-w: 124px; --tile-h: 124px; }
+  #welcome { padding: 14px 16px 14px; gap: 4px; }
+  .boo-icon { width: 40px; }
+  .title-en { font-size: clamp(18px, 3.8vw, 28px); }
+  .divider  { margin: 5px 0 2px; }
+  .deck-links {
+    grid-template-columns: repeat(3, var(--tile-w));
+    gap: .8rem;
+  }
+  a.deck:nth-child(3) { grid-column: auto; justify-self: auto; }
+}
+
+/* ── Close button ── */
+#btn-close {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 9999;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.35);
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .18s ease, border-color .18s ease;
+  box-shadow:
+    0 0 14px rgba(255,255,255,.18),
+    0 0 28px rgba(255,255,255,.08);
+  animation: pulseClose 2.8s ease-in-out infinite;
+}
+#btn-close:hover {
+  transform: scale(1.15);
+  border-color: rgba(255,255,255,.75);
+  box-shadow:
+    0 0 20px rgba(255,255,255,.38),
+    0 0 44px rgba(255,255,255,.15);
+}
+#btn-close:active { transform: scale(.9); }
+#btn-close svg {
+  width: 22px;
+  height: 22px;
+  stroke: #fff;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 5px rgba(255,255,255,.7));
+}
+@keyframes pulseClose {
+  0%,100% { box-shadow: 0 0 12px rgba(255,255,255,.18), 0 0 26px rgba(255,255,255,.07); }
+  50%     { box-shadow: 0 0 22px rgba(255,255,255,.36), 0 0 48px rgba(255,255,255,.14); }
+}
+</style>
+</head>
+
+<body>
+<div id="app">
+
+<canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+<button id="btn-close" aria-label="Close" onclick="window.location.href='../index.html'">
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <line x1="5" y1="5" x2="19" y2="19"/>
+    <line x1="19" y1="5" x2="5" y2="19"/>
+  </svg>
+</button>
+
+<audio id="clickBgm" preload="auto">
+  <source src="studydeck.mp3" type="audio/mpeg">
+</audio>
+
+<section id="welcome">
+
+  <img class="boo-icon" src="../assets/img/boo-tree.png" alt="Boo-tree" onerror="this.style.display='none'">
+
+  <h1 class="title-en">Boo-riculum<br>Study Decks</h1>
+  <p class="title-jp">ブーリキュラム・スタディデッキ</p>
+
+  <div class="divider" aria-hidden="true"></div>
+
+  <p class="subtitle">July Week 1 &middot; 7月第1週</p>
+
+  <div class="deck-links">
+
+    <a class="deck" href="#" data-file="br_vocab.html">
+      <div class="clip">
+        <div class="inner">
+          <span class="label">Vocabulary</span>
+          <span class="jp">語彙</span>
+        </div>
+        <div class="sparkles" aria-hidden="true"></div>
+      </div>
+    </a>
+
+    <a class="deck" href="#" data-file="br_sentences.html">
+      <div class="clip">
+        <div class="inner">
+          <span class="label">Sentences</span>
+          <span class="jp">文</span>
+        </div>
+        <div class="sparkles" aria-hidden="true"></div>
+      </div>
+    </a>
+
+    <a class="deck" href="#" data-file="br_questions.html">
+      <div class="clip">
+        <div class="inner">
+          <span class="label">Questions</span>
+          <span class="jp">質問</span>
+        </div>
+        <div class="sparkles" aria-hidden="true"></div>
+      </div>
+    </a>
+
+    <a class="deck" href="#" data-file="br_stream.html">
+      <div class="clip">
+        <div class="inner">
+          <span class="label">Stream</span>
+          <span class="jp">ストリーム</span>
+        </div>
+        <div class="sparkles" aria-hidden="true"></div>
+      </div>
+    </a>
+
+  </div>
+
+</section>
+
+<!-- ── Background: drifting nature particles ── -->
+<script>
+(function () {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  const COLORS = [
+    '#30d050','#4df070','#20a8f0','#60d8ff',
+    '#f0aa00','#ffe060','#28c890','#b0f040',
+    '#ff9040','#e8e080'
+  ];
+  const PARTS = [];
+  const N = 60;
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function makePart(scatter) {
+    return {
+      x:     Math.random() * (canvas.width  || 400),
+      y:     scatter ? Math.random() * (canvas.height || 700) : (canvas.height || 700) + 10,
+      r:     .7 + Math.random() * 2.1,
+      vx:    (Math.random() - .5) * .22,
+      vy:    -.06 - Math.random() * .18,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      alpha: .1 + Math.random() * .26,
+      life:  scatter ? Math.random() : 0,
+    };
+  }
+
+  for (let i = 0; i < N; i++) PARTS.push(makePart(true));
+
+  function tick() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < PARTS.length; i++) {
+      const p = PARTS[i];
+      p.x += p.vx; p.y += p.vy; p.life += .0033;
+      if (p.y < -10 || p.life > 1) { PARTS[i] = makePart(false); continue; }
+      const a = p.alpha * Math.sin(p.life * Math.PI);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = a;
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+</script>
+
+<!-- ── Week routing ── -->
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const week   = params.get('week');
+
+  if (!week) {
+    window.location.href = '../index.html';
+    return;
+  }
+
+  document.querySelectorAll('a.deck').forEach(deck => {
+    const file = deck.dataset.file;
+    if (file) deck.setAttribute('href', `../weeks/${week}/${file}`);
+  });
+})();
+</script>
+
+<!-- ── Interactions ── -->
+<script>
+const clickBgm = document.getElementById('clickBgm');
+let lockedUI = false;
+
+function stopBgm() {
+  try { clickBgm.pause(); clickBgm.currentTime = 0; } catch {}
+}
+
+function burstMotes(anchor) {
+  const box = anchor.querySelector('.sparkles');
+  if (!box) return;
+  box.innerHTML = '';
+  for (let i = 0; i < 16; i++) {
+    const m = document.createElement('div');
+    m.className = 'mote';
+    const sz  = 5 + Math.random() * 9;
+    const x   = 12 + Math.random() * 76;
+    const y   = 12 + Math.random() * 76;
+    const tx  = (Math.random() - .5) * 64 + 'px';
+    const ty  = -(18 + Math.random() * 52) + 'px';
+    const dur = (.45 + Math.random() * .55) + 's';
+    m.style.cssText = `width:${sz}px;height:${sz}px;left:${x}%;top:${y}%;--tx:${tx};--ty:${ty};--dur:${dur};animation-delay:${(Math.random()*.1)}s`;
+    box.appendChild(m);
+  }
+  setTimeout(() => { box.innerHTML = ''; }, 1200);
+}
+
+async function playThenGo(anchor) {
+  if (lockedUI) return;
+  lockedUI = true;
+  const url = anchor.getAttribute('href');
+
+  anchor.classList.add('tap');
+  setTimeout(() => anchor.classList.remove('tap'), 110);
+
+  document.querySelectorAll('a.deck').forEach(el => {
+    if (el !== anchor) el.style.pointerEvents = 'none';
+  });
+
+  stopBgm();
+  anchor.classList.add('playing');
+  burstMotes(anchor);
+
+  let navigated = false;
+  const go = () => { if (!navigated) { navigated = true; window.location.href = url; } };
+
+  clickBgm.onended = go;
+  const fallback = setTimeout(go, 900);
+
+  try {
+    clickBgm.volume = 0.95;
+    clickBgm.currentTime = 0;
+    await clickBgm.play();
+    clearTimeout(fallback);
+    setTimeout(go, 5200);
+  } catch (e) { go(); }
+}
+
+document.querySelectorAll('a.deck').forEach(a => {
+  a.addEventListener('click', e => { e.preventDefault(); playThenGo(a); }, { passive: false });
+});
+</script>
+
+</div>
+</body>
+</html>
