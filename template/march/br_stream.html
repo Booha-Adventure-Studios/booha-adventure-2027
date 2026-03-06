@@ -446,7 +446,7 @@ svg.ring-svg {
 
   <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
-  <button id="btn-close" aria-label="Close" onclick="window.close()">
+  <button id="btn-close" aria-label="Close" onclick="location.href='br_index.html'">
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <line x1="5" y1="5" x2="19" y2="19"/>
       <line x1="19" y1="5" x2="5" y2="19"/>
@@ -560,19 +560,6 @@ svg.ring-svg {
      STREAM LOGIC
      ══════════════════════════════════ -->
 <script>
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   STREAM SETTINGS
-
-   br_stream.json contains 180 ordered items:
-
-   1–60   vocab
-   61–120 sentences
-   121–180 questions
-
-   Each week plays 45 items:
-   vocab 15 → sentences 15 → questions 15
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
 const AUDIO_BASE = '../../assets/audio/march/boo_riculum/stream/';
 const JSON_URL   = 'br_stream.json';
 const DEFAULT_PAUSE = 5.5;
@@ -594,249 +581,393 @@ let ringRAF = null;
 let audioCache = {};
 let currentAudio = null;
 
-const enTextEl = document.getElementById('en-text');
-const stripeEl = document.getElementById('stripe-layer');
+const enTextEl     = document.getElementById('en-text');
+const stripeEl     = document.getElementById('stripe-layer');
 const trackCounter = document.getElementById('track-counter');
 const progressFill = document.getElementById('progress-fill');
-const pauseRing = document.getElementById('pause-ring');
-const ringFg = document.getElementById('ring-fg');
+const pauseRing    = document.getElementById('pause-ring');
+const ringFg       = document.getElementById('ring-fg');
 const btnPlayPause = document.getElementById('btn-playpause');
-const btnSlow = document.getElementById('btn-slow');
-const btnPrev = document.getElementById('btn-prev');
-const btnNext = document.getElementById('btn-next');
-const preloadBar = document.getElementById('preload-bar');
+const btnSlow      = document.getElementById('btn-slow');
+const btnPrev      = document.getElementById('btn-prev');
+const btnNext      = document.getElementById('btn-next');
+const preloadBar   = document.getElementById('preload-bar');
+const weekLabelEl  = document.getElementById('week-label');
+const progressLeft = document.getElementById('progress-left');
+const progressRight= document.getElementById('progress-right');
 
-/* ── Determine week ── */
-
-function getWeekKey() {
+/* ─────────────────────────────
+   WEEK LABEL + WEEK NUMBER
+───────────────────────────── */
+function parseWeekInfo() {
   const params = new URLSearchParams(window.location.search);
-  const week = params.get("week");
-  if (week) return week;
+  const weekParam = params.get('week') || '';
 
-  const parts = window.location.pathname.split("/");
-  const folder = parts[parts.length-2] || "";
-  const m = folder.match(/_w(\d)$/i);
-  return m ? "w"+m[1] : "w1";
+  // Matches: 2027_w09_mar_w1
+  let m = weekParam.match(/^(\d{4})_w(\d{2})_([a-z]{3})_w(\d)$/i);
+  if (m) {
+    const year = m[1];
+    const cycleWeek = m[2];
+    const mo = m[3].toLowerCase();
+    const wn = Number(m[4]);
+
+    const MO = {
+      jan:'January', feb:'February', mar:'March', apr:'April',
+      may:'May', jun:'June', jul:'July', aug:'August',
+      sep:'September', oct:'October', nov:'November', dec:'December'
+    };
+    const JP = {
+      jan:'1月', feb:'2月', mar:'3月', apr:'4月',
+      may:'5月', jun:'6月', jul:'7月', aug:'8月',
+      sep:'9月', oct:'10月', nov:'11月', dec:'12月'
+    };
+
+    weekLabelEl.innerHTML = `${MO[mo]} Week ${wn} &middot; ${JP[mo]}第${wn}週`;
+    return { weekNum: wn, monthKey: mo, cycleWeek, year };
+  }
+
+  // Fallback: mar_w1
+  m = weekParam.match(/^([a-z]{3})_w(\d)$/i);
+  if (m) {
+    const mo = m[1].toLowerCase();
+    const wn = Number(m[2]);
+
+    const MO = {
+      jan:'January', feb:'February', mar:'March', apr:'April',
+      may:'May', jun:'June', jul:'July', aug:'August',
+      sep:'September', oct:'October', nov:'November', dec:'December'
+    };
+    const JP = {
+      jan:'1月', feb:'2月', mar:'3月', apr:'4月',
+      may:'5月', jun:'6月', jul:'7月', aug:'8月',
+      sep:'9月', oct:'10月', nov:'11月', dec:'12月'
+    };
+
+    weekLabelEl.innerHTML = `${MO[mo]} Week ${wn} &middot; ${JP[mo]}第${wn}週`;
+    return { weekNum: wn, monthKey: mo, cycleWeek: null, year: null };
+  }
+
+  // Folder fallback
+  const parts = window.location.pathname.split('/');
+  const folder = parts[parts.length - 2] || '';
+  m = folder.match(/^([a-z]{3})$/i);
+
+  if (m) {
+    weekLabelEl.textContent = 'Month Stream';
+  } else {
+    weekLabelEl.textContent = 'Weekly Stream';
+  }
+
+  return { weekNum: 1, monthKey: 'mar', cycleWeek: null, year: null };
 }
 
-/* ── Calculate correct 45 items ── */
+/* ─────────────────────────────
+   BUILD 45-ITEM WEEK STREAM
+   br_stream.json order:
+   1–60 vocab
+   61–120 sentences
+   121–180 questions
+───────────────────────────── */
+function buildWeekStream(allCards, weekNum) {
+  const base = (weekNum - 1) * 15;
 
-function buildWeekStream(allCards, weekIndex) {
-
-  const base = (weekIndex-1)*15;
-
-  const vocab     = allCards.slice(base, base+15);
-  const sentences = allCards.slice(60+base, 60+base+15);
-  const questions = allCards.slice(120+base, 120+base+15);
+  const vocab     = allCards.slice(base, base + 15);
+  const sentences = allCards.slice(60 + base, 60 + base + 15);
+  const questions = allCards.slice(120 + base, 120 + base + 15);
 
   return [...vocab, ...sentences, ...questions];
 }
 
-/* ── Preload audio ── */
+/* ─────────────────────────────
+   HELPERS
+───────────────────────────── */
+function makeStripe(colors) {
+  const band = 40;
+  const stops = [];
+  colors.forEach((c, i) => {
+    const s = i * band;
+    stops.push(`${c} ${s}px ${s + band}px`);
+  });
+  const doubled = stops.concat(
+    stops.map(s => s.replace(/(\d+)px/g, (_, n) => (+n + band * colors.length) + 'px'))
+  );
+  return `repeating-linear-gradient(180deg, ${doubled.join(', ')})`;
+}
 
+function fitText(el) {
+  el.style.fontSize = '';
+  const content = el.closest('.card-content');
+  if (!content) return;
+
+  const cardH = document.getElementById('card-face').offsetHeight;
+  const padV = parseFloat(getComputedStyle(content).paddingTop) * 2;
+  const ringH = document.getElementById('pause-ring').offsetHeight + 10;
+  const avail = cardH - padV - ringH - 16;
+  const maxPx = Math.min(48, cardH * 0.13);
+  const minPx = 15;
+
+  let lo = minPx, hi = maxPx, best = minPx;
+  for (let step = 0; step < 14; step++) {
+    const mid = Math.round((lo + hi) / 2);
+    el.style.fontSize = mid + 'px';
+    if (el.scrollHeight <= avail) { best = mid; lo = mid + 1; }
+    else { hi = mid - 1; }
+  }
+  el.style.fontSize = best + 'px';
+}
+
+function wrapWords(el, text) {
+  el.innerHTML = text.split(' ').map((w, i) =>
+    `<span class="word" style="--wdel:${(i * .07).toFixed(2)}s;--wd:${(.4 + Math.random() * .2).toFixed(2)}s">${w}</span>`
+  ).join(' ');
+}
+
+const MOTE_COLORS = ['#c0ffcc','#c0eeff','#ffeeaa','#b0f0ff','#fff','#8de8dc'];
+const sparkL = document.getElementById('sparkle-layer');
+
+function burstMotes() {
+  sparkL.innerHTML = '';
+  for (let i = 0; i < 18; i++) {
+    const m = document.createElement('div');
+    m.className = 'mote';
+    const sz = 5 + Math.random() * 9;
+    const x  = 10 + Math.random() * 80;
+    const y  = 15 + Math.random() * 65;
+    const tx = (Math.random() - .5) * 70 + 'px';
+    const ty = -(18 + Math.random() * 55) + 'px';
+    const md = (.45 + Math.random() * .55) + 's';
+    const mc = MOTE_COLORS[Math.floor(Math.random() * MOTE_COLORS.length)];
+    m.style.cssText = `width:${sz}px;height:${sz}px;left:${x}%;top:${y}%;--tx:${tx};--ty:${ty};--md:${md};--mc:${mc};animation-delay:${(Math.random() * .1).toFixed(2)}s`;
+    sparkL.appendChild(m);
+  }
+  setTimeout(() => { sparkL.innerHTML = ''; }, 1400);
+}
+
+/* ─────────────────────────────
+   SECTION DISPLAY
+───────────────────────────── */
+function getSectionInfo(idx) {
+  if (idx < 15) return { label: 'Vocab', color: '#2ecc50' };
+  if (idx < 30) return { label: 'Sentences', color: '#1a8fe0' };
+  return { label: 'Questions', color: '#d98c00' };
+}
+
+/* ─────────────────────────────
+   PRELOAD
+───────────────────────────── */
 function preloadAudio(cards) {
-
   let loaded = 0;
+  audioCache = {};
 
-  cards.forEach(card=>{
+  cards.forEach(card => {
     const a = new Audio();
+    a.preload = 'auto';
     a.src = AUDIO_BASE + card.mp3;
-    a.preload = "auto";
 
-    const done=()=>{
+    const done = () => {
       loaded++;
-      preloadBar.textContent=`Audio ${loaded} / ${cards.length}`;
-      if(loaded===cards.length) preloadBar.classList.add("done");
+      preloadBar.textContent = 'Audio ' + loaded + ' / ' + cards.length;
+      if (loaded >= cards.length) preloadBar.classList.add('done');
     };
 
-    a.addEventListener("canplaythrough",done,{once:true});
-    a.addEventListener("error",done,{once:true});
-
+    a.addEventListener('canplaythrough', done, { once: true });
+    a.addEventListener('error', done, { once: true });
     a.load();
-    audioCache[card.mp3]=a;
+    audioCache[card.mp3] = a;
   });
 }
 
-/* ── Stripe background ── */
+/* ─────────────────────────────
+   UI
+───────────────────────────── */
+function updateUI(track) {
+  const palette = STREAM_PALETTES[trackIdx % STREAM_PALETTES.length];
+  const sec = getSectionInfo(trackIdx);
 
-function makeStripe(colors){
+  stripeEl.style.backgroundImage = makeStripe(palette);
+  trackCounter.textContent = `${trackIdx + 1} / ${TRACKS.length}`;
+  progressFill.style.width = ((trackIdx + 1) / TRACKS.length * 100).toFixed(1) + '%';
 
-  const band=40;
-  const stops=[];
+  document.documentElement.style.setProperty('--stream', sec.color);
+  document.getElementById('stream-label').textContent = sec.label;
+  document.getElementById('stream-label').style.color = sec.color;
+  document.querySelector('.stream-dot').style.background = sec.color;
+  document.querySelector('.stream-dot').style.boxShadow = `0 0 10px ${sec.color}`;
+  progressFill.style.background = sec.color;
+  progressFill.style.boxShadow = `0 0 8px ${sec.color}`;
 
-  colors.forEach((c,i)=>{
-    const s=i*band;
-    stops.push(`${c} ${s}px ${s+band}px`);
-  });
+  progressLeft.textContent = 'Vocab';
+  progressRight.textContent = 'Questions';
 
-  const doubled=stops.concat(
-    stops.map(s=>s.replace(/(\d+)px/g,(_,n)=>(+n+band*colors.length)+"px"))
-  );
+  wrapWords(enTextEl, track.en);
+  enTextEl.classList.remove('dancing');
+  requestAnimationFrame(() => fitText(enTextEl));
 
-  return `repeating-linear-gradient(180deg, ${doubled.join(",")})`;
+  pauseRing.classList.remove('visible');
+  ringFg.style.strokeDashoffset = '0';
 }
 
-/* ── Update UI ── */
-
-function updateUI(track){
-
-  const palette=STREAM_PALETTES[trackIdx%STREAM_PALETTES.length];
-  stripeEl.style.backgroundImage=makeStripe(palette);
-
-  trackCounter.textContent=`${trackIdx+1} / ${TRACKS.length}`;
-  progressFill.style.width=((trackIdx+1)/TRACKS.length*100)+"%";
-
-  enTextEl.textContent=track.en;
-}
-
-/* ── Ring animation ── */
-
-function animateRing(duration){
-
-  const circumference=113;
-  const start=performance.now();
+/* ─────────────────────────────
+   RING
+───────────────────────────── */
+function animateRing(durationMs) {
+  const circumference = 113;
+  const start = performance.now();
 
   cancelAnimationFrame(ringRAF);
 
-  function step(now){
-
-    const elapsed=now-start;
-    const fraction=Math.min(elapsed/duration,1);
-
-    ringFg.style.strokeDashoffset=(circumference*fraction).toFixed(2);
-
-    if(fraction<1) ringRAF=requestAnimationFrame(step);
+  function step(now) {
+    const elapsed = now - start;
+    const fraction = Math.min(elapsed / durationMs, 1);
+    ringFg.style.strokeDashoffset = (circumference * fraction).toFixed(2);
+    if (fraction < 1) ringRAF = requestAnimationFrame(step);
   }
 
-  ringFg.style.strokeDashoffset="0";
-  ringRAF=requestAnimationFrame(step);
+  ringFg.style.strokeDashoffset = '0';
+  ringRAF = requestAnimationFrame(step);
 }
 
-/* ── Stop playback ── */
-
-function stopEverything(){
-
-  if(currentAudio){
-    currentAudio.pause();
-    currentAudio.currentTime=0;
+/* ─────────────────────────────
+   PLAYBACK
+───────────────────────────── */
+function stopEverything() {
+  if (currentAudio) {
+    try {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    } catch (e) {}
   }
-
   clearTimeout(pauseTimer);
   cancelAnimationFrame(ringRAF);
-
-  pauseRing.classList.remove("visible");
+  pauseRing.classList.remove('visible');
+  enTextEl.classList.remove('dancing');
 }
 
-/* ── Pause stage ── */
+function startPause(track) {
+  const pauseSeconds = Number.isFinite(track.pause) ? track.pause : DEFAULT_PAUSE;
+  const durationMs = pauseSeconds * (slowMode ? 2 : 1) * 1000;
 
-function startPause(track){
+  pauseRing.classList.add('visible');
+  animateRing(durationMs);
 
-  const pause=(track.pause ?? DEFAULT_PAUSE)*(slowMode?2:1)*1000;
-
-  pauseRing.classList.add("visible");
-  animateRing(pause);
-
-  pauseTimer=setTimeout(()=>{
-
-    pauseRing.classList.remove("visible");
-
-    if(!isPlaying) return;
-
-    playTrack((trackIdx+1)%TRACKS.length);
-
-  },pause);
+  pauseTimer = setTimeout(() => {
+    pauseRing.classList.remove('visible');
+    if (!isPlaying) return;
+    playTrack((trackIdx + 1) % TRACKS.length);
+  }, durationMs);
 }
 
-/* ── Play track ── */
-
-function playTrack(idx){
-
+function playTrack(idx) {
   stopEverything();
 
-  trackIdx=((idx%TRACKS.length)+TRACKS.length)%TRACKS.length;
-  const track=TRACKS[trackIdx];
-
+  trackIdx = ((idx % TRACKS.length) + TRACKS.length) % TRACKS.length;
+  const track = TRACKS[trackIdx];
   updateUI(track);
 
-  currentAudio=audioCache[track.mp3] || new Audio(AUDIO_BASE+track.mp3);
-  currentAudio.currentTime=0;
+  currentAudio = audioCache[track.mp3] || new Audio(AUDIO_BASE + track.mp3);
+  currentAudio.currentTime = 0;
 
-  currentAudio.onended=()=>{
-    if(!isPlaying) return;
+  currentAudio.onended = () => {
+    enTextEl.classList.remove('dancing');
+    if (!isPlaying) return;
     startPause(track);
   };
 
-  currentAudio.onerror=()=>{
-    if(!isPlaying) return;
+  currentAudio.onerror = () => {
+    enTextEl.classList.remove('dancing');
+    if (!isPlaying) return;
     startPause(track);
   };
 
-  currentAudio.play();
+  currentAudio.play().then(() => {
+    enTextEl.classList.add('dancing');
+    burstMotes();
+  }).catch(() => {
+    enTextEl.classList.remove('dancing');
+    if (!isPlaying) return;
+    startPause(track);
+  });
 }
 
-/* ── Controls ── */
+function togglePlay() {
+  if (!TRACKS.length) return;
 
-btnPlayPause.onclick=()=>{
-
-  if(!TRACKS.length) return;
-
-  if(isPlaying){
-
-    isPlaying=false;
+  if (isPlaying) {
+    isPlaying = false;
     stopEverything();
-    btnPlayPause.innerHTML="&#9654;";
-
-  }else{
-
-    isPlaying=true;
-    btnPlayPause.innerHTML="&#9646;&#9646;";
+    btnPlayPause.innerHTML = '&#9654;';
+    btnPlayPause.classList.remove('playing');
+    btnPlayPause.setAttribute('aria-label', 'Play');
+  } else {
+    isPlaying = true;
+    btnPlayPause.innerHTML = '&#9646;&#9646;';
+    btnPlayPause.classList.add('playing');
+    btnPlayPause.setAttribute('aria-label', 'Pause');
     playTrack(trackIdx);
+  }
+}
 
+/* ─────────────────────────────
+   CONTROLS
+───────────────────────────── */
+btnPrev.addEventListener('click', () => {
+  if (!TRACKS.length) return;
+  const newIdx = ((trackIdx - 1) + TRACKS.length) % TRACKS.length;
+  if (isPlaying) playTrack(newIdx);
+  else { trackIdx = newIdx; updateUI(TRACKS[trackIdx]); }
+});
+
+btnNext.addEventListener('click', () => {
+  if (!TRACKS.length) return;
+  const newIdx = (trackIdx + 1) % TRACKS.length;
+  if (isPlaying) playTrack(newIdx);
+  else { trackIdx = newIdx; updateUI(TRACKS[trackIdx]); }
+});
+
+btnPlayPause.addEventListener('click', togglePlay);
+
+btnSlow.addEventListener('click', () => {
+  slowMode = !slowMode;
+  btnSlow.classList.toggle('active', slowMode);
+  btnSlow.setAttribute('aria-pressed', slowMode);
+});
+
+window.addEventListener('resize', () => {
+  if (TRACKS[trackIdx]) requestAnimationFrame(() => fitText(enTextEl));
+});
+
+/* ─────────────────────────────
+   INIT
+───────────────────────────── */
+(async function init() {
+  const info = parseWeekInfo();
+  const weekNum = info.weekNum || 1;
+
+  try {
+    const res = await fetch(JSON_URL);
+    const data = await res.json();
+    const allCards = data.cards || [];
+
+    if (allCards.length < 180) {
+      preloadBar.textContent = 'br_stream.json needs 180 items.';
+      console.error('[br_stream] Expected 180 cards, got:', allCards.length);
+      return;
+    }
+
+    TRACKS = buildWeekStream(allCards, weekNum);
+  } catch (e) {
+    preloadBar.textContent = 'Could not load stream data.';
+    console.error('[br_stream] JSON fetch failed:', e);
+    return;
   }
 
-};
-
-btnPrev.onclick=()=>{
-  const newIdx=(trackIdx-1+TRACKS.length)%TRACKS.length;
-  if(isPlaying) playTrack(newIdx);
-  else{
-    trackIdx=newIdx;
-    updateUI(TRACKS[trackIdx]);
+  if (!TRACKS.length) {
+    preloadBar.textContent = 'No stream tracks for this week.';
+    return;
   }
-};
-
-btnNext.onclick=()=>{
-  const newIdx=(trackIdx+1)%TRACKS.length;
-  if(isPlaying) playTrack(newIdx);
-  else{
-    trackIdx=newIdx;
-    updateUI(TRACKS[trackIdx]);
-  }
-};
-
-btnSlow.onclick=()=>{
-  slowMode=!slowMode;
-  btnSlow.classList.toggle("active",slowMode);
-};
-
-/* ── INIT ── */
-
-(async function init(){
-
-  const weekKey=getWeekKey();
-  const weekNum=parseInt(weekKey.replace("w","")) || 1;
-
-  const res=await fetch(JSON_URL);
-  const data=await res.json();
-
-  const allCards=data.cards || [];
-
-  TRACKS=buildWeekStream(allCards,weekNum);
 
   preloadAudio(TRACKS);
-
   updateUI(TRACKS[0]);
-
 })();
 </script>
 
