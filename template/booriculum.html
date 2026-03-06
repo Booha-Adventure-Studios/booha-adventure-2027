@@ -134,6 +134,16 @@ html, body {
   margin-top: 3px;
 }
 
+.title-deck {
+  font-size: clamp(11px, 2vw, 16px);
+  letter-spacing: 4px;
+  color: var(--white-dim);
+  text-transform: uppercase;
+  margin-top: 0;
+  margin-bottom: 2px;
+}
+
+
 .week-label {
   font-size: clamp(13px, 2.4vw, 19px);
   color: var(--white);
@@ -420,6 +430,7 @@ a.deck.playing .clip {
   <img class="boo-icon" src="../assets/img/boo-tree.png" alt="Boo-riculum" onerror="this.style.display='none'">
 
   <h1 class="title-en">Boo-riculum</h1>
+  <p class="title-deck">Study Decks</p>
   <p class="title-jp">ブーリキュラム・スタディデッキ</p>
 
   <div class="divider" aria-hidden="true"></div>
@@ -517,28 +528,28 @@ a.deck.playing .clip {
 })();
 </script>
 
-<!-- ── Tile interaction ── -->
+<!-- ── Tile interaction + audio ── -->
 <script>
 let lockedUI = false;
 let moteInterval = null;
+let deckAudio = null;
 
 function resetUI() {
   lockedUI = false;
   if (moteInterval) { clearInterval(moteInterval); moteInterval = null; }
+  if (deckAudio) { try { deckAudio.pause(); deckAudio.currentTime = 0; } catch(e){} }
   document.querySelectorAll('a.deck').forEach(el => {
     el.classList.remove('playing', 'tap');
     el.style.pointerEvents = '';
   });
 }
 
-/* Restore clean state when returning via bfcache or browser back */
 window.addEventListener('pageshow', ev => {
   if (ev.persisted || sessionStorage.getItem('booha_deck_open')) {
     resetUI();
     sessionStorage.removeItem('booha_deck_open');
   }
 });
-/* Also reset on regular load in case sessionStorage was set */
 if (sessionStorage.getItem('booha_deck_open')) {
   resetUI();
   sessionStorage.removeItem('booha_deck_open');
@@ -557,26 +568,19 @@ function burstMotes(anchor, count) {
     const tx  = (Math.random() - .5) * 80 + 'px';
     const ty  = -(20 + Math.random() * 60) + 'px';
     const dur = (.35 + Math.random() * .5) + 's';
-    m.style.cssText = `width:${sz}px;height:${sz}px;left:${x}%;top:${y}%;--tx:${tx};--ty:${ty};--dur:${dur};animation-delay:${(Math.random()*.08).toFixed(3)}s`;
+    m.style.cssText = 'width:'+sz+'px;height:'+sz+'px;left:'+x+'%;top:'+y+'%;--tx:'+tx+';--ty:'+ty+';--dur:'+dur+';animation-delay:'+(Math.random()*.08).toFixed(3)+'s';
     box.appendChild(m);
   }
-  setTimeout(() => {
-    /* Only clear motes that have finished — keep box alive for continuous bursts */
-    const motes = box.querySelectorAll('.mote');
-    motes.forEach(m => { if (m.style.animationDelay) {} });
-    box.innerHTML = '';
-  }, 900);
+  setTimeout(() => { box.innerHTML = ''; }, 900);
 }
 
 function startMusicShow(anchor) {
-  /* Continuous mote bursts every 220ms while music plays */
   moteInterval = setInterval(() => {
     if (!anchor.classList.contains('playing')) {
       clearInterval(moteInterval); moteInterval = null; return;
     }
     burstMotes(anchor, 8);
   }, 220);
-  /* Initial big burst */
   burstMotes(anchor, 20);
 }
 
@@ -588,16 +592,29 @@ function goToDeck(anchor) {
 
   anchor.classList.add('tap');
   setTimeout(() => anchor.classList.remove('tap'), 110);
-
   document.querySelectorAll('a.deck').forEach(el => {
     if (el !== anchor) el.style.pointerEvents = 'none';
   });
-
   anchor.classList.add('playing');
   startMusicShow(anchor);
-
-  /* Flag so booriculum.html resets cleanly on return */
   sessionStorage.setItem('booha_deck_open', '1');
+
+  const MONTH_FOLDERS = {
+    jan:'january', feb:'february', mar:'march',   apr:'april',
+    may:'may',     jun:'june',     jul:'july',    aug:'august',
+    sep:'september',oct:'october', nov:'november',dec:'december'
+  };
+  try {
+    const week = new URLSearchParams(window.location.search).get('week') || '';
+    const mMatch = week.match(/_([a-z]{3})_w[0-9]$/i);
+    const monthKey = mMatch ? mMatch[1].toLowerCase() : '';
+    const monthFolder = MONTH_FOLDERS[monthKey] || monthKey;
+    if (monthFolder) {
+      deckAudio = new Audio('../assets/audio/' + monthFolder + '/studydeck.mp3');
+      deckAudio.volume = 0.92;
+      deckAudio.play().catch(() => {});
+    }
+  } catch(e) {}
 
   setTimeout(() => { window.location.href = url; }, 420);
 }
