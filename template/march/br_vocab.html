@@ -723,22 +723,28 @@ function burstMotes() {
 }
 
 /* ── Audio: single element, primed on first user interaction ── */
-const audio   = new Audio();
+/* ── Audio ── */
+const audio = new Audio();
 audio.preload = 'auto';
+
 let audioPrimed = false;
+let unlockAudio = null;
 
 function primeAudio() {
   if (audioPrimed) return;
-  /* Set a silent src and play immediately to unlock iOS audio */
-  audio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
-  audio.play().then(() => {
-    audio.pause();
-    audio.src = '';
+
+  unlockAudio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+  unlockAudio.volume = 0;
+
+  unlockAudio.play().then(() => {
+    unlockAudio.pause();
+    unlockAudio.currentTime = 0;
     audioPrimed = true;
   }).catch(() => {});
 }
+
 document.addEventListener('touchstart', primeAudio, { once: true, passive: true });
-document.addEventListener('click',      primeAudio, { once: true });
+document.addEventListener('click', primeAudio, { once: true });
 
 /* ── Button-smash protection ── */
 let playLocked    = false;
