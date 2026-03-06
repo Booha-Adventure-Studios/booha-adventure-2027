@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -144,6 +143,16 @@ body::before {
   font-weight: 500;
   margin-top: 3px;
 }
+
+.title-deck {
+  font-size: clamp(11px, 2vw, 16px);
+  letter-spacing: 4px;
+  color: var(--white-dim);
+  text-transform: uppercase;
+  margin-top: 0;
+  margin-bottom: 2px;
+}
+
 
 /* Divider — thin ruled line, like a page rule */
 .divider {
@@ -297,19 +306,54 @@ a.deck:hover::before { opacity: .7; }
 a.deck:hover::after  { opacity: .6; transform: scale(1) translateZ(0); }
 
 /* Tap / playing */
-a.deck.tap { transform: scale(.95); transition: transform .1s ease; }
-a.deck.playing {
-  transform: scale(1.08) translateY(-4px);
-  z-index: 999;
-  animation: bloom .5s cubic-bezier(.25,.8,.35,1) forwards;
-}
-a.deck.playing::after  { opacity:1; transform:scale(1.15) translateZ(0); }
-a.deck.playing::before { opacity:1; animation:spinRing 2s linear infinite; }
-a.deck.playing .inner  { animation:pulseInner 1.4s ease-in-out infinite; }
+a.deck.tap    { transform: scale(.92); transition: transform .1s ease; }
 
-@keyframes bloom      { 0%{transform:scale(1);} 60%{transform:scale(1.1) translateY(-5px);} 100%{transform:scale(1.08) translateY(-4px);} }
-@keyframes pulseInner { 0%,100%{filter:brightness(1);} 50%{filter:brightness(1.25) saturate(1.2);} }
-@keyframes spinRing   { to { --angle: 360deg; } }
+/* ── Playing: dramatic music-sync show ── */
+a.deck.playing {
+  z-index: 999;
+  animation:
+    bloom      .45s cubic-bezier(.34,1.56,.64,1) forwards,
+    beatBounce .38s ease-in-out .45s infinite;
+}
+a.deck.playing::after  {
+  opacity: 1;
+  transform: scale(1.2) translateZ(0);
+  animation: haloFlash .38s ease-in-out infinite;
+}
+a.deck.playing::before {
+  opacity: 1;
+  animation: spinRing .65s linear infinite;
+}
+a.deck.playing .inner {
+  animation: innerFlash .38s ease-in-out infinite;
+}
+a.deck.playing .clip {
+  animation: borderFlash .19s ease-in-out infinite;
+}
+
+@keyframes bloom {
+  0%   { transform: scale(1); }
+  55%  { transform: scale(1.18) translateY(-8px); }
+  100% { transform: scale(1.1)  translateY(-5px); }
+}
+@keyframes beatBounce {
+  0%,100% { transform: scale(1.1)  translateY(-5px); }
+  40%     { transform: scale(1.18) translateY(-9px) rotate(1.5deg); }
+  70%     { transform: scale(1.05) translateY(-3px) rotate(-1deg); }
+}
+@keyframes innerFlash {
+  0%,100% { filter: brightness(1)   saturate(1); }
+  45%     { filter: brightness(1.7) saturate(1.6) contrast(1.1); }
+}
+@keyframes haloFlash {
+  0%,100% { opacity: .5;  transform: scale(1.0) translateZ(0); }
+  45%     { opacity: 1;   transform: scale(1.5) translateZ(0); }
+}
+@keyframes borderFlash {
+  0%,100% { box-shadow: 0 14px 40px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.08) inset, 0 1px 0 rgba(255,255,255,.18) inset; }
+  50%     { box-shadow: 0 14px 40px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.5) inset, 0 0 22px 4px var(--border-c); }
+}
+@keyframes spinRing   { to { --angle: 360deg; } } }
 @keyframes fadeUp     { from{opacity:0;transform:translateY(18px);} to{opacity:1;transform:translateY(0);} }
 @keyframes tileIn     { from{opacity:0;transform:translateY(20px) scale(.9);} to{opacity:1;transform:translateY(0) scale(1);} }
 
@@ -380,6 +424,7 @@ a.deck.playing .inner  { animation:pulseInner 1.4s ease-in-out infinite; }
   <img class="boo-icon" src="../assets/img/cont-tree.png" alt="Boo-continuum" onerror="this.style.display='none'">
 
   <h1 class="title-en">Boo-continuum</h1>
+  <p class="title-deck">Study Decks</p>
   <p class="title-jp">ブーコンティニューム・スタディデッキ</p>
 
   <div class="divider" aria-hidden="true"></div>
@@ -465,27 +510,60 @@ a.deck.playing .inner  { animation:pulseInner 1.4s ease-in-out infinite; }
 })();
 </script>
 
-<!-- ── Tile interaction ── -->
+<!-- ── Tile interaction + audio ── -->
 <script>
 let lockedUI = false;
+let moteInterval = null;
+let deckAudio = null;
 
-function burstMotes(anchor) {
+function resetUI() {
+  lockedUI = false;
+  if (moteInterval) { clearInterval(moteInterval); moteInterval = null; }
+  if (deckAudio) { try { deckAudio.pause(); deckAudio.currentTime = 0; } catch(e){} }
+  document.querySelectorAll('a.deck').forEach(el => {
+    el.classList.remove('playing', 'tap');
+    el.style.pointerEvents = '';
+  });
+}
+
+window.addEventListener('pageshow', ev => {
+  if (ev.persisted || sessionStorage.getItem('booha_deck_open')) {
+    resetUI();
+    sessionStorage.removeItem('booha_deck_open');
+  }
+});
+if (sessionStorage.getItem('booha_deck_open')) {
+  resetUI();
+  sessionStorage.removeItem('booha_deck_open');
+}
+
+function burstMotes(anchor, count) {
   const box = anchor.querySelector('.sparkles');
   if (!box) return;
-  box.innerHTML = '';
-  for (let i = 0; i < 14; i++) {
+  const n = count || 16;
+  for (let i = 0; i < n; i++) {
     const m = document.createElement('div');
     m.className = 'mote';
-    const sz  = 4 + Math.random() * 7;
-    const x   = 12 + Math.random() * 76;
-    const y   = 12 + Math.random() * 76;
-    const tx  = (Math.random() - .5) * 56 + 'px';
-    const ty  = -(16 + Math.random() * 44) + 'px';
-    const dur = (.5 + Math.random() * .6) + 's';
-    m.style.cssText = `width:${sz}px;height:${sz}px;left:${x}%;top:${y}%;--tx:${tx};--ty:${ty};--dur:${dur};animation-delay:${(Math.random()*.12).toFixed(2)}s`;
+    const sz  = 4 + Math.random() * 11;
+    const x   = 8  + Math.random() * 84;
+    const y   = 8  + Math.random() * 84;
+    const tx  = (Math.random() - .5) * 80 + 'px';
+    const ty  = -(20 + Math.random() * 60) + 'px';
+    const dur = (.35 + Math.random() * .5) + 's';
+    m.style.cssText = 'width:'+sz+'px;height:'+sz+'px;left:'+x+'%;top:'+y+'%;--tx:'+tx+';--ty:'+ty+';--dur:'+dur+';animation-delay:'+(Math.random()*.08).toFixed(3)+'s';
     box.appendChild(m);
   }
-  setTimeout(() => { box.innerHTML = ''; }, 1300);
+  setTimeout(() => { box.innerHTML = ''; }, 900);
+}
+
+function startMusicShow(anchor) {
+  moteInterval = setInterval(() => {
+    if (!anchor.classList.contains('playing')) {
+      clearInterval(moteInterval); moteInterval = null; return;
+    }
+    burstMotes(anchor, 8);
+  }, 220);
+  burstMotes(anchor, 20);
 }
 
 function goToDeck(anchor) {
@@ -493,14 +571,34 @@ function goToDeck(anchor) {
   lockedUI = true;
   const url = anchor.getAttribute('href');
   if (!url || url === '#') { lockedUI = false; return; }
+
   anchor.classList.add('tap');
   setTimeout(() => anchor.classList.remove('tap'), 110);
   document.querySelectorAll('a.deck').forEach(el => {
     if (el !== anchor) el.style.pointerEvents = 'none';
   });
   anchor.classList.add('playing');
-  burstMotes(anchor);
-  setTimeout(() => { window.location.href = url; }, 460);
+  startMusicShow(anchor);
+  sessionStorage.setItem('booha_deck_open', '1');
+
+  const MONTH_FOLDERS = {
+    jan:'january', feb:'february', mar:'march',   apr:'april',
+    may:'may',     jun:'june',     jul:'july',    aug:'august',
+    sep:'september',oct:'october', nov:'november',dec:'december'
+  };
+  try {
+    const week = new URLSearchParams(window.location.search).get('week') || '';
+    const mMatch = week.match(/_([a-z]{3})_w[0-9]$/i);
+    const monthKey = mMatch ? mMatch[1].toLowerCase() : '';
+    const monthFolder = MONTH_FOLDERS[monthKey] || monthKey;
+    if (monthFolder) {
+      deckAudio = new Audio('../assets/audio/' + monthFolder + '/studydeck.mp3');
+      deckAudio.volume = 0.92;
+      deckAudio.play().catch(() => {});
+    }
+  } catch(e) {}
+
+  setTimeout(() => { window.location.href = url; }, 420);
 }
 
 document.querySelectorAll('a.deck').forEach(a => {
