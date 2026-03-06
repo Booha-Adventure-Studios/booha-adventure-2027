@@ -1,0 +1,844 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Boo-riculum – Sentences</title>
+<meta name="theme-color" content="#0d1a09">
+<link rel="icon" type="image/png" href="../../assets/img/boo-tree.png">
+<link href="https://fonts.googleapis.com/css2?family=Chau+Philomene+One&family=Nunito:wght@800;900&family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet" />
+
+<style>
+:root {
+  --bg:        #0d1a09;
+  --font-ui:   'Chau Philomene One', sans-serif;
+  --font-en:   'Nunito', sans-serif;
+  --font-jp:   'Noto Sans JP', sans-serif;
+  --white:     #ffffff;
+  --white-dim: rgba(255,255,255,.65);
+  --card-r:    28px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--white);
+  overflow: hidden;
+}
+
+#app {
+  height: 100dvh;
+  max-height: -webkit-fill-available;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── Close button ── */
+#btn-close {
+  position: fixed;
+  top: 18px; right: 18px;
+  z-index: 9999;
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.35);
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .18s ease, border-color .18s ease;
+  animation: pulseClose 2.8s ease-in-out infinite;
+}
+#btn-close:hover  { transform: scale(1.15); border-color: rgba(255,255,255,.75); box-shadow: 0 0 20px rgba(255,255,255,.38); }
+#btn-close:active { transform: scale(.9); }
+#btn-close svg {
+  width: 22px; height: 22px;
+  stroke: #fff; stroke-width: 2.5; stroke-linecap: round;
+  filter: drop-shadow(0 0 5px rgba(255,255,255,.7));
+}
+@keyframes pulseClose {
+  0%,100% { box-shadow: 0 0 12px rgba(255,255,255,.18), 0 0 26px rgba(255,255,255,.07); }
+  50%     { box-shadow: 0 0 22px rgba(255,255,255,.36), 0 0 48px rgba(255,255,255,.14); }
+}
+
+/* ── Header ── */
+header {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 36px 20px 10px;
+  animation: fadeUp .9s cubic-bezier(.22,.8,.36,1) both;
+}
+.hdr-title {
+  font-family: var(--font-ui);
+  font-size: clamp(20px, 4.4vw, 44px);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--white);
+  text-shadow: 0 0 28px rgba(91,163,217,.6), 0 2px 8px rgba(0,0,0,.8);
+  line-height: 1.05;
+}
+.hdr-jp {
+  font-family: var(--font-jp);
+  font-size: clamp(12px, 2vw, 17px);
+  color: var(--white-dim);
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+.hdr-sub {
+  font-family: var(--font-ui);
+  font-size: clamp(13px, 2vw, 17px);
+  color: var(--white);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 6px;
+  text-shadow: 0 1px 6px rgba(0,0,0,.6);
+}
+.divider {
+  width: clamp(80px, 28vw, 200px);
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.3), transparent);
+  border-radius: 2px;
+  margin: 8px auto 0;
+}
+
+/* ── Preload bar ── */
+#preload-bar {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-ui);
+  font-size: clamp(10px, 1.5vw, 13px);
+  color: rgba(255,255,255,.4);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 6px;
+  height: 16px;
+  transition: opacity .4s ease;
+}
+#preload-bar.done { opacity: 0; pointer-events: none; }
+
+/* ── Card counter ── */
+.card-counter {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-ui);
+  font-size: clamp(12px, 1.8vw, 15px);
+  color: var(--white-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+/* ── Card wrapper — 4:3 taller ratio for sentences ── */
+.card-area {
+  position: relative;
+  z-index: 1;
+  width: min(92vw, 740px);
+  flex-shrink: 0;
+  margin-top: 10px;
+  perspective: 1200px;
+}
+
+.card-scene {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform .55s cubic-bezier(.4,0,.2,1);
+  cursor: pointer;
+}
+.card-scene.flipped { transform: rotateY(180deg); }
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--card-r);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+  border: 3px solid rgba(255,255,255,.22);
+  box-shadow: 0 20px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.07) inset;
+  display: flex; align-items: center; justify-content: center;
+  background: #111;
+  isolation: isolate;
+  will-change: transform;
+}
+.card-back { transform: rotateY(180deg); }
+
+.card-face .stripe-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-size: 100% 240px;
+  animation: stripeScroll 7s linear infinite;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+@keyframes stripeScroll {
+  from { background-position: 0 0; }
+  to   { background-position: 0 240px; }
+}
+
+/* Slightly stronger frosted overlay for sentence readability */
+.card-face .frosted {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(0,0,0,.38);
+}
+
+.card-face .content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%; height: 100%;
+  padding: clamp(18px, 4vw, 36px) clamp(20px, 5vw, 48px);
+  gap: clamp(8px, 1.8vw, 16px);
+  text-align: center;
+}
+
+/* ── FRONT: English sentence ── */
+.en-sentence {
+  font-family: var(--font-en);
+  font-weight: 900;
+  font-size: clamp(18px, 4vw, 46px);  /* JS will tighten this to fit */
+  line-height: 1.35;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0,0,0,.75);
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+  max-width: 100%;
+  letter-spacing: .2px;
+}
+
+/* Word-level dancing spans */
+.en-sentence .word { display: inline-block; }
+.en-sentence.dancing .word {
+  animation: wordBounce var(--wd, .55s) ease-in-out infinite alternate;
+  animation-delay: var(--wdel, 0s);
+}
+@keyframes wordBounce {
+  0%   { transform: translateY(0)    scale(1); }
+  100% { transform: translateY(-9px) scale(1.04); }
+}
+
+.flip-hint {
+  position: absolute;
+  bottom: 12px; right: 16px;
+  font-family: var(--font-ui);
+  font-size: clamp(10px, 1.3vw, 12px);
+  color: rgba(255,255,255,.4);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* ── BACK: Kanji + Hiragana ── */
+.jp-kanji {
+  font-family: var(--font-jp);
+  font-weight: 900;
+  font-size: clamp(18px, 4vw, 44px);
+  line-height: 1.45;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0,0,0,.75);
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+  max-width: 95%;
+}
+.jp-hira {
+  font-family: var(--font-jp);
+  font-weight: 500;
+  font-size: clamp(12px, 2.4vw, 24px);
+  color: rgba(255,255,255,.82);
+  line-height: 1.55;
+  text-shadow: 0 1px 6px rgba(0,0,0,.7);
+  max-width: 95%;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+  margin-top: clamp(4px, 1vw, 10px);
+  letter-spacing: .03em;
+}
+
+/* ── Sparkle motes ── */
+#sparkle-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--card-r);
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 10;
+}
+.mote {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  background: radial-gradient(circle, var(--mc, #fff) 0%, transparent 70%);
+  animation: motePop var(--md, .9s) ease-out forwards;
+}
+@keyframes motePop {
+  0%   { opacity: 0; transform: translate(-50%,-50%) scale(.3); }
+  15%  { opacity: 1; transform: translate(-50%,-50%) scale(1.15); }
+  100% { opacity: 0; transform: translate(var(--tx,0), var(--ty,-50px)) scale(.4); }
+}
+
+/* ── Controls ── */
+.controls {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: clamp(12px, 2.8vw, 22px);
+  justify-content: center;
+  align-items: center;
+  margin-top: clamp(10px, 1.8vh, 22px);
+  padding: 0 16px 20px;
+  flex-shrink: 0;
+}
+
+.btn {
+  width:  clamp(62px, 10.5vw, 80px);
+  height: clamp(62px, 10.5vw, 80px);
+  border-radius: 20px;
+  border: 3px solid rgba(255,255,255,.25);
+  background: rgba(255,255,255,.10);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--white);
+  font-family: var(--font-ui);
+  font-size: clamp(20px, 3.8vw, 32px);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .15s ease, border-color .15s ease, background .15s ease;
+  box-shadow: 0 8px 24px rgba(0,0,0,.4);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
+}
+.btn:hover  { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.55); transform: scale(1.06); }
+.btn:active { transform: scale(.92); }
+
+/* Play — sky blue glow (matches sentences tile colour) */
+#btn-play {
+  background: linear-gradient(145deg, #1070c0, #073568);
+  border-color: #4ab8ff;
+  box-shadow: 0 0 18px rgba(74,184,255,.45), 0 8px 24px rgba(0,0,0,.4);
+}
+#btn-play:hover {
+  background: linear-gradient(145deg, #1a8fe0, #0d5090);
+  border-color: #88d8ff;
+  box-shadow: 0 0 28px rgba(74,184,255,.65), 0 8px 24px rgba(0,0,0,.4);
+}
+/* Locked while audio plays — students cannot re-tap */
+#btn-play.locked {
+  opacity: .42;
+  pointer-events: none;
+  cursor: not-allowed;
+  box-shadow: none;
+  filter: grayscale(.7);
+}
+
+/* ── Warning toast ── */
+#warning-toast {
+  position: fixed;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  z-index: 9999;
+  background: rgba(10,10,10,.92);
+  border: 2px solid rgba(255,100,100,.6);
+  border-radius: 16px;
+  padding: 14px 22px;
+  text-align: center;
+  font-family: var(--font-jp);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 30px rgba(255,80,80,.3);
+  transition: transform .35s cubic-bezier(.34,1.56,.64,1), opacity .35s ease;
+  opacity: 0;
+  pointer-events: none;
+  max-width: min(90vw, 360px);
+}
+#warning-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+#warning-toast .warn-jp {
+  font-size: clamp(14px, 3vw, 18px);
+  font-weight: 700; color: #ff8888; line-height: 1.5;
+}
+#warning-toast .warn-en {
+  font-size: clamp(11px, 2vw, 13px);
+  color: rgba(255,255,255,.55);
+  margin-top: 4px;
+  font-family: var(--font-ui);
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+/* ── Entrance animations ── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(18px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.card-area { animation: fadeUp .8s cubic-bezier(.22,.8,.36,1) .15s both; }
+.controls  { animation: fadeUp .8s cubic-bezier(.22,.8,.36,1) .28s both; }
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .card-scene { transition: none; }
+  .stripe-layer { animation: none; }
+  .en-sentence.dancing .word { animation: none; }
+  .mote { animation: none; opacity: 0; }
+}
+
+/* ── Landscape compact ── */
+@media (orientation: landscape) and (max-height: 520px) {
+  header        { padding: 14px 70px 4px; }
+  .hdr-title    { font-size: clamp(13px, 2.8vw, 20px); }
+  .hdr-jp       { font-size: clamp(10px, 1.5vw, 13px); }
+  .hdr-sub      { font-size: clamp(11px, 1.5vw, 13px); margin-top: 2px; }
+  .divider      { margin: 3px auto 0; }
+  .card-counter { margin-top: 4px; font-size: 11px; }
+  .card-area    { width: min(62vw, 520px); margin-top: 4px; }
+  .controls     { margin-top: 6px; gap: 9px; padding-bottom: 12px; }
+  .btn          { width: 50px; height: 50px; font-size: 19px; border-radius: 13px; }
+}
+
+/* ── Small portrait ── */
+@media (max-width: 380px) {
+  .card-area { width: 94vw; }
+  .btn       { width: 56px; height: 56px; font-size: 19px; }
+}
+</style>
+</head>
+
+<body>
+<div id="app">
+
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+  <button id="btn-close" aria-label="Close" onclick="window.close()">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <line x1="5" y1="5" x2="19" y2="19"/>
+      <line x1="19" y1="5" x2="5" y2="19"/>
+    </svg>
+  </button>
+
+  <div id="warning-toast" role="alert" aria-live="assertive">
+    <div class="warn-jp">まだ再生中です！<br>終わってから押してね。</div>
+    <div class="warn-en">Wait for the audio to finish.</div>
+  </div>
+
+  <header>
+    <div class="hdr-title">Boo-riculum Sentences</div>
+    <div class="hdr-jp">ブーリキュラム・文</div>
+    <div class="divider" aria-hidden="true"></div>
+    <div class="hdr-sub" id="week-label">Loading…</div>
+  </header>
+
+  <div id="preload-bar">Loading audio…</div>
+  <div class="card-counter" id="card-counter">– / –</div>
+
+  <div class="card-area">
+    <div class="card-scene" id="card-scene">
+
+      <div class="card-face card-front">
+        <div class="stripe-layer" id="stripe-front"></div>
+        <div class="frosted"></div>
+        <div class="content">
+          <div class="en-sentence" id="en-sentence"></div>
+        </div>
+        <div class="flip-hint">Tap to flip</div>
+      </div>
+
+      <div class="card-face card-back">
+        <div class="stripe-layer" id="stripe-back"></div>
+        <div class="frosted"></div>
+        <div class="content">
+          <div class="jp-kanji" id="jp-kanji"></div>
+          <div class="jp-hira"  id="jp-hira"></div>
+        </div>
+      </div>
+
+    </div>
+    <div id="sparkle-layer" aria-hidden="true"></div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="btn-prev" aria-label="Previous card">&#10094;</button>
+    <button class="btn" id="btn-flip" aria-label="Flip card">&#8635;</button>
+    <button class="btn" id="btn-next" aria-label="Next card">&#10095;</button>
+    <button class="btn" id="btn-play" aria-label="Play audio">&#9654;</button>
+  </div>
+
+</div>
+
+<!-- ══ BACKGROUND PARTICLES ══ -->
+<script>
+(function () {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx    = canvas.getContext('2d');
+  /* Sky-blue tinted palette for sentences */
+  const COLORS = ['#20a8f0','#60d8ff','#30d050','#4df070','#f0aa00','#ffe060','#28c890','#b0f040','#a8e8ff','#ffffff'];
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+  const PARTS = [];
+  function makePart(scatter) {
+    return {
+      x: Math.random() * (canvas.width  || 400),
+      y: scatter ? Math.random() * (canvas.height || 700) : (canvas.height || 700) + 10,
+      r: .7 + Math.random() * 2,
+      vx: (Math.random() - .5) * .2,
+      vy: -.06 - Math.random() * .16,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      alpha: .08 + Math.random() * .22,
+      life: scatter ? Math.random() : 0,
+    };
+  }
+  for (let i = 0; i < 55; i++) PARTS.push(makePart(true));
+  function tick() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < PARTS.length; i++) {
+      const p = PARTS[i];
+      p.x += p.vx; p.y += p.vy; p.life += .0032;
+      if (p.y < -10 || p.life > 1) { PARTS[i] = makePart(false); continue; }
+      const a = p.alpha * Math.sin(p.life * Math.PI);
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color; ctx.globalAlpha = a; ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+</script>
+
+<!-- ══ FLASHCARD LOGIC ══ -->
+<script>
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   AUDIO STRUCTURE:
+   assets/audio/march/boo_riculum/sentences/br_s01_***.mp3
+   Week 1 → n=1–15   (br_s01–br_s15)
+   Week 2 → n=16–30  (br_s16–br_s30)
+   Week 3 → n=31–45  (br_s31–br_s45)
+   Week 4 → n=46–60  (br_s46–br_s60)
+   Cards shuffle on every visit.
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+const AUDIO_BASE = '../../assets/audio/march/boo_riculum/sentences/';
+const JSON_URL   = 'br_sentences.json';
+
+const WEEK_RANGES = { w1:[1,15], w2:[16,30], w3:[31,45], w4:[46,60] };
+
+const PALETTES = [
+  ['#0d5fa8','#1a8fe0','#60c4ff'],
+  ['#1a7a2e','#2ecc50','#6ee88a'],
+  ['#a06200','#d98c00','#ffc532'],
+  ['#0a6060','#18a8a8','#5cf0e0'],
+  ['#5a1a8a','#8e3dcc','#c87aff'],
+  ['#8a1a1a','#cc3d3d','#ff8a7a'],
+  ['#3a5a00','#6a9a00','#b8f040'],
+  ['#5a3a00','#a07000','#f0c040'],
+];
+
+const MOTE_COLORS = ['#c0eeff','#a8e8ff','#c0ffcc','#ffeeaa','#fff','#b0f0ff'];
+
+/* ── DOM refs ── */
+const scene      = document.getElementById('card-scene');
+const enEl       = document.getElementById('en-sentence');
+const kanjiEl    = document.getElementById('jp-kanji');
+const hiraEl     = document.getElementById('jp-hira');
+const sfEl       = document.getElementById('stripe-front');
+const sbEl       = document.getElementById('stripe-back');
+const counter    = document.getElementById('card-counter');
+const sparkL     = document.getElementById('sparkle-layer');
+const preloadBar = document.getElementById('preload-bar');
+const btnPlay    = document.getElementById('btn-play');
+const toast      = document.getElementById('warning-toast');
+
+/* ── State ── */
+let CARDS      = [];
+let audioCache = {};
+let idx        = 0;
+let flipped    = false;
+let playLocked = false;
+let toastTimer = null;
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   WEEK LABEL
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function prettyWeek(folder) {
+  const m = folder.match(/_([a-z]{3})_w(\d)$/i);
+  if (!m) return '';
+  const MO = {jan:'January',feb:'February',mar:'March',apr:'April',may:'May',jun:'June',jul:'July',aug:'August',sep:'September',oct:'October',nov:'November',dec:'December'};
+  const JP = {jan:'1月',feb:'2月',mar:'3月',apr:'4月',may:'5月',jun:'6月',jul:'7月',aug:'8月',sep:'9月',oct:'10月',nov:'11月',dec:'12月'};
+  const mo = m[1].toLowerCase(), wn = m[2];
+  return (MO[mo]||mo)+' Week '+wn+' &middot; '+(JP[mo]||mo)+'第'+wn+'週';
+}
+
+function getWeekKey() {
+  const params   = new URLSearchParams(window.location.search);
+  const weekParam = params.get('week') || '';
+  const label    = prettyWeek(weekParam);
+  if (label) {
+    document.getElementById('week-label').innerHTML = label;
+    const m = weekParam.match(/_w(\d)$/i);
+    return m ? 'w'+m[1] : 'w1';
+  }
+  const parts  = window.location.pathname.split('/');
+  const folder = parts[parts.length - 2] || '';
+  const lbl    = prettyWeek(folder);
+  if (lbl) document.getElementById('week-label').innerHTML = lbl;
+  const m2 = folder.match(/_w(\d)$/i);
+  return m2 ? 'w'+m2[1] : 'w1';
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SHUFFLE
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   AUDIO PRELOAD
+   All 15 week cards buffered immediately.
+   First tap plays from cache — no delay.
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function preloadAudio(cards) {
+  let loaded = 0;
+  audioCache = {};
+  cards.forEach(card => {
+    const a = new Audio();
+    a.preload = 'auto';
+    a.src = AUDIO_BASE + card.mp3;
+    const done = () => {
+      loaded++;
+      preloadBar.textContent = 'Audio ' + loaded + ' / ' + cards.length;
+      if (loaded >= cards.length) preloadBar.classList.add('done');
+    };
+    a.addEventListener('canplaythrough', done, { once: true });
+    a.addEventListener('error', done, { once: true });
+    a.load();
+    audioCache[card.mp3] = a;
+  });
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   STRIPE BACKGROUND
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function makeStripe(colors) {
+  const band = 40, stops = [];
+  colors.forEach((c, i) => { const s = i*band; stops.push(c+' '+s+'px '+(s+band)+'px'); });
+  const doubled = stops.concat(stops.map(s => s.replace(/(\d+)px/g, (_,n) => (+n+band*colors.length)+'px')));
+  return 'repeating-linear-gradient(180deg,'+doubled.join(',')+')';
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   FIT ENGLISH SENTENCE
+   Binary-search font size so the sentence never overflows the card.
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function fitSentence(el, container) {
+  const cardH     = scene.offsetHeight;
+  const padV      = parseFloat(getComputedStyle(container).paddingTop) * 2;
+  const available = cardH - padV - 16;
+  const maxPx     = Math.min(46, cardH * 0.13);
+  const minPx     = 13;
+  let lo = minPx, hi = maxPx, best = minPx;
+  for (let step = 0; step < 14; step++) {
+    const mid = Math.round((lo + hi) / 2);
+    el.style.fontSize = mid + 'px';
+    if (el.scrollHeight <= available) { best = mid; lo = mid + 1; }
+    else { hi = mid - 1; }
+  }
+  el.style.fontSize = best + 'px';
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   FIT JAPANESE PAIR
+   Kanji + hira fit together without overflow.
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function fitJapanesePair(kEl, hEl, container) {
+  const RATIO  = 1.7;
+  const cardH  = scene.offsetHeight;
+  const padV   = parseFloat(getComputedStyle(container).paddingTop) * 2;
+  const gapPx  = parseFloat(getComputedStyle(container).gap) || 12;
+  const avail  = cardH - padV - gapPx - 20;
+  const maxK   = Math.min(44, cardH * 0.12);
+  const minK   = 12;
+  let lo = minK, hi = maxK, bestK = minK;
+  for (let step = 0; step < 16; step++) {
+    const midK = Math.round((lo + hi) / 2);
+    const midH = Math.max(10, Math.round(midK / RATIO));
+    kEl.style.fontSize = midK + 'px';
+    hEl.style.fontSize = midH + 'px';
+    const total = kEl.scrollHeight + hEl.scrollHeight + gapPx;
+    if (total <= avail) { bestK = midK; lo = midK + 1; }
+    else { hi = midK - 1; }
+  }
+  kEl.style.fontSize = bestK + 'px';
+  hEl.style.fontSize = Math.max(10, Math.round(bestK / RATIO)) + 'px';
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   WRAP WORDS FOR DANCING
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function wrapWords(el, text) {
+  el.innerHTML = text.split(' ').map((word, i) =>
+    '<span class="word" style="--wdel:' + (i*0.07).toFixed(2) + 's;--wd:' + (.42+Math.random()*.22).toFixed(2) + 's">' + word + '</span>'
+  ).join(' ');
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SHOW CARD
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function showCard() {
+  const card    = CARDS[idx];
+  const palette = PALETTES[idx % PALETTES.length];
+  const stripe  = makeStripe(palette);
+  sfEl.style.backgroundImage = stripe;
+  sbEl.style.backgroundImage = stripe;
+
+  wrapWords(enEl, card.en);
+  enEl.classList.remove('dancing');
+  kanjiEl.textContent = card.jp;
+  hiraEl.textContent  = card.hira;
+  counter.textContent = (idx+1) + ' / ' + CARDS.length;
+  scene.classList.toggle('flipped', flipped);
+
+  requestAnimationFrame(() => {
+    const fc = document.querySelector('.card-front .content');
+    const bc = document.querySelector('.card-back  .content');
+    if (fc) fitSentence(enEl, fc);
+    if (bc) fitJapanesePair(kanjiEl, hiraEl, bc);
+  });
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MOTE BURST
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function burstMotes() {
+  sparkL.innerHTML = '';
+  for (let i = 0; i < 22; i++) {
+    const m  = document.createElement('div');
+    m.className = 'mote';
+    const sz = 5 + Math.random() * 10;
+    const x  = 8  + Math.random() * 84;
+    const y  = 20 + Math.random() * 60;
+    const tx = (Math.random()-.5)*80+'px';
+    const ty = -(20+Math.random()*70)+'px';
+    const md = (.5+Math.random()*.6)+'s';
+    const mc = MOTE_COLORS[Math.floor(Math.random()*MOTE_COLORS.length)];
+    m.style.cssText = 'width:'+sz+'px;height:'+sz+'px;left:'+x+'%;top:'+y+'%;--tx:'+tx+';--ty:'+ty+';--md:'+md+';--mc:'+mc+';animation-delay:'+(Math.random()*.12).toFixed(2)+'s';
+    sparkL.appendChild(m);
+  }
+  setTimeout(() => { sparkL.innerHTML = ''; }, 1400);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PLAY AUDIO
+   • Plays from preloaded cache — instant on first tap.
+   • Button fully locked (grayed, no pointer events)
+     for the entire audio duration.
+   • Tapping while locked → warning toast.
+   • prev/next stops audio cleanly before switching.
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function showWarning() {
+  if (toastTimer) clearTimeout(toastTimer);
+  toast.classList.add('show');
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function unlockPlay() {
+  playLocked = false;
+  btnPlay.classList.remove('locked');
+  enEl.classList.remove('dancing');
+}
+
+function stopAudio() {
+  const a = audioCache[CARDS[idx]?.mp3];
+  if (a) { try { a.pause(); a.currentTime = 0; } catch(e){} }
+  unlockPlay();
+}
+
+function playAudio() {
+  if (playLocked) { showWarning(); return; }
+  const card = CARDS[idx];
+  if (!card) return;
+  const a = audioCache[card.mp3];
+  if (!a) return;
+
+  playLocked = true;
+  btnPlay.classList.add('locked');
+  enEl.classList.add('dancing');
+  burstMotes();
+
+  a.currentTime = 0;
+  a.onended = unlockPlay;
+  a.onerror = unlockPlay;
+  a.play().catch(() => unlockPlay());
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   NAVIGATION
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function goNext() { stopAudio(); idx = (idx+1) % CARDS.length; flipped = false; showCard(); }
+function goPrev() { stopAudio(); idx = (idx-1+CARDS.length) % CARDS.length; flipped = false; showCard(); }
+function doFlip() { flipped = !flipped; scene.classList.toggle('flipped', flipped); }
+
+document.getElementById('btn-prev').addEventListener('click', goPrev);
+document.getElementById('btn-next').addEventListener('click', goNext);
+document.getElementById('btn-flip').addEventListener('click', doFlip);
+btnPlay.addEventListener('click', playAudio);
+scene.addEventListener('click', doFlip);
+window.addEventListener('resize', () => showCard());
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   INIT — fetch JSON → pick week → shuffle → preload
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+(async function init() {
+  const weekKey = getWeekKey();
+  const [lo, hi] = WEEK_RANGES[weekKey] || WEEK_RANGES.w1;
+
+  try {
+    const res  = await fetch(JSON_URL);
+    const data = await res.json();
+    CARDS = (data.cards || []).filter(c => c.n >= lo && c.n <= hi);
+  } catch(e) {
+    preloadBar.textContent = 'Could not load sentence data.';
+    console.error('[br_sentences] JSON fetch failed:', e);
+    return;
+  }
+
+  if (!CARDS.length) { preloadBar.textContent = 'No cards for ' + weekKey; return; }
+
+  shuffle(CARDS);
+  preloadAudio(CARDS);
+  showCard();
+})();
+</script>
+
+</body>
+</html>
