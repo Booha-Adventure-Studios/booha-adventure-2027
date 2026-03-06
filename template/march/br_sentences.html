@@ -435,13 +435,12 @@ header {
 
   <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
-  <button id="btn-close" aria-label="Back to menu"
-  onclick="sessionStorage.setItem('booha_deck_open','1'); window.location.href='../booriculum.html';">
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <line x1="5" y1="5" x2="19" y2="19"/>
-      <line x1="19" y1="5" x2="5" y2="19"/>
-    </svg>
-  </button>
+<button id="btn-close" aria-label="Back to menu">
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <line x1="5" y1="5" x2="19" y2="19"/>
+    <line x1="19" y1="5" x2="5" y2="19"/>
+  </svg>
+</button>
 
   <div id="warning-toast" role="alert" aria-live="assertive">
     <div class="warn-jp">まだ再生中です！<br>終わってから押してね。</div>
@@ -584,6 +583,19 @@ let idx        = 0;
 let flipped    = false;
 let playLocked = false;
 let toastTimer = null;
+
+function goBackToBooriculum() {
+  const params = new URLSearchParams(window.location.search);
+  const weekParam = params.get('week') || '';
+  const target =
+    `${window.location.origin}/booha-adventure-2027/template/booriculum.html` +
+    (weekParam ? `?week=${encodeURIComponent(weekParam)}` : '');
+
+  sessionStorage.setItem('booha_deck_open', '1');
+  window.location.assign(target);
+}
+
+document.getElementById('btn-close').addEventListener('click', goBackToBooriculum);  
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━
    WEEK LABEL
