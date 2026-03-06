@@ -561,30 +561,21 @@ svg.ring-svg {
      ══════════════════════════════════ -->
 <script>
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   TEMPLATE SETTINGS
+   STREAM SETTINGS
 
-   JSON FORMAT:
-   {
-     "cards": [
-       { "n": 1, "en": "...", "mp3": "...", "pause": 5 },
-       ...
-     ]
-   }
+   br_stream.json contains 180 ordered items:
 
-   Week 1 → 1–15
-   Week 2 → 16–30
-   Week 3 → 31–45
-   Week 4 → 46–60
+   1–60   vocab
+   61–120 sentences
+   121–180 questions
 
-   "pause" is optional per card.
-   If omitted, DEFAULT_PAUSE is used.
-   SLOW mode doubles the pause length.
+   Each week plays 45 items:
+   vocab 15 → sentences 15 → questions 15
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-const AUDIO_BASE    = '../../assets/audio/march/boo_riculum/stream/';
-const JSON_URL      = 'br_stream.json';
+const AUDIO_BASE = '../../assets/audio/march/boo_riculum/stream/';
+const JSON_URL   = 'br_stream.json';
 const DEFAULT_PAUSE = 5.5;
-const WEEK_RANGES   = { w1:[1,15], w2:[16,30], w3:[31,45], w4:[46,60] };
 
 const STREAM_PALETTES = [
   ['#0e6a60','#22bfae','#8de8dc'],
@@ -594,320 +585,258 @@ const STREAM_PALETTES = [
   ['#5a1a8a','#8e3dcc','#c87aff']
 ];
 
-/* ── Stripe builder ── */
-function makeStripe(colors) {
-  const band = 40, stops = [];
-  colors.forEach((c, i) => {
-    const s = i * band;
-    stops.push(`${c} ${s}px ${s + band}px`);
-  });
-  const doubled = stops.concat(
-    stops.map(s => s.replace(/(\d+)px/g, (_, n) => (+n + band * colors.length) + 'px'))
-  );
-  return `repeating-linear-gradient(180deg, ${doubled.join(', ')})`;
-}
-
-/* ── Week label ── */
-function prettyWeek(folder) {
-  const m = folder.match(/_([a-z]{3})_w(\d)$/i);
-  if (!m) return '';
-  const MO = {jan:'January',feb:'February',mar:'March',apr:'April',may:'May',jun:'June',jul:'July',aug:'August',sep:'September',oct:'October',nov:'November',dec:'December'};
-  const JP = {jan:'1月',feb:'2月',mar:'3月',apr:'4月',may:'5月',jun:'6月',jul:'7月',aug:'8月',sep:'9月',oct:'10月',nov:'11月',dec:'12月'};
-  const mo = m[1].toLowerCase();
-  const wn = m[2];
-  return (MO[mo] || mo) + ' Week ' + wn + ' &middot; ' + (JP[mo] || mo) + '第' + wn + '週';
-}
-
-function getWeekKey() {
-  const params    = new URLSearchParams(window.location.search);
-  const weekParam = params.get('week') || '';
-  const label     = prettyWeek(weekParam);
-
-  if (label) {
-    document.getElementById('week-label').innerHTML = label;
-    const m = weekParam.match(/_w(\d)$/i);
-    return m ? 'w' + m[1] : 'w1';
-  }
-
-  const parts  = window.location.pathname.split('/');
-  const folder = parts[parts.length - 2] || '';
-  const lbl    = prettyWeek(folder);
-  if (lbl) document.getElementById('week-label').innerHTML = lbl;
-
-  const m2 = folder.match(/_w(\d)$/i);
-  return m2 ? 'w' + m2[1] : 'w1';
-}
-
-/* ── Auto-size text ── */
-function fitText(el) {
-  el.style.fontSize = '';
-  const content = el.closest('.card-content');
-  if (!content) return;
-  const cardH   = document.getElementById('card-face').offsetHeight;
-  const padV    = parseFloat(getComputedStyle(content).paddingTop) * 2;
-  const ringH   = document.getElementById('pause-ring').offsetHeight + 10;
-  const avail   = cardH - padV - ringH - 16;
-  const maxPx   = Math.min(48, cardH * 0.13);
-  const minPx   = 15;
-  let lo = minPx, hi = maxPx, best = minPx;
-
-  for (let step = 0; step < 14; step++) {
-    const mid = Math.round((lo + hi) / 2);
-    el.style.fontSize = mid + 'px';
-    if (el.scrollHeight <= avail) { best = mid; lo = mid + 1; }
-    else { hi = mid - 1; }
-  }
-  el.style.fontSize = best + 'px';
-}
-
-/* ── Wrap words ── */
-function wrapWords(el, text) {
-  el.innerHTML = text.split(' ').map((w, i) =>
-    `<span class="word" style="--wdel:${(i * .07).toFixed(2)}s;--wd:${(.4 + Math.random() * .2).toFixed(2)}s">${w}</span>`
-  ).join(' ');
-}
-
-/* ── Motes ── */
-const MOTE_COLORS = ['#c0ffcc','#c0eeff','#ffeeaa','#b0f0ff','#fff','#8de8dc'];
-const sparkL = document.getElementById('sparkle-layer');
-
-function burstMotes() {
-  sparkL.innerHTML = '';
-  for (let i = 0; i < 18; i++) {
-    const m = document.createElement('div');
-    m.className = 'mote';
-    const sz = 5 + Math.random() * 9;
-    const x  = 10 + Math.random() * 80;
-    const y  = 15 + Math.random() * 65;
-    const tx = (Math.random() - .5) * 70 + 'px';
-    const ty = -(18 + Math.random() * 55) + 'px';
-    const md = (.45 + Math.random() * .55) + 's';
-    const mc = MOTE_COLORS[Math.floor(Math.random() * MOTE_COLORS.length)];
-    m.style.cssText = `width:${sz}px;height:${sz}px;left:${x}%;top:${y}%;--tx:${tx};--ty:${ty};--md:${md};--mc:${mc};animation-delay:${(Math.random() * .1).toFixed(2)}s`;
-    sparkL.appendChild(m);
-  }
-  setTimeout(() => { sparkL.innerHTML = ''; }, 1400);
-}
-
-/* ── DOM refs ── */
-const enTextEl     = document.getElementById('en-text');
-const stripeEl     = document.getElementById('stripe-layer');
-const trackCounter = document.getElementById('track-counter');
-const progressFill = document.getElementById('progress-fill');
-const pauseRing    = document.getElementById('pause-ring');
-const ringFg       = document.getElementById('ring-fg');
-const btnPlayPause = document.getElementById('btn-playpause');
-const btnSlow      = document.getElementById('btn-slow');
-const btnPrev      = document.getElementById('btn-prev');
-const btnNext      = document.getElementById('btn-next');
-const preloadBar   = document.getElementById('preload-bar');
-
-/* ── State ── */
-let TRACKS      = [];
-let audioCache  = {};
-let trackIdx    = 0;
-let isPlaying   = false;
-let slowMode    = false;
-let pauseTimer  = null;
-let ringRAF     = null;
-
-/* ── Audio ── */
+let TRACKS = [];
+let trackIdx = 0;
+let isPlaying = false;
+let slowMode = false;
+let pauseTimer = null;
+let ringRAF = null;
+let audioCache = {};
 let currentAudio = null;
 
+const enTextEl = document.getElementById('en-text');
+const stripeEl = document.getElementById('stripe-layer');
+const trackCounter = document.getElementById('track-counter');
+const progressFill = document.getElementById('progress-fill');
+const pauseRing = document.getElementById('pause-ring');
+const ringFg = document.getElementById('ring-fg');
+const btnPlayPause = document.getElementById('btn-playpause');
+const btnSlow = document.getElementById('btn-slow');
+const btnPrev = document.getElementById('btn-prev');
+const btnNext = document.getElementById('btn-next');
+const preloadBar = document.getElementById('preload-bar');
+
+/* ── Determine week ── */
+
+function getWeekKey() {
+  const params = new URLSearchParams(window.location.search);
+  const week = params.get("week");
+  if (week) return week;
+
+  const parts = window.location.pathname.split("/");
+  const folder = parts[parts.length-2] || "";
+  const m = folder.match(/_w(\d)$/i);
+  return m ? "w"+m[1] : "w1";
+}
+
+/* ── Calculate correct 45 items ── */
+
+function buildWeekStream(allCards, weekIndex) {
+
+  const base = (weekIndex-1)*15;
+
+  const vocab     = allCards.slice(base, base+15);
+  const sentences = allCards.slice(60+base, 60+base+15);
+  const questions = allCards.slice(120+base, 120+base+15);
+
+  return [...vocab, ...sentences, ...questions];
+}
+
 /* ── Preload audio ── */
+
 function preloadAudio(cards) {
+
   let loaded = 0;
-  audioCache = {};
 
-  cards.forEach(card => {
+  cards.forEach(card=>{
     const a = new Audio();
-    a.preload = 'auto';
     a.src = AUDIO_BASE + card.mp3;
+    a.preload = "auto";
 
-    const done = () => {
+    const done=()=>{
       loaded++;
-      preloadBar.textContent = 'Audio ' + loaded + ' / ' + cards.length;
-      if (loaded >= cards.length) preloadBar.classList.add('done');
+      preloadBar.textContent=`Audio ${loaded} / ${cards.length}`;
+      if(loaded===cards.length) preloadBar.classList.add("done");
     };
 
-    a.addEventListener('canplaythrough', done, { once: true });
-    a.addEventListener('error', done, { once: true });
+    a.addEventListener("canplaythrough",done,{once:true});
+    a.addEventListener("error",done,{once:true});
+
     a.load();
-    audioCache[card.mp3] = a;
+    audioCache[card.mp3]=a;
   });
+}
+
+/* ── Stripe background ── */
+
+function makeStripe(colors){
+
+  const band=40;
+  const stops=[];
+
+  colors.forEach((c,i)=>{
+    const s=i*band;
+    stops.push(`${c} ${s}px ${s+band}px`);
+  });
+
+  const doubled=stops.concat(
+    stops.map(s=>s.replace(/(\d+)px/g,(_,n)=>(+n+band*colors.length)+"px"))
+  );
+
+  return `repeating-linear-gradient(180deg, ${doubled.join(",")})`;
 }
 
 /* ── Update UI ── */
-function updateUI(track) {
-  const palette = STREAM_PALETTES[trackIdx % STREAM_PALETTES.length];
-  stripeEl.style.backgroundImage = makeStripe(palette);
 
-  trackCounter.textContent = `${trackIdx + 1} / ${TRACKS.length}`;
-  progressFill.style.width = ((trackIdx + 1) / TRACKS.length * 100).toFixed(1) + '%';
+function updateUI(track){
 
-  wrapWords(enTextEl, track.en);
-  enTextEl.classList.remove('dancing');
-  requestAnimationFrame(() => fitText(enTextEl));
+  const palette=STREAM_PALETTES[trackIdx%STREAM_PALETTES.length];
+  stripeEl.style.backgroundImage=makeStripe(palette);
 
-  pauseRing.classList.remove('visible');
-  ringFg.style.strokeDashoffset = '0';
+  trackCounter.textContent=`${trackIdx+1} / ${TRACKS.length}`;
+  progressFill.style.width=((trackIdx+1)/TRACKS.length*100)+"%";
+
+  enTextEl.textContent=track.en;
 }
 
 /* ── Ring animation ── */
-function animateRing(durationMs) {
-  const circumference = 113;
-  const start = performance.now();
+
+function animateRing(duration){
+
+  const circumference=113;
+  const start=performance.now();
 
   cancelAnimationFrame(ringRAF);
 
-  function step(now) {
-    const elapsed  = now - start;
-    const fraction = Math.min(elapsed / durationMs, 1);
-    ringFg.style.strokeDashoffset = (circumference * fraction).toFixed(2);
-    if (fraction < 1) ringRAF = requestAnimationFrame(step);
+  function step(now){
+
+    const elapsed=now-start;
+    const fraction=Math.min(elapsed/duration,1);
+
+    ringFg.style.strokeDashoffset=(circumference*fraction).toFixed(2);
+
+    if(fraction<1) ringRAF=requestAnimationFrame(step);
   }
 
-  ringFg.style.strokeDashoffset = '0';
-  ringRAF = requestAnimationFrame(step);
+  ringFg.style.strokeDashoffset="0";
+  ringRAF=requestAnimationFrame(step);
 }
 
-/* ── Stop current playback ── */
-function stopEverything() {
-  if (currentAudio) {
-    try {
-      currentAudio.pause();
-      currentAudio.currentTime = 0;
-    } catch (e) {}
+/* ── Stop playback ── */
+
+function stopEverything(){
+
+  if(currentAudio){
+    currentAudio.pause();
+    currentAudio.currentTime=0;
   }
+
   clearTimeout(pauseTimer);
   cancelAnimationFrame(ringRAF);
-  pauseRing.classList.remove('visible');
-  enTextEl.classList.remove('dancing');
+
+  pauseRing.classList.remove("visible");
 }
 
-/* ── Start pause window ── */
-function startPause(track) {
-  const pauseSeconds = Number.isFinite(track.pause) ? track.pause : DEFAULT_PAUSE;
-  const durationMs   = pauseSeconds * (slowMode ? 2 : 1) * 1000;
+/* ── Pause stage ── */
 
-  pauseRing.classList.add('visible');
-  animateRing(durationMs);
+function startPause(track){
 
-  pauseTimer = setTimeout(() => {
-    pauseRing.classList.remove('visible');
-    if (!isPlaying) return;
-    playTrack((trackIdx + 1) % TRACKS.length);
-  }, durationMs);
+  const pause=(track.pause ?? DEFAULT_PAUSE)*(slowMode?2:1)*1000;
+
+  pauseRing.classList.add("visible");
+  animateRing(pause);
+
+  pauseTimer=setTimeout(()=>{
+
+    pauseRing.classList.remove("visible");
+
+    if(!isPlaying) return;
+
+    playTrack((trackIdx+1)%TRACKS.length);
+
+  },pause);
 }
 
 /* ── Play track ── */
-function playTrack(idx) {
+
+function playTrack(idx){
+
   stopEverything();
 
-  trackIdx = ((idx % TRACKS.length) + TRACKS.length) % TRACKS.length;
-  const track = TRACKS[trackIdx];
+  trackIdx=((idx%TRACKS.length)+TRACKS.length)%TRACKS.length;
+  const track=TRACKS[trackIdx];
+
   updateUI(track);
 
-  currentAudio = audioCache[track.mp3] || new Audio(AUDIO_BASE + track.mp3);
-  currentAudio.currentTime = 0;
+  currentAudio=audioCache[track.mp3] || new Audio(AUDIO_BASE+track.mp3);
+  currentAudio.currentTime=0;
 
-  currentAudio.onended = () => {
-    enTextEl.classList.remove('dancing');
-    if (!isPlaying) return;
+  currentAudio.onended=()=>{
+    if(!isPlaying) return;
     startPause(track);
   };
 
-  currentAudio.onerror = () => {
-    enTextEl.classList.remove('dancing');
-    if (!isPlaying) return;
+  currentAudio.onerror=()=>{
+    if(!isPlaying) return;
     startPause(track);
   };
 
-  currentAudio.play().then(() => {
-    enTextEl.classList.add('dancing');
-    burstMotes();
-  }).catch(() => {
-    enTextEl.classList.remove('dancing');
-    if (!isPlaying) return;
-    startPause(track);
-  });
-}
-
-/* ── Play / Pause ── */
-function togglePlay() {
-  if (!TRACKS.length) return;
-
-  if (isPlaying) {
-    isPlaying = false;
-    stopEverything();
-    btnPlayPause.innerHTML = '&#9654;';
-    btnPlayPause.classList.remove('playing');
-    btnPlayPause.setAttribute('aria-label', 'Play');
-  } else {
-    isPlaying = true;
-    btnPlayPause.innerHTML = '&#9646;&#9646;';
-    btnPlayPause.classList.add('playing');
-    btnPlayPause.setAttribute('aria-label', 'Pause');
-    playTrack(trackIdx);
-  }
+  currentAudio.play();
 }
 
 /* ── Controls ── */
-btnPrev.addEventListener('click', () => {
-  if (!TRACKS.length) return;
-  const newIdx = ((trackIdx - 1) + TRACKS.length) % TRACKS.length;
-  if (isPlaying) playTrack(newIdx);
-  else { trackIdx = newIdx; updateUI(TRACKS[trackIdx]); }
-});
 
-btnNext.addEventListener('click', () => {
-  if (!TRACKS.length) return;
-  const newIdx = (trackIdx + 1) % TRACKS.length;
-  if (isPlaying) playTrack(newIdx);
-  else { trackIdx = newIdx; updateUI(TRACKS[trackIdx]); }
-});
+btnPlayPause.onclick=()=>{
 
-btnPlayPause.addEventListener('click', togglePlay);
+  if(!TRACKS.length) return;
 
-btnSlow.addEventListener('click', () => {
-  slowMode = !slowMode;
-  btnSlow.classList.toggle('active', slowMode);
-  btnSlow.setAttribute('aria-pressed', slowMode);
-});
+  if(isPlaying){
 
-window.addEventListener('resize', () => {
-  if (TRACKS[trackIdx]) requestAnimationFrame(() => fitText(enTextEl));
-});
+    isPlaying=false;
+    stopEverything();
+    btnPlayPause.innerHTML="&#9654;";
 
-/* ── Init ── */
-(async function init() {
-  const weekKey = getWeekKey();
-  const [lo, hi] = WEEK_RANGES[weekKey] || WEEK_RANGES.w1;
+  }else{
 
-  try {
-    const res  = await fetch(JSON_URL);
-    const data = await res.json();
-    TRACKS = (data.cards || [])
-      .filter(c => c.n >= lo && c.n <= hi)
-      .map(c => ({
-        n: c.n,
-        en: c.en,
-        mp3: c.mp3,
-        pause: c.pause
-      }));
-  } catch (e) {
-    preloadBar.textContent = 'Could not load stream data.';
-    console.error('[br_stream] JSON fetch failed:', e);
-    return;
+    isPlaying=true;
+    btnPlayPause.innerHTML="&#9646;&#9646;";
+    playTrack(trackIdx);
+
   }
 
-  if (!TRACKS.length) {
-    preloadBar.textContent = 'No stream tracks for ' + weekKey;
-    return;
+};
+
+btnPrev.onclick=()=>{
+  const newIdx=(trackIdx-1+TRACKS.length)%TRACKS.length;
+  if(isPlaying) playTrack(newIdx);
+  else{
+    trackIdx=newIdx;
+    updateUI(TRACKS[trackIdx]);
   }
+};
+
+btnNext.onclick=()=>{
+  const newIdx=(trackIdx+1)%TRACKS.length;
+  if(isPlaying) playTrack(newIdx);
+  else{
+    trackIdx=newIdx;
+    updateUI(TRACKS[trackIdx]);
+  }
+};
+
+btnSlow.onclick=()=>{
+  slowMode=!slowMode;
+  btnSlow.classList.toggle("active",slowMode);
+};
+
+/* ── INIT ── */
+
+(async function init(){
+
+  const weekKey=getWeekKey();
+  const weekNum=parseInt(weekKey.replace("w","")) || 1;
+
+  const res=await fetch(JSON_URL);
+  const data=await res.json();
+
+  const allCards=data.cards || [];
+
+  TRACKS=buildWeekStream(allCards,weekNum);
 
   preloadAudio(TRACKS);
+
   updateUI(TRACKS[0]);
+
 })();
 </script>
 
