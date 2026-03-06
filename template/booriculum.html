@@ -418,7 +418,7 @@ a.deck.playing .clip {
 <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
 <!-- Close button goes back to index -->
-<button id="btn-close" aria-label="Back to menu" onclick="history.back()">
+<button id="btn-close" aria-label="Back to menu" onclick="window.close()">
   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <line x1="5" y1="5" x2="19" y2="19"/>
     <line x1="19" y1="5" x2="5" y2="19"/>
@@ -598,7 +598,7 @@ function goToDeck(anchor) {
   sessionStorage.setItem('booha_deck_open', '1');
 
   /* 2 seconds of sparkles then navigate */
-  setTimeout(() => { window.location.href = url; }, 2000);
+  setTimeout(() => { window.location.href = url; }, 1000);
 }
 
 document.querySelectorAll('a.deck').forEach(a => {
@@ -641,10 +641,16 @@ document.querySelectorAll('a.deck').forEach(a => {
   document.getElementById('week-label').innerHTML = prettyWeek(week);
 
   /* Wire up tile hrefs */
-  document.getElementById("vocab").href = `../weeks/${week}/br_vocab.html`;
-  document.getElementById("sentences").href = `../weeks/${week}/br_sentences.html`;
-  document.getElementById("questions").href = `../weeks/${week}/br_questions.html`;
-  document.getElementById("stream").href = `../weeks/${week}/br_stream.html`;
+    /* Derive month folder from week param for template paths */
+  const MONTH_MAP = {jan:'january',feb:'february',mar:'march',apr:'april',may:'may',jun:'june',jul:'july',aug:'august',sep:'september',oct:'october',nov:'november',dec:'december'};
+  const mKey = (week.match(/_([a-z]{3})_w\d$/i)||[])[1] || '';
+  const monthDir = MONTH_MAP[mKey.toLowerCase()] || mKey.toLowerCase();
+
+  /* Wire up tile hrefs → template/{month}/br_*.html?week=FOLDER */
+  document.getElementById("vocab").href     = `${monthDir}/br_vocab.html?week=${week}`;
+  document.getElementById("sentences").href = `${monthDir}/br_sentences.html?week=${week}`;
+  document.getElementById("questions").href = `${monthDir}/br_questions.html?week=${week}`;
+  document.getElementById("stream").href    = `${monthDir}/br_stream.html?week=${week}`;
 })();
 </script>
 
