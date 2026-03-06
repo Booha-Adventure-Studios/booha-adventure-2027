@@ -581,13 +581,20 @@ function goToDeck(anchor) {
   startMusicShow(anchor);
   sessionStorage.setItem('booha_deck_open', '1');
 
+  /* Play full 5-second studydeck.mp3, then navigate */
+  let navigated = false;
+  const go = () => { if (!navigated) { navigated = true; window.location.href = url; } };
+
   try {
     deckAudio = new Audio('../assets/audio/studydeck.mp3');
     deckAudio.volume = 0.92;
-    deckAudio.play().catch(() => {});
-  } catch(e) {}
+    deckAudio.onended = go;
+    deckAudio.onerror = go;
+    deckAudio.play().catch(go);
+  } catch(e) { go(); }
 
-  setTimeout(() => { window.location.href = url; }, 420);
+  /* Fallback: navigate after 5.5s even if audio events don't fire */
+  setTimeout(go, 5500);
 }
 
 document.querySelectorAll('a.deck').forEach(a => {
