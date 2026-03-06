@@ -1,1 +1,542 @@
 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Boo-continuum Study Decks</title>
+<meta name="theme-color" content="#07080f">
+<link href="https://fonts.googleapis.com/css2?family=Grenze:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet" />
+
+<style>
+:root {
+  /* Deep midnight — serious, scholarly */
+  --bg: #07080f;
+
+  /* Tile 1 — Crimson Codex */
+  --c1-bg:     linear-gradient(145deg, #7a1020 0%, #300608 55%, #560c18 100%);
+  --c1-border: #d4404c;
+  --c1-halo:   rgba(212,64,76,.55);
+  --c1-ring-a: #c03040;
+  --c1-ring-b: #e89090;
+  --c1-mote:   #f0c0c4;
+
+  /* Tile 2 — Amber Folio */
+  --c2-bg:     linear-gradient(145deg, #7a5000 0%, #321e00 55%, #5a3800 100%);
+  --c2-border: #d4a040;
+  --c2-halo:   rgba(212,160,64,.55);
+  --c2-ring-a: #c08820;
+  --c2-ring-b: #e8cc80;
+  --c2-mote:   #f0dca0;
+
+  /* Tile 3 — Slate Violet */
+  --c3-bg:     linear-gradient(145deg, #2e1a60 0%, #100828 55%, #200c48 100%);
+  --c3-border: #8868cc;
+  --c3-halo:   rgba(136,104,204,.55);
+  --c3-ring-a: #6644b8;
+  --c3-ring-b: #b8a0e8;
+  --c3-mote:   #d4c8f4;
+
+  /* Tile 4 — Iron Teal */
+  --c4-bg:     linear-gradient(145deg, #0c4050 0%, #041820 55%, #083040 100%);
+  --c4-border: #3898b8;
+  --c4-halo:   rgba(56,152,184,.55);
+  --c4-ring-a: #2080a8;
+  --c4-ring-b: #80c4d8;
+  --c4-mote:   #b0dce8;
+
+  --white:     #f0ece4;
+  --white-dim: rgba(240,236,228,.55);
+
+  /* Slightly sharper corners — academic, not playful */
+  --tile-w: 158px;
+  --tile-h: 158px;
+  --tile-r: 16px;
+
+  --font-head: 'Grenze', serif;
+  --font-jp:   'Noto Sans JP', sans-serif;
+}
+
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: var(--font-head);
+  background: var(--bg);
+  color: var(--white);
+  overflow: hidden;
+}
+
+/* Deep vignette — like looking at old pages by lamplight */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%,   rgba(80,40,120,.14) 0%, transparent 65%),
+    radial-gradient(ellipse 100% 50% at 50% 100%, rgba(0,0,0,.55)    0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#app {
+  position: relative; z-index: 1;
+  height: 100dvh; max-height: 100vh;
+  overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+#bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+#welcome {
+  position: relative; z-index: 1;
+  min-height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  padding: 36px 20px;
+  gap: 7px;
+  animation: fadeUp 1.4s cubic-bezier(.18,.8,.32,1) both;
+}
+
+/* Icon — slow, measured float */
+.boo-icon {
+  width: clamp(56px, 11vw, 84px);
+  height: auto;
+  filter:
+    drop-shadow(0 0 20px rgba(180,140,220,.6))
+    drop-shadow(0 0 6px rgba(100,60,160,.5));
+  animation: floatIcon 6s ease-in-out infinite;
+  margin-bottom: 2px;
+}
+@keyframes floatIcon {
+  0%, 100% { transform: translateY(0) rotate(-.5deg); }
+  50%       { transform: translateY(-8px) rotate(.5deg); }
+}
+
+/* Titles */
+.title-en {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: clamp(26px, 5.5vw, 58px);
+  letter-spacing: 2px;
+  line-height: 1.04;
+  color: var(--white);
+  text-shadow:
+    0 0 40px rgba(160,120,220,.5),
+    0 0 16px rgba(100,70,180,.35),
+    0 2px 12px rgba(0,0,0,.9);
+  margin-top: 4px;
+}
+
+.title-jp {
+  font-family: var(--font-jp);
+  font-size: clamp(11px, 2vw, 17px);
+  color: var(--white-dim);
+  letter-spacing: 3px;
+  font-weight: 500;
+  margin-top: 3px;
+}
+
+/* Divider — thin ruled line, like a page rule */
+.divider {
+  width: clamp(80px, 28vw, 200px);
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(180,140,220,.5) 30%,
+    rgba(220,200,255,.6) 50%,
+    rgba(180,140,220,.5) 70%,
+    transparent);
+  margin: 10px 0 5px;
+}
+
+.week-label {
+  font-family: var(--font-head);
+  font-style: italic;
+  font-size: clamp(13px, 2.2vw, 18px);
+  color: rgba(240,236,228,.75);
+  letter-spacing: 1.5px;
+  text-shadow: 0 1px 8px rgba(0,0,0,.7);
+  margin-bottom: 2px;
+}
+
+.deck-links {
+  display: grid;
+  grid-template-columns: repeat(2, var(--tile-w));
+  gap: 1rem;
+  padding: 14px 0 6px;
+}
+
+a.deck {
+  width: var(--tile-w); height: var(--tile-h);
+  border-radius: var(--tile-r);
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  text-decoration: none; overflow: visible;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none; touch-action: pan-y manipulation;
+  transition: transform .28s cubic-bezier(.25,.8,.35,1);
+  transform: translateZ(0); z-index: 1;
+}
+
+a.deck.c1 { --tile-bg:var(--c1-bg); --border-c:var(--c1-border); --halo:var(--c1-halo); --ring-a:var(--c1-ring-a); --ring-b:var(--c1-ring-b); --mote-c:var(--c1-mote); }
+a.deck.c2 { --tile-bg:var(--c2-bg); --border-c:var(--c2-border); --halo:var(--c2-halo); --ring-a:var(--c2-ring-a); --ring-b:var(--c2-ring-b); --mote-c:var(--c2-mote); }
+a.deck.c3 { --tile-bg:var(--c3-bg); --border-c:var(--c3-border); --halo:var(--c3-halo); --ring-a:var(--c3-ring-a); --ring-b:var(--c3-ring-b); --mote-c:var(--c3-mote); }
+a.deck.c4 { --tile-bg:var(--c4-bg); --border-c:var(--c4-border); --halo:var(--c4-halo); --ring-a:var(--c4-ring-a); --ring-b:var(--c4-ring-b); --mote-c:var(--c4-mote); }
+
+/* Spinning ring — slower, more deliberate */
+a.deck::before {
+  content: "";
+  position: absolute; inset: -5px;
+  border-radius: calc(var(--tile-r) + 5px);
+  background: conic-gradient(
+    from var(--angle, 0deg),
+    var(--ring-a) 0%, var(--ring-b) 25%,
+    var(--ring-a) 50%, var(--ring-b) 75%,
+    var(--ring-a) 100%
+  );
+  opacity: .4; z-index: -1; filter: blur(2px);
+  animation: spinRing 10s linear infinite;
+  pointer-events: none;
+}
+
+/* Bloom halo */
+a.deck::after {
+  content: "";
+  position: absolute; inset: -46px;
+  border-radius: 50%; z-index: -2;
+  pointer-events: none; opacity: 0;
+  transform: scale(.6) translateZ(0);
+  transition: opacity .35s, transform .35s;
+  background: radial-gradient(circle, var(--halo) 0%, transparent 70%);
+}
+
+/* Tile face — slightly more border weight for gravitas */
+a.deck .clip {
+  position: absolute; inset: 0;
+  border-radius: inherit; overflow: hidden; z-index: 2;
+  border: 2px solid var(--border-c);
+  box-shadow:
+    0 16px 44px rgba(0,0,0,.8),
+    0 0 0 1px rgba(255,255,255,.06) inset,
+    0 1px 0 rgba(255,255,255,.12) inset;
+}
+
+a.deck .inner {
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 14px 10px; gap: 5px;
+  background: var(--tile-bg);
+  text-align: center; line-height: 1.1;
+  transition: filter .25s;
+}
+
+a.deck .inner::after {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(115deg, transparent 25%, rgba(255,255,255,.08) 50%, transparent 75%);
+  background-size: 200% 200%; background-position: 160% 0;
+  pointer-events: none;
+  transition: background-position .5s ease;
+}
+a.deck:hover .inner::after { background-position: -60% 100%; }
+
+/* Label — Grenze italic for tile text */
+a.deck .label {
+  display: block;
+  font-family: var(--font-head);
+  font-style: italic;
+  font-size: clamp(14px, 1.9vw, 17px);
+  letter-spacing: .8px;
+  color: var(--white);
+  text-shadow: 0 1px 8px rgba(0,0,0,.85);
+  text-wrap: balance; line-height: 1.15;
+}
+a.deck .jp {
+  display: block;
+  font-family: var(--font-jp);
+  font-size: clamp(10px, 1.2vw, 12px);
+  color: rgba(240,236,228,.65);
+  letter-spacing: .5px;
+  text-shadow: 0 1px 4px rgba(0,0,0,.7);
+  font-weight: 500;
+}
+
+a.deck .sparkles {
+  position: absolute; inset: 0; z-index: 9;
+  pointer-events: none; border-radius: inherit; overflow: hidden;
+}
+.mote {
+  position: absolute; border-radius: 50%; opacity: 0;
+  animation: moteFly var(--dur, .8s) ease-out forwards;
+  background: radial-gradient(circle, var(--mote-c, #fff) 0%, transparent 70%);
+}
+@keyframes moteFly {
+  0%   { opacity:0; transform:translate(-50%,-50%) scale(.3); }
+  18%  { opacity:1; transform:translate(-50%,-50%) scale(1.0); }
+  100% { opacity:0; transform:translate(var(--tx,0), var(--ty,-40px)) scale(.4); }
+}
+
+/* Hover — subtle lift, not bouncy */
+a.deck:hover {
+  transform: scale(1.04) translateY(-3px);
+  z-index: 10;
+}
+a.deck:hover::before { opacity: .7; }
+a.deck:hover::after  { opacity: .6; transform: scale(1) translateZ(0); }
+
+/* Tap / playing */
+a.deck.tap { transform: scale(.95); transition: transform .1s ease; }
+a.deck.playing {
+  transform: scale(1.08) translateY(-4px);
+  z-index: 999;
+  animation: bloom .5s cubic-bezier(.25,.8,.35,1) forwards;
+}
+a.deck.playing::after  { opacity:1; transform:scale(1.15) translateZ(0); }
+a.deck.playing::before { opacity:1; animation:spinRing 2s linear infinite; }
+a.deck.playing .inner  { animation:pulseInner 1.4s ease-in-out infinite; }
+
+@keyframes bloom      { 0%{transform:scale(1);} 60%{transform:scale(1.1) translateY(-5px);} 100%{transform:scale(1.08) translateY(-4px);} }
+@keyframes pulseInner { 0%,100%{filter:brightness(1);} 50%{filter:brightness(1.25) saturate(1.2);} }
+@keyframes spinRing   { to { --angle: 360deg; } }
+@keyframes fadeUp     { from{opacity:0;transform:translateY(18px);} to{opacity:1;transform:translateY(0);} }
+@keyframes tileIn     { from{opacity:0;transform:translateY(20px) scale(.9);} to{opacity:1;transform:translateY(0) scale(1);} }
+
+/* Staggered entrance — slower than Pre-Boo */
+.deck-links a.deck              { animation: tileIn .8s cubic-bezier(.18,.8,.32,1) both; }
+.deck-links a.deck:nth-child(1) { animation-delay: .26s; }
+.deck-links a.deck:nth-child(2) { animation-delay: .40s; }
+.deck-links a.deck:nth-child(3) { animation-delay: .54s; }
+.deck-links a.deck:nth-child(4) { animation-delay: .68s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .boo-icon, a.deck::before, a.deck.playing { animation: none !important; }
+  a.deck.playing .inner { animation: none !important; }
+  .mote { animation: none !important; opacity: 0; }
+}
+@media (max-width: 390px) {
+  :root { --tile-w: 140px; --tile-h: 140px; --tile-r: 12px; }
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  :root { --tile-w: 118px; --tile-h: 118px; }
+  #welcome { padding: 12px 16px; gap: 3px; }
+  .boo-icon { width: 36px; }
+  .title-en { font-size: clamp(16px, 3.5vw, 24px); }
+  .divider  { margin: 4px 0 2px; }
+  .deck-links { grid-template-columns: repeat(4, var(--tile-w)); gap: .8rem; }
+}
+
+/* Close button — cooler tone */
+#btn-close {
+  position: fixed; top: 18px; right: 18px; z-index: 9999;
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 2px solid rgba(160,130,210,.4);
+  background: rgba(10,8,20,.6);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .18s ease, border-color .18s ease;
+  animation: pulseClose 3.5s ease-in-out infinite;
+}
+#btn-close:hover { transform: scale(1.12); border-color: rgba(200,170,255,.8); }
+#btn-close:active { transform: scale(.91); }
+#btn-close svg {
+  width: 20px; height: 20px;
+  stroke: rgba(240,236,228,.85); stroke-width: 2; stroke-linecap: round;
+  filter: drop-shadow(0 0 4px rgba(180,140,255,.6));
+}
+@keyframes pulseClose {
+  0%,100% { box-shadow: 0 0 10px rgba(140,100,200,.2), 0 0 22px rgba(140,100,200,.08); }
+  50%     { box-shadow: 0 0 18px rgba(140,100,200,.42), 0 0 40px rgba(140,100,200,.16); }
+}
+</style>
+</head>
+
+<body>
+<div id="app">
+
+<canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+<button id="btn-close" aria-label="Back to menu" onclick="history.back()">
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <line x1="5" y1="5" x2="19" y2="19"/>
+    <line x1="19" y1="5" x2="5" y2="19"/>
+  </svg>
+</button>
+
+<section id="welcome">
+
+  <img class="boo-icon" src="../assets/img/cont-tree.png" alt="Boo-continuum" onerror="this.style.display='none'">
+
+  <h1 class="title-en">Boo-continuum</h1>
+  <p class="title-jp">ブーコンティニューム・スタディデッキ</p>
+
+  <div class="divider" aria-hidden="true"></div>
+
+  <p class="week-label" id="week-label">Loading…</p>
+
+  <div class="deck-links">
+
+    <a id="vocab" class="deck c1" href="#">
+      <div class="clip"><div class="inner">
+        <span class="label">Vocabulary</span>
+        <span class="jp">語彙</span>
+      </div><div class="sparkles" aria-hidden="true"></div></div>
+    </a>
+
+    <a id="sentences" class="deck c2" href="#">
+      <div class="clip"><div class="inner">
+        <span class="label">Sentences</span>
+        <span class="jp">文</span>
+      </div><div class="sparkles" aria-hidden="true"></div></div>
+    </a>
+
+    <a id="questions" class="deck c3" href="#">
+      <div class="clip"><div class="inner">
+        <span class="label">Questions</span>
+        <span class="jp">質問</span>
+      </div><div class="sparkles" aria-hidden="true"></div></div>
+    </a>
+
+    <a id="stream" class="deck c4" href="#">
+      <div class="clip"><div class="inner">
+        <span class="label">Stream</span>
+        <span class="jp">ストリーム</span>
+      </div><div class="sparkles" aria-hidden="true"></div></div>
+    </a>
+
+  </div>
+
+</section>
+
+<!-- ── Background particles — cool academic ember drift ── -->
+<script>
+(function () {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx    = canvas.getContext('2d');
+  /* Muted jewel tones — not garish, like illuminated manuscript pigments */
+  const COLORS = [
+    '#8868cc','#a090d8','#c03040','#d87080',
+    '#c08820','#d8b060','#2080a8','#60b0c8',
+    '#604898','#402860','#a06030','#304060'
+  ];
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+  const PARTS = [];
+  function makePart(scatter) {
+    return {
+      x:     Math.random() * (canvas.width  || 400),
+      y:     scatter ? Math.random() * (canvas.height || 700) : (canvas.height || 700) + 10,
+      r:     .5 + Math.random() * 1.6,
+      vx:    (Math.random() - .5) * .14,
+      vy:    -.04 - Math.random() * .12,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      alpha: .08 + Math.random() * .2,
+      life:  scatter ? Math.random() : 0,
+    };
+  }
+  for (let i = 0; i < 55; i++) PARTS.push(makePart(true));
+  function tick() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < PARTS.length; i++) {
+      const p = PARTS[i];
+      p.x += p.vx; p.y += p.vy; p.life += .0025;
+      if (p.y < -10 || p.life > 1) { PARTS[i] = makePart(false); continue; }
+      const a = p.alpha * Math.sin(p.life * Math.PI);
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color; ctx.globalAlpha = a; ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+</script>
+
+<!-- ── Tile interaction ── -->
+<script>
+let lockedUI = false;
+
+function burstMotes(anchor) {
+  const box = anchor.querySelector('.sparkles');
+  if (!box) return;
+  box.innerHTML = '';
+  for (let i = 0; i < 14; i++) {
+    const m = document.createElement('div');
+    m.className = 'mote';
+    const sz  = 4 + Math.random() * 7;
+    const x   = 12 + Math.random() * 76;
+    const y   = 12 + Math.random() * 76;
+    const tx  = (Math.random() - .5) * 56 + 'px';
+    const ty  = -(16 + Math.random() * 44) + 'px';
+    const dur = (.5 + Math.random() * .6) + 's';
+    m.style.cssText = `width:${sz}px;height:${sz}px;left:${x}%;top:${y}%;--tx:${tx};--ty:${ty};--dur:${dur};animation-delay:${(Math.random()*.12).toFixed(2)}s`;
+    box.appendChild(m);
+  }
+  setTimeout(() => { box.innerHTML = ''; }, 1300);
+}
+
+function goToDeck(anchor) {
+  if (lockedUI) return;
+  lockedUI = true;
+  const url = anchor.getAttribute('href');
+  if (!url || url === '#') { lockedUI = false; return; }
+  anchor.classList.add('tap');
+  setTimeout(() => anchor.classList.remove('tap'), 110);
+  document.querySelectorAll('a.deck').forEach(el => {
+    if (el !== anchor) el.style.pointerEvents = 'none';
+  });
+  anchor.classList.add('playing');
+  burstMotes(anchor);
+  setTimeout(() => { window.location.href = url; }, 460);
+}
+
+document.querySelectorAll('a.deck').forEach(a => {
+  a.addEventListener('click', e => { e.preventDefault(); goToDeck(a); }, { passive: false });
+});
+</script>
+
+<!-- ── Week routing ── -->
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const week   = params.get('week');
+
+  if (!week) {
+    window.location.href = '../index.html';
+    return;
+  }
+
+  function prettyWeek(folder) {
+    const m = folder.match(/_([a-z]{3})_w(\d)$/i);
+    if (!m) return folder;
+    const MONTHS    = { jan:'January',feb:'February',mar:'March',apr:'April',may:'May',jun:'June',jul:'July',aug:'August',sep:'September',oct:'October',nov:'November',dec:'December' };
+    const MONTHS_JP = { jan:'1月',feb:'2月',mar:'3月',apr:'4月',may:'5月',jun:'6月',jul:'7月',aug:'8月',sep:'9月',oct:'10月',nov:'11月',dec:'12月' };
+    const mo = m[1].toLowerCase(), wn = m[2];
+    return `${MONTHS[mo] || mo} Week ${wn} &middot; ${MONTHS_JP[mo] || mo}第${wn}週`;
+  }
+
+  document.getElementById('week-label').innerHTML = prettyWeek(week);
+
+  document.getElementById('vocab').href     = `../weeks/${week}/bc_vocab.html`;
+  document.getElementById('sentences').href = `../weeks/${week}/bc_sentences.html`;
+  document.getElementById('questions').href = `../weeks/${week}/bc_questions.html`;
+  document.getElementById('stream').href    = `../weeks/${week}/bc_stream.html`;
+})();
+</script>
+
+</div>
+</body>
+</html>
