@@ -435,7 +435,8 @@ header {
 
   <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
-  <button id="btn-close" aria-label="Close">
+  <button id="btn-close" aria-label="Back to menu"
+  onclick="sessionStorage.setItem('booha_deck_open','1'); window.location.href='../booriculum.html';">    
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <line x1="5" y1="5" x2="19" y2="19"/>
       <line x1="19" y1="5" x2="5" y2="19"/>
@@ -575,9 +576,6 @@ const preloadBar = document.getElementById('preload-bar');
 const btnPlay    = document.getElementById('btn-play');
 const toast      = document.getElementById('warning-toast');
 
-document.getElementById('btn-close').onclick = () => {
-  location.href = '../booriculum.html';
-};  
 
 /* ── State ── */
 let CARDS      = [];
