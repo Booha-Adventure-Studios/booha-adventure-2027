@@ -578,25 +578,33 @@ header {
    AUDIO PATH: assets/audio/march/boo_riculum/vocab/
    Files:      br_v01_****.mp3  →  br_v60_****.mp3
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-const AUDIO_BASE = '../../assets/audio/march/boo_riculum/vocab/';
+const AUDIO_ROOT = 'https://pub-8d5941f302df44b899ce9d9a4606dcb7.r2.dev/audio-2027';
+const JSON_URL   = 'br_vocab.json';
 
-const CARDS = [
-  { en: 'job',            jp: '仕事',              hira: 'しごと',                    mp3: 'br_v01_job.mp3' },
-  { en: 'worker',         jp: '働く人・労働者',     hira: 'はたらく ひと・ろうどうしゃ', mp3: 'br_v02_worker.mp3' },
-  { en: 'teacher',        jp: '先生',              hira: 'せんせい',                   mp3: 'br_v03_teacher.mp3' },
-  { en: 'doctor',         jp: '医者',              hira: 'いしゃ',                    mp3: 'br_v04_doctor.mp3' },
-  { en: 'nurse',          jp: '看護師',             hira: 'かんごし',                  mp3: 'br_v05_nurse.mp3' },
-  { en: 'chef',           jp: '料理人・コック',      hira: 'りょうりにん・こっく',        mp3: 'br_v06_chef.mp3' },
-  { en: 'artist',         jp: '芸術家・アーティスト', hira: 'げいじゅつか・あーてぃすと',  mp3: 'br_v07_artist.mp3' },
-  { en: 'scientist',      jp: '科学者',             hira: 'かがくしゃ',                mp3: 'br_v08_scientist.mp3' },
-  { en: 'police officer', jp: '警察官',             hira: 'けいさつかん',               mp3: 'br_v09_police_officer.mp3' },
-  { en: 'pilot',          jp: 'パイロット',          hira: 'ぱいろっと',                mp3: 'br_v10_pilot.mp3' },
-  { en: 'engineer',       jp: 'エンジニア',          hira: 'えんじにあ',                mp3: 'br_v11_engineer.mp3' },
-  { en: 'farmer',         jp: '農家',              hira: 'のうか',                    mp3: 'br_v12_farmer.mp3' },
-  { en: 'office',         jp: '事務所・オフィス',    hira: 'じむしょ・おふぃす',          mp3: 'br_v13_office.mp3' },
-  { en: 'company',        jp: '会社',              hira: 'かいしゃ',                  mp3: 'br_v14_company.mp3' },
-  { en: 'career',         jp: '職業・キャリア',      hira: 'しょくぎょう・きゃりあ',      mp3: 'br_v15_career.mp3' },
-];
+const params = new URLSearchParams(window.location.search);
+const weekParam = params.get('week') || '';
+
+const monthMatch = weekParam.match(/_([a-z]{3})_w/i);
+const MONTH = monthMatch ? monthMatch[1] : 'jan';
+
+const AUDIO_BASE = `${AUDIO_ROOT}/${MONTH}/boo_riculum/vocab/`;
+
+/// { en: 'job',            jp: '仕事',              hira: 'しごと',                    mp3: 'br_v01_job.mp3' },
+ // { en: 'worker',         jp: '働く人・労働者',     hira: 'はたらく ひと・ろうどうしゃ', mp3: 'br_v02_worker.mp3' },
+ // { en: 'teacher',        jp: '先生',              hira: 'せんせい',                   mp3: 'br_v03_teacher.mp3' },
+ // { en: 'doctor',         jp: '医者',              hira: 'いしゃ',                    mp3: 'br_v04_doctor.mp3' },
+ // { en: 'nurse',          jp: '看護師',             hira: 'かんごし',                  mp3: 'br_v05_nurse.mp3' },
+ // { en: 'chef',           jp: '料理人・コック',      hira: 'りょうりにん・こっく',        mp3: 'br_v06_chef.mp3' },
+ // { en: 'artist',         jp: '芸術家・アーティスト', hira: 'げいじゅつか・あーてぃすと',  mp3: 'br_v07_artist.mp3' },
+ // { en: 'scientist',      jp: '科学者',             hira: 'かがくしゃ',                mp3: 'br_v08_scientist.mp3' },
+ // { en: 'police officer', jp: '警察官',             hira: 'けいさつかん',               mp3: 'br_v09_police_officer.mp3' },
+ // { en: 'pilot',          jp: 'パイロット',          hira: 'ぱいろっと',                mp3: 'br_v10_pilot.mp3' },
+ // { en: 'engineer',       jp: 'エンジニア',          hira: 'えんじにあ',                mp3: 'br_v11_engineer.mp3' },
+ // { en: 'farmer',         jp: '農家',              hira: 'のうか',                    mp3: 'br_v12_farmer.mp3' },
+ // { en: 'office',         jp: '事務所・オフィス',    hira: 'じむしょ・おふぃす',          mp3: 'br_v13_office.mp3' },
+ // { en: 'company',        jp: '会社',              hira: 'かいしゃ',                  mp3: 'br_v14_company.mp3' },
+ // { en: 'career',         jp: '職業・キャリア',      hira: 'しょくぎょう・きゃりあ',      mp3: 'br_v15_career.mp3' },
+//];
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    END OF WEEKLY CONTENT
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
