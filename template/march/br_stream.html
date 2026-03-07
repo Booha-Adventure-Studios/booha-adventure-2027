@@ -609,10 +609,10 @@ const progressRight= document.getElementById('progress-right');
 
 
 function getAudioSrc(mp3) {
-  if (mp3.startsWith('br_v')) return AUDIO_ROOT + 'vocab/' + mp3;
-  if (mp3.startsWith('br_s')) return AUDIO_ROOT + 'sentences/' + mp3;
-  if (mp3.startsWith('br_q')) return AUDIO_ROOT + 'questions/' + mp3;
-  return AUDIO_ROOT + mp3;
+  if (mp3.startsWith('br_v')) return STREAM_AUDIO_ROOT + 'vocab/' + mp3;
+  if (mp3.startsWith('br_s')) return STREAM_AUDIO_ROOT + 'sentences/' + mp3;
+  if (mp3.startsWith('br_q')) return STREAM_AUDIO_ROOT + 'questions/' + mp3;
+  return STREAM_AUDIO_ROOT + mp3;
 }
 
 function goBackToBooriculum() {
