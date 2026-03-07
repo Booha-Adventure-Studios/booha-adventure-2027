@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Pre-Boo Study Decks</title>
 <meta name="theme-color" content="#180d28">
-<link href="https://fonts.googleapis.com/css2?family=Croissant+One&family=Nunito:wght@800;900&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Ranchers&family=Nunito:wght@800;900&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet" />
 
 <style>
 :root {
@@ -51,7 +51,7 @@
   --tile-h: 162px;
   --tile-r: 32px;
 
-  --font-head: 'Croissant One', serif;
+  --font-head: 'Ranchers', cursive;
   --font-ui:   'Nunito', sans-serif;
   --font-jp:   'Noto Sans JP', sans-serif;
 }
@@ -146,7 +146,6 @@ body::before {
   margin-top: 0;
   margin-bottom: 2px;
 }
-
 
 .divider {
   width: clamp(100px, 36vw, 240px);
@@ -333,7 +332,7 @@ a.deck.playing .clip {
   0%,100% { box-shadow: 0 14px 40px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.08) inset, 0 1px 0 rgba(255,255,255,.18) inset; }
   50%     { box-shadow: 0 14px 40px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.5) inset, 0 0 22px 4px var(--border-c); }
 }
-@keyframes spinRing   { to { --angle: 360deg; } } }
+@keyframes spinRing   { to { --angle: 360deg; } }
 @keyframes fadeUp     { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
 @keyframes tileIn     { from{opacity:0;transform:translateY(24px) scale(.85);} to{opacity:1;transform:translateY(0) scale(1);} }
 
@@ -556,7 +555,6 @@ function goToDeck(anchor) {
   startMusicShow(anchor);
   sessionStorage.setItem('booha_deck_open', '1');
 
-  /* 2 seconds of sparkles then navigate */
   setTimeout(() => { window.location.href = url; }, 1000);
 }
 
@@ -587,7 +585,7 @@ document.querySelectorAll('a.deck').forEach(a => {
 
   document.getElementById('week-label').innerHTML = prettyWeek(week);
 
-    const MONTH_MAP = {jan:'january',feb:'february',mar:'march',apr:'april',may:'may',jun:'june',jul:'july',aug:'august',sep:'september',oct:'october',nov:'november',dec:'december'};
+  const MONTH_MAP = {jan:'january',feb:'february',mar:'march',apr:'april',may:'may',jun:'june',jul:'july',aug:'august',sep:'september',oct:'october',nov:'november',dec:'december'};
   const mKey = (week.match(/_([a-z]{3})_w\d$/i)||[])[1] || '';
   const monthDir = MONTH_MAP[mKey.toLowerCase()] || mKey.toLowerCase();
 
