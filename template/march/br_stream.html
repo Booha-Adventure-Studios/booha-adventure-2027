@@ -560,8 +560,17 @@ svg.ring-svg {
      STREAM LOGIC
      ══════════════════════════════════ -->
 <script>
-const AUDIO_ROOT = '../../assets/audio/march/boo_riculum/';
+const AUDIO_ROOT = 'https://pub-8d5941f302df44b899ce9d9a4606dcb7.r2.dev/audio-2027';
 const JSON_URL   = 'br_stream.json';
+
+const params = new URLSearchParams(window.location.search);
+const weekParam = params.get('week') || '';
+
+const monthMatch = weekParam.match(/_([a-z]{3})_w/i);
+const MONTH = monthMatch ? monthMatch[1] : 'jan';
+
+const STREAM_AUDIO_ROOT = `${AUDIO_ROOT}/${MONTH}/boo_riculum/`;
+  
 const DEFAULT_PAUSE = 5.5;
 
 const STREAM_PALETTES = [
@@ -602,7 +611,7 @@ function getAudioSrc(mp3) {
   if (mp3.startsWith('br_s')) return AUDIO_ROOT + 'sentences/' + mp3;
   if (mp3.startsWith('br_q')) return AUDIO_ROOT + 'questions/' + mp3;
   return AUDIO_ROOT + mp3;
-}  
+}
 
 function goBackToBooriculum() {
   const params = new URLSearchParams(window.location.search);
