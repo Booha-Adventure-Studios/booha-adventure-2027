@@ -598,6 +598,14 @@ document.querySelectorAll('a.deck').forEach(a => {
 })();
 </script>
 
+<!-- ── Close button routing ── -->
+<script>
+document.getElementById('btn-close').addEventListener('click', () => {
+  sessionStorage.setItem('booha_return_to_hub', '1');
+  window.location.assign('https://booha-adventure-studios.github.io/booha-adventure-2027/');
+});
+</script>  
+
 </div>
 </body>
 </html>
