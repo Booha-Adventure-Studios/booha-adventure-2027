@@ -1,0 +1,940 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>PRE-BOO – Vocabulary Tap</title>
+<link rel="icon" type="image/png" href="../../BoohaYellow.png">
+<link rel="apple-touch-icon" href="../../BoohaYellow.png">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════
+   PRE-BOO – Vocabulary Tap
+   Soft candy-pastel world, round jelly cards
+   ══════════════════════════════════════════ */
+:root{
+  --bg:#fce8f3;
+  --bg2:#fff5fb;
+  --ink:#3d1a4f;
+  --pink:#ff6fae;
+  --purple:#a855c8;
+  --mint:#a8e6cf;
+  --peach:#ffd3a5;
+  --sky:#b5d8fa;
+  --lavender:#e8c6f8;
+  --gold:#fbbf24;
+  --green:#22c55e;
+  --red:#ef4444;
+  --cardH:106px;
+  --radius:26px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  min-height:100vh;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Baloo 2','Nunito',sans-serif;
+  display:flex;flex-direction:column;align-items:center;
+  overflow-y:auto;overflow-x:hidden;
+  overscroll-behavior-y:contain;
+  padding-bottom:env(safe-area-inset-bottom);
+  position:relative;
+}
+
+/* Polka-dot background */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    radial-gradient(circle,rgba(255,158,196,0.22) 3px,transparent 3px),
+    radial-gradient(circle,rgba(168,230,207,0.18) 3px,transparent 3px),
+    radial-gradient(circle,rgba(181,216,250,0.15) 3px,transparent 3px);
+  background-size:44px 44px,72px 72px,58px 58px;
+  background-position:0 0,22px 22px,11px 33px;
+}
+
+/* Drifting cloud blobs */
+.cloud{
+  position:fixed;border-radius:50%;filter:blur(70px);pointer-events:none;z-index:0;
+  animation:cloudDrift var(--cd,18s) ease-in-out infinite alternate;
+}
+.cloud:nth-child(1){width:420px;height:300px;background:rgba(255,158,196,0.18);top:-60px;left:-80px;--cd:20s;}
+.cloud:nth-child(2){width:350px;height:260px;background:rgba(168,230,207,0.15);bottom:-50px;right:-60px;--cd:16s;}
+.cloud:nth-child(3){width:280px;height:240px;background:rgba(232,198,248,0.14);top:40%;left:55%;--cd:24s;}
+.cloud:nth-child(4){width:200px;height:200px;background:rgba(255,209,102,0.10);top:60%;left:8%;--cd:19s;}
+@keyframes cloudDrift{from{transform:translate(0,0) scale(1);}to{transform:translate(18px,24px) scale(1.05);}}
+
+/* ── X close button ── */
+.close-btn{
+  position:fixed;top:10px;right:12px;z-index:40;
+  width:38px;height:38px;border-radius:50%;
+  background:rgba(255,255,255,0.85);
+  border:2.5px solid #ffb3d1;
+  color:#c0607a;font-size:1.1rem;font-weight:900;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;text-decoration:none;
+  box-shadow:0 3px 10px rgba(255,100,160,0.2);
+  transition:background 0.2s,transform 0.2s,box-shadow 0.2s;
+  line-height:1;
+}
+.close-btn:hover{background:#ffe0ee;transform:scale(1.12) rotate(-8deg);box-shadow:0 4px 14px rgba(255,100,160,0.35);}
+
+/* ── Header ── */
+header{
+  position:relative;z-index:10;
+  padding:18px 60px 10px;text-align:center;width:100%;
+}
+header h1{
+  font-family:'Baloo 2',sans-serif;font-weight:800;
+  font-size:clamp(1.4rem,4vw,2rem);
+  background:linear-gradient(135deg,#ff6fae,#e879a0,#a855c8,#60a5fa);
+  background-size:300% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:candyShift 5s ease-in-out infinite alternate;
+  line-height:1.1;
+}
+@keyframes candyShift{0%{background-position:0% center;}100%{background-position:100% center;}}
+
+header h2{
+  font-family:'Baloo 2',sans-serif;font-weight:800;
+  font-size:clamp(1.6rem,5vw,2.4rem);
+  color:var(--ink);margin-top:2px;
+  text-shadow:0 2px 0 rgba(255,158,196,0.5),0 0 30px rgba(168,85,200,0.12);
+  animation:h2BubblePulse 3.5s ease-in-out infinite;
+}
+@keyframes h2BubblePulse{
+  0%,100%{text-shadow:0 2px 0 rgba(255,158,196,0.5),0 0 30px rgba(168,85,200,0.12);}
+  50%{text-shadow:0 2px 0 rgba(255,158,196,0.7),0 0 50px rgba(168,85,200,0.22);}
+}
+
+.subtitle-stack{
+  font-family:'Nunito',sans-serif;
+  font-size:.88rem;color:rgba(80,30,100,0.70);font-weight:700;
+  display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap;margin-top:4px;
+}
+
+/* Round tracker — bubbly dots with ripple */
+.round-dots{display:flex;gap:10px;justify-content:center;margin:8px 0 2px;}
+.round-dot{
+  width:13px;height:13px;border-radius:50%;
+  background:rgba(200,150,200,0.22);border:2px solid rgba(200,150,200,0.45);
+  transition:all 0.35s ease;position:relative;
+}
+.round-dot.done{background:#ff9ec4;border-color:#ff6fae;box-shadow:0 0 10px rgba(255,110,174,0.55);}
+.round-dot.active{
+  background:var(--purple);border-color:#7c3aad;
+  box-shadow:0 0 14px rgba(168,85,200,0.7),0 0 30px rgba(168,85,200,0.25);
+  transform:scale(1.3);
+}
+.round-dot.active::after{
+  content:'';position:absolute;inset:-5px;border-radius:50%;
+  border:2px solid rgba(168,85,200,0.45);
+  animation:dotBubble 1.4s ease-out infinite;
+}
+@keyframes dotBubble{0%{transform:scale(1);opacity:0.8;}100%{transform:scale(2.1);opacity:0;}}
+
+hr.sep{
+  border:0;height:1.5px;
+  background:linear-gradient(90deg,transparent,rgba(255,179,209,0.25),#ffb3d1,rgba(255,179,209,0.25),transparent);
+  margin:8px 0;
+}
+
+/* ── Pages ── */
+.page{width:100%;max-width:980px;margin:0 auto;display:none;padding:8px 16px 24px;position:relative;z-index:10;}
+.page.active{display:block}
+
+/* ── Round layout ── */
+.round-wrap{display:flex;gap:20px;align-items:flex-start;justify-content:center;flex-wrap:wrap;margin-top:12px;}
+.col{flex:1 1 400px;max-width:440px;display:flex;flex-direction:column;gap:12px;}
+.round-wrap,.card,.col{touch-action:pan-y;}
+
+/* ── EN card gradient classes ── */
+.pb-en-0{background:linear-gradient(135deg,#ffb3cc,#ff9ec4);}
+.pb-en-1{background:linear-gradient(135deg,#c8f2e0,#a8e6cf);}
+.pb-en-2{background:linear-gradient(135deg,#ffe5c0,#ffd3a5);}
+.pb-en-3{background:linear-gradient(135deg,#d4eaff,#b5d8fa);}
+.pb-en-4{background:linear-gradient(135deg,#f2dbff,#e8c6f8);}
+
+/* ── Cards ── */
+.card{
+  border-radius:var(--radius);
+  height:var(--cardH);
+  padding:14px 18px;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  font-family:'Baloo 2',sans-serif;font-size:clamp(1.3rem,4vw,2rem);font-weight:800;line-height:1.2;
+  user-select:none;
+  transition:transform .15s cubic-bezier(.34,1.46,.64,1),box-shadow .2s ease;
+  word-break:break-word;cursor:pointer;
+  position:relative;overflow:hidden;
+}
+
+/* EN card */
+.card.en{
+  color:#3d1a4f;font-size:clamp(1.6rem,5vw,2.6rem);font-weight:900;
+  border:3px solid rgba(255,255,255,0.88);
+  box-shadow:0 5px 0 rgba(0,0,0,0.08),0 8px 20px rgba(0,0,0,0.07),inset 0 1px 0 rgba(255,255,255,0.7);
+  word-break:keep-all;overflow-wrap:normal;hyphens:none;
+}
+/* Shimmer sweep on select/hover */
+.card.en .en-shimmer{
+  position:absolute;inset:0;pointer-events:none;z-index:3;border-radius:inherit;
+  background:linear-gradient(110deg,transparent 25%,rgba(255,255,255,0.35) 50%,transparent 75%);
+  transform:translateX(-130%);transition:transform 0.5s ease;
+}
+.card.en.selected .en-shimmer,
+.card.en:hover:not(.locked) .en-shimmer{transform:translateX(130%);}
+
+/* JP card */
+.card.jp{
+  background:rgba(255,255,255,0.58);
+  border:2.5px dashed #ffb3d1;
+  color:var(--ink);white-space:pre-line;
+  font-size:clamp(1.1rem,3.2vw,1.6rem);font-weight:700;
+  box-shadow:0 4px 14px rgba(0,0,0,0.06);
+  backdrop-filter:blur(4px);
+}
+
+/* Selected EN */
+.card.selected{
+  transform:scale(1.04) translateY(-3px);
+  box-shadow:0 0 0 3px #fff,0 0 22px rgba(255,107,174,0.75),0 0 45px rgba(255,209,102,0.4);
+}
+
+/* JP awake — gentle float */
+.jpAwake .card.jp:not(.combined):not(.correct):not(.wrong){
+  border-color:var(--purple);
+  box-shadow:0 0 14px rgba(168,85,200,0.28);
+  animation:jpFloatPB 2s ease-in-out infinite alternate;
+}
+@keyframes jpFloatPB{from{transform:translateY(0) scale(1);}to{transform:translateY(-4px) scale(1.01);}}
+
+/* Combined pair */
+.card.combined{border:0!important;display:flex;flex-direction:column;gap:6px;}
+.card.matchedBlue{
+  background:linear-gradient(135deg,#93c5fd,#60a5fa)!important;
+  color:#fff!important;
+  box-shadow:0 0 0 3px rgba(147,197,253,0.5),0 0 20px rgba(96,165,250,0.65)!important;
+}
+.card.combined .enTxt{font-size:1.05em;font-weight:900;}
+.card.combined .jpTxt{font-family:'Nunito',sans-serif;font-size:.68em;opacity:.95;}
+
+@keyframes pairBounce{0%{transform:scale(0.95)}55%{transform:scale(1.07)}100%{transform:scale(1)}}
+.card.pairedPop{animation:pairBounce .22s cubic-bezier(.34,1.46,.64,1);}
+
+/* CORRECT — fresh green */
+.card.correct{
+  background:linear-gradient(135deg,#bbf7d0,#22c55e)!important;
+  color:#052e16!important;border:0!important;
+}
+@keyframes correctWiggle{
+  0%,100%{transform:rotate(0deg) scale(1);}
+  20%{transform:rotate(-4deg) scale(1.07);}
+  40%{transform:rotate(4deg) scale(1.09);}
+  60%{transform:rotate(-3deg) scale(1.07);}
+  80%{transform:rotate(3deg) scale(1.04);}
+}
+.card.correct.animate{animation:correctWiggle 0.5s ease-in-out;}
+
+/* WRONG — red wobble */
+.card.wrong{
+  background:linear-gradient(135deg,#fecaca,#ef4444)!important;
+  color:#fff!important;border:0!important;
+}
+@keyframes wrongWobble{
+  0%,100%{transform:translateX(0) rotate(0deg);}
+  15%{transform:translateX(-10px) rotate(-3deg);}
+  30%{transform:translateX(10px) rotate(3deg);}
+  45%{transform:translateX(-8px) rotate(-2deg);}
+  60%{transform:translateX(8px) rotate(2deg);}
+  75%{transform:translateX(-5px) rotate(-1deg);}
+}
+.card.wrong.animate{animation:wrongWobble 0.55s ease-in-out;}
+.card.locked{pointer-events:none;}
+
+/* ── Buttons ── */
+.actions{display:flex;gap:12px;justify-content:center;margin-top:16px;flex-wrap:wrap;}
+.btn{
+  border:0;border-radius:999px;padding:11px 32px;font-weight:900;
+  font-family:'Baloo 2',sans-serif;font-size:1.05rem;cursor:pointer;
+  transition:transform .1s ease,box-shadow .2s ease,filter .2s ease;
+  touch-action:manipulation;
+}
+.btn:active{transform:scale(0.96) translateY(1px);}
+.btn-check{
+  background:linear-gradient(135deg,#4ade80,#22c55e);
+  color:#052e16;
+  box-shadow:0 5px 0 #15803d,0 0 22px rgba(34,197,94,0.45);
+  animation:checkBouncePB 2.6s ease-in-out infinite;
+}
+@keyframes checkBouncePB{
+  0%,100%{box-shadow:0 5px 0 #15803d,0 0 22px rgba(34,197,94,0.45);}
+  50%{box-shadow:0 5px 0 #15803d,0 0 40px rgba(34,197,94,0.75),0 0 70px rgba(34,197,94,0.2);}
+}
+.btn-check:not(:disabled):hover{transform:translateY(-2px) scale(1.04);filter:brightness(1.08);}
+.btn-check:disabled{filter:saturate(.2) brightness(.85);box-shadow:none;cursor:not-allowed;animation:none;}
+.btn-secondary{
+  background:rgba(255,255,255,0.75);color:var(--ink);
+  border:2px solid #ffb3d1;
+  box-shadow:0 3px 10px rgba(0,0,0,0.08);
+  font-size:.95rem;
+}
+
+/* ── Results ── */
+#page-results .result-box{
+  min-height:60vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;gap:14px;
+}
+.result-icon{font-size:clamp(2.4rem,7vw,3.6rem);line-height:1;}
+.result-stars{font-size:clamp(1.8rem,5vw,2.8rem);letter-spacing:6px;line-height:1;}
+.result-msg{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:clamp(1.5rem,4.5vw,2.4rem);}
+.result-sub{font-family:'Nunito',sans-serif;font-size:clamp(.95rem,2.8vw,1.3rem);font-weight:700;opacity:0.82;line-height:1.35;}
+.result-score{font-family:'Baloo 2',sans-serif;font-size:clamp(1.3rem,3.8vw,2rem);font-weight:700;opacity:.88;}
+/* Result tier backgrounds — soft candy gradients */
+.res-red   {background:linear-gradient(160deg,#ffe4ec,#fca5a5);}
+.res-orange{background:linear-gradient(160deg,#ffedd5,#fdba74);}
+.res-blue  {background:linear-gradient(160deg,#dbeafe,#93c5fd);}
+.res-gold  {background:linear-gradient(160deg,#fef9c3,#fde68a,#fcd34d);}
+
+/* ── Round flash ── */
+.round-flash{
+  position:fixed;inset:0;z-index:60;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(252,232,243,0.84);backdrop-filter:blur(6px);
+}
+.round-flash.show{display:flex;}
+.round-flash .box{
+  padding:20px 38px;border-radius:28px;
+  background:rgba(255,255,255,0.97);
+  border:3px solid #ffb3d1;
+  box-shadow:0 8px 32px rgba(200,100,180,0.22);
+  text-align:center;
+}
+.round-flash .t1{
+  font-family:'Baloo 2',sans-serif;font-size:1.9rem;font-weight:800;
+  color:var(--purple);
+}
+.round-flash .t2{margin-top:4px;color:rgba(80,30,100,0.68);font-weight:700;font-family:'Nunito',sans-serif;}
+
+/* ══ Particle effects ══ */
+
+/* Dot bits — correct + wrong + confetti */
+.pb-bit{
+  position:fixed;border-radius:50%;pointer-events:none;z-index:100;
+  animation:pbBitFly var(--dur,0.65s) ease-out forwards;
+}
+@keyframes pbBitFly{
+  0%{opacity:1;transform:translate(-50%,-50%) translate(0,0) scale(1);}
+  100%{opacity:0;transform:translate(-50%,-50%) translate(var(--dx),var(--dy)) scale(0.25);}
+}
+/* Unicode shape bursts */
+.pb-shape{
+  position:fixed;pointer-events:none;z-index:100;line-height:1;
+  animation:pbShapeFly var(--dur,0.75s) ease-out forwards;
+}
+@keyframes pbShapeFly{
+  0%{opacity:1;transform:translate(-50%,-50%) translate(0,0) scale(1) rotate(0deg);}
+  100%{opacity:0;transform:translate(-50%,-50%) translate(var(--dx),var(--dy)) scale(0.3) rotate(360deg);}
+}
+/* Pop ring */
+.pb-ring{
+  position:fixed;border-radius:50%;pointer-events:none;z-index:99;
+  animation:pbRingPop 0.52s ease-out forwards;
+}
+@keyframes pbRingPop{
+  from{transform:translate(-50%,-50%) scale(0);opacity:0.9;}
+  to  {transform:translate(-50%,-50%) scale(4.5);opacity:0;}
+}
+/* Wrong puff */
+.pb-puff{
+  position:fixed;border-radius:50%;pointer-events:none;z-index:99;
+  background:radial-gradient(circle,rgba(239,68,68,0.75) 0%,rgba(239,68,68,0) 70%);
+  animation:pbPuffOut 0.65s ease-out forwards;
+}
+@keyframes pbPuffOut{
+  0%{transform:translate(-50%,-50%) scale(0.4);opacity:0.9;}
+  100%{transform:translate(-50%,-50%) scale(3.8);opacity:0;}
+}
+/* Confetti fall */
+.pb-confetti{
+  position:fixed;border-radius:3px;pointer-events:none;z-index:200;
+  animation:pbConfettiFall var(--dur,1.2s) linear forwards;
+}
+@keyframes pbConfettiFall{
+  0%{transform:translateY(-10px) rotate(0deg);opacity:1;}
+  100%{transform:translateY(110vh) rotate(720deg);opacity:0;}
+}
+
+/* ── Help overlay ── */
+.help-icon{
+  position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));
+  width:34px;height:34px;border-radius:50%;border:none;
+  background:linear-gradient(135deg,#f9a8d4,#a855c8);
+  color:#fff;font-weight:900;font-size:1.1rem;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  z-index:35;box-shadow:0 0 14px rgba(168,85,200,0.5);
+  font-family:'Baloo 2',sans-serif;
+}
+.help-overlay{
+  position:fixed;inset:0;background:rgba(252,232,243,0.9);
+  backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:50;
+}
+.help-overlay.show{display:flex;}
+.help-dialog{
+  max-width:500px;width:90%;padding:22px;border-radius:26px;
+  background:rgba(255,255,255,0.98);border:2px solid #ffb3d1;
+  box-shadow:0 8px 40px rgba(200,100,180,0.25);
+  position:relative;max-height:80vh;overflow-y:auto;
+}
+.help-title{font-family:'Baloo 2',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:6px;text-align:center;color:var(--purple);}
+.help-sub{font-size:.88rem;opacity:.72;text-align:center;margin-bottom:10px;font-family:'Nunito',sans-serif;}
+.help-content{font-size:.9rem;line-height:1.65;font-family:'Nunito',sans-serif;}
+.help-content ul{padding-left:1.1em;margin:4px 0 10px;}
+.help-content li{margin-bottom:4px;}
+.help-close{
+  position:absolute;top:10px;right:12px;border:2px solid #ffb3d1;
+  border-radius:50%;width:28px;height:28px;background:#fce8f3;
+  color:var(--purple);font-weight:900;cursor:pointer;font-size:1rem;
+}
+hr.sep-h{border:0;height:1px;background:#ffb3d1;margin:8px 0;}
+
+/* ── Mobile ── */
+@media(max-width:700px){
+  :root{--cardH:86px;}
+  .round-wrap{flex-wrap:nowrap;gap:10px;}
+  .col{flex:0 0 48%;max-width:48%;}
+  .card{height:var(--cardH);padding:10px 10px;font-size:1rem;}
+  .card.en{font-size:1.3rem;}
+  .card.jp{font-size:.88rem;line-height:1.3;}
+  .actions{position:sticky;bottom:0;z-index:5;background:linear-gradient(transparent,rgba(252,232,243,0.92));padding:8px 0 calc(env(safe-area-inset-bottom));}
+}
+</style>
+</head>
+<body>
+
+<div class="cloud"></div>
+<div class="cloud"></div>
+<div class="cloud"></div>
+<div class="cloud"></div>
+
+<a class="close-btn" href="../pb_games.html" id="closeBtn" title="Back">✕</a>
+
+<header>
+  <h1>PRE-BOO</h1>
+  <h2>VOCABULARY TAP</h2>
+  <div class="subtitle-stack">
+    <span id="subEn">Loading...</span>
+    <span id="subJp"></span>
+  </div>
+  <div class="round-dots">
+    <div class="round-dot" id="dot0"></div>
+    <div class="round-dot" id="dot1"></div>
+    <div class="round-dot" id="dot2"></div>
+  </div>
+  <hr class="sep">
+</header>
+
+<section id="page-round" class="page active">
+  <div class="round-wrap" id="tapArea">
+    <div id="col-en" class="col"></div>
+    <div id="col-jp" class="col"></div>
+  </div>
+  <div class="actions">
+    <button id="checkBtn" class="btn btn-check" disabled>CHECK</button>
+  </div>
+</section>
+
+<section id="page-results" class="page">
+  <div class="result-box">
+    <div id="resultStars" class="result-stars"></div>
+    <div id="resultMsg"   class="result-msg"></div>
+    <div id="resultSub"   class="result-sub"></div>
+    <div id="resultScore" class="result-score"></div>
+  </div>
+  <div class="actions">
+    <button id="playAgain"  class="btn btn-check">もう一度 / Play Again</button>
+    <button id="backToMenu" class="btn btn-secondary">もどる / Back</button>
+  </div>
+</section>
+
+<button id="helpBtn" class="help-icon">?</button>
+<div id="helpOverlay" class="help-overlay">
+  <div class="help-dialog">
+    <button id="helpClose" class="help-close">✕</button>
+    <div class="help-title">遊び方 / How to Play</div>
+    <div class="help-sub">PRE-BOO Vocabulary Tap</div>
+    <div class="help-content">
+      <p><strong>日本語</strong></p>
+      <ul>
+        <li>左の<strong>英語カード</strong>をタップして選びます。</li>
+        <li>右の<strong>日本語カード</strong>をタップしてペアにします。</li>
+        <li>青くなったら合ってます。タップで取り消しできます。</li>
+        <li>5つペアにできたら<strong>CHECK</strong>を押します。</li>
+        <li><strong>3ラウンド（合計15問）</strong>あります！</li>
+      </ul>
+      <hr class="sep-h">
+      <p><strong>English</strong></p>
+      <ul>
+        <li>Tap an <strong>English card</strong> to select it.</li>
+        <li>Tap the matching <strong>Japanese card</strong> to pair them.</li>
+        <li>Blue = paired. Tap to undo.</li>
+        <li>Pair all 5, then tap <strong>CHECK</strong>.</li>
+        <li><strong>3 rounds</strong> (15 total). Go for perfect!</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div id="roundFlash" class="round-flash">
+  <div class="box">
+    <div class="t1" id="roundFlashT1">ROUND 1</div>
+    <div class="t2" id="roundFlashT2">ラウンド１</div>
+  </div>
+</div>
+
+<audio id="s_ding"  preload="auto" playsinline></audio>
+<audio id="s_fart"  preload="auto" playsinline></audio>
+<audio id="s_r05"   preload="auto" playsinline></audio>
+<audio id="s_r610"  preload="auto" playsinline></audio>
+<audio id="s_r1114" preload="auto" playsinline></audio>
+<audio id="s_r15"   preload="auto" playsinline></audio>
+
+<script>
+/* ═══════════════════════════════════════════
+   AUDIO + JSON CONFIG
+   ═══════════════════════════════════════════ */
+const AUDIO_ROOT = 'https://pub-8d5941f302df44b899ce9d9a4606dcb7.r2.dev/audio-2027';
+const JSON_URL   = 'pb_vocab.json';
+
+// ── Month detection (3-source priority) ──
+// 1. URL folder: template/march/pb_vt.html → "mar"
+// 2. ?week= param: pb_mar_w2 → "mar"
+// 3. Current calendar month
+const MONTH_ABBR_3  = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+const MONTH_NAMES_EN= ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTH_NAMES_JP= ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+
+const _pathParts  = window.location.pathname.split('/');
+const _folderName = _pathParts[_pathParts.length - 2] || '';
+const _pathMonth  = MONTH_ABBR_3.find(m =>
+  _folderName.toLowerCase().startsWith(m) || _folderName.toLowerCase() === m
+) || null;
+
+const params      = new URLSearchParams(window.location.search);
+const weekParam   = params.get('week') || '';
+const _paramMatch = weekParam.match(/_([a-z]{3})_w/i);
+const _paramMonth = _paramMatch ? _paramMatch[1].toLowerCase() : null;
+
+const _now       = new Date();
+const _calMonth  = MONTH_ABBR_3[_now.getMonth()];
+
+const MONTH      = _pathMonth || _paramMonth || _calMonth;
+
+const AUDIO_BASE  = `${AUDIO_ROOT}/${MONTH}/pre_boo/vocab/`;
+const WEEK_RANGES = { w1:[1,15], w2:[16,30], w3:[31,45], w4:[46,60] };
+const SFX_BASE    = '../../assets/audio/';
+
+function getWeekKey(){
+  const wm = weekParam.match(/(w[1-4])/i);
+  if(wm) return wm[1].toLowerCase();
+  return 'w' + Math.min(4, Math.ceil(_now.getDate() / 7));
+}
+
+/* ═══════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════ */
+const $ = s => document.querySelector(s);
+function shuffle(a){ return a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]); }
+function pad2(n){ return String(n).padStart(2,'0'); }
+function safeWord(s){ return (s||'').toLowerCase().trim().replace(/\s+/g,'_').replace(/[^a-z0-9_'-]/g,''); }
+function centerOf(el){ const r=el.getBoundingClientRect(); return{x:r.left+r.width/2,y:r.top+r.height/2}; }
+function vocabUrl(item){
+  if(item && item.mp3) return `${AUDIO_BASE}${item.mp3}`;
+  const id = typeof item === 'object' ? item.id : item;
+  const en = typeof item === 'object' ? item.en : '';
+  return `${AUDIO_BASE}v${pad2(id)}_${safeWord(en)}.mp3`;
+}
+
+/* ═══════════════════════════════════════════
+   AUDIO ENGINE
+   ═══════════════════════════════════════════ */
+const TAGS={ding:$('#s_ding'),fart:$('#s_fart'),r0_5:$('#s_r05'),r6_10:$('#s_r610'),r11_14:$('#s_r1114'),r15:$('#s_r15')};
+[[TAGS.ding,SFX_BASE+'ding.mp3'],[TAGS.fart,SFX_BASE+'fart.mp3'],
+ [TAGS.r0_5,SFX_BASE+'result_0-5.mp3'],[TAGS.r6_10,SFX_BASE+'result_6-10.mp3'],
+ [TAGS.r11_14,SFX_BASE+'result_11-14.mp3'],[TAGS.r15,SFX_BASE+'result_15.mp3']
+].forEach(([t,u])=>{ if(!t)return; t.src=u; t.preload='auto'; try{t.load();}catch{} });
+
+let AC=null, audioUnlocked=false;
+const SFX_BUFFERS=new Map();
+function getAC(){ if(AC)return AC; const C=window.AudioContext||window.webkitAudioContext; if(!C)return null; AC=new C(); return AC; }
+async function decodeToBuffer(url){ const ctx=getAC(); if(!ctx)return null; const r=await fetch(url,{cache:'force-cache'}).catch(()=>null); if(!r||!r.ok)return null; const ab=await r.arrayBuffer(); return ctx.decodeAudioData(ab.slice(0)).catch(()=>null); }
+function playSfxBuffer(name){ const ctx=getAC(); const b=SFX_BUFFERS.get(name); if(!ctx||!b)return false; const s=ctx.createBufferSource(); s.buffer=b; s.connect(ctx.destination); try{s.start(0);}catch{} return true; }
+
+// SFX overlap prevention
+let _activeSfxNode=null, _activeSfxTag=null;
+function playSfx(name){
+  const ctx=getAC(); const b=SFX_BUFFERS.get(name);
+  if(ctx && b){
+    if(_activeSfxNode){ try{_activeSfxNode.stop();}catch{} }
+    const s=ctx.createBufferSource(); s.buffer=b; s.connect(ctx.destination);
+    try{s.start(0);}catch{} _activeSfxNode=s;
+    s.onended=()=>{ if(_activeSfxNode===s)_activeSfxNode=null; };
+    return;
+  }
+  const m={ding:TAGS.ding,fart:TAGS.fart,r0_5:TAGS.r0_5,r6_10:TAGS.r6_10,r11_14:TAGS.r11_14,r15:TAGS.r15};
+  const a=m[name]; if(!a)return;
+  if(_activeSfxTag && _activeSfxTag!==a){ try{_activeSfxTag.pause();_activeSfxTag.currentTime=0;}catch{} }
+  _activeSfxTag=a;
+  try{a.pause();a.currentTime=0;const p=a.play();if(p&&p.catch)p.catch(()=>{});}catch{}
+}
+
+async function primeTag(a){ if(!a)return; try{const m=a.muted,v=a.volume;a.muted=true;a.volume=0;const p=a.play();if(p&&p.catch)await p.catch(()=>{});a.pause();a.currentTime=0;a.volume=v;a.muted=m;}catch{} }
+async function unlockAudioOnce(){
+  if(audioUnlocked)return; audioUnlocked=true;
+  const ctx=getAC(); if(ctx&&ctx.state==='suspended')await ctx.resume().catch(()=>{});
+  await primeTag(TAGS.ding);
+  for(const a of sage.values())await primeTag(a);
+  if(ctx){ for(const[n,u] of [['ding',SFX_BASE+'ding.mp3'],['fart',SFX_BASE+'fart.mp3'],['r0_5',SFX_BASE+'result_0-5.mp3'],['r6_10',SFX_BASE+'result_6-10.mp3'],['r11_14',SFX_BASE+'result_11-14.mp3'],['r15',SFX_BASE+'result_15.mp3']]){ const b=await decodeToBuffer(u); if(b)SFX_BUFFERS.set(n,b); } }
+}
+['pointerdown','touchstart','mousedown','keydown'].forEach(e=>window.addEventListener(e,unlockAudioOnce,{once:true,passive:true}));
+
+const sage=new Map();
+function stopAllSage(){ sage.forEach(a=>{try{a.pause();a.currentTime=0;}catch{}}); }
+function playVocabById(id){
+  const a=sage.get(id); if(!a)return;
+  stopAllSage();
+  try{a.pause();a.currentTime=0;}catch{}
+  const p=a.play(); if(p&&p.catch)p.catch(()=>{});
+}
+
+/* ═══════════════════════════════════════════
+   PARTICLE EFFECTS
+   ═══════════════════════════════════════════ */
+const PB_CORRECT_COLS=['#ff9ec4','#a8e6cf','#ffd3a5','#b5d8fa','#e8c6f8','#fef08a','#fff'];
+const PB_WRONG_COLS  =['#fca5a5','#f87171','#ef4444','#fde68a'];
+const PB_SHAPES      =['★','◆','●','▲','◇'];
+
+function correctBurst(el){
+  const{x,y}=centerOf(el);
+  // Two pop rings
+  for(let r=0;r<2;r++){
+    const ring=document.createElement('div'); ring.className='pb-ring';
+    ring.style.cssText=`left:${x}px;top:${y}px;width:60px;height:60px;border:3px solid ${r===0?'#22c55e':'rgba(168,230,207,0.7)'};`;
+    ring.style.animationDelay=r*0.11+'s';
+    document.body.appendChild(ring); ring.addEventListener('animationend',()=>ring.remove());
+  }
+  // Dot burst
+  for(let i=0;i<18;i++){
+    const ang=(i/18)*Math.PI*2,d=50+Math.random()*72;
+    const bit=document.createElement('div'); bit.className='pb-bit';
+    const sz=(7+Math.random()*9)+'px';
+    bit.style.cssText=`left:${x}px;top:${y}px;width:${sz};height:${sz};background:${PB_CORRECT_COLS[Math.floor(Math.random()*PB_CORRECT_COLS.length)]};`;
+    bit.style.setProperty('--dx',(Math.cos(ang)*d).toFixed(1)+'px');
+    bit.style.setProperty('--dy',(Math.sin(ang)*d).toFixed(1)+'px');
+    bit.style.setProperty('--dur',(0.5+Math.random()*0.4)+'s');
+    document.body.appendChild(bit); bit.addEventListener('animationend',()=>bit.remove());
+  }
+  // Shape burst
+  for(let i=0;i<7;i++){
+    const ang=Math.random()*Math.PI*2,d=38+Math.random()*62;
+    const s=document.createElement('div'); s.className='pb-shape';
+    s.textContent=PB_SHAPES[Math.floor(Math.random()*PB_SHAPES.length)];
+    s.style.cssText=`left:${x}px;top:${y}px;color:${PB_CORRECT_COLS[Math.floor(Math.random()*PB_CORRECT_COLS.length)]};font-size:${13+Math.random()*10}px;`;
+    s.style.setProperty('--dx',(Math.cos(ang)*d).toFixed(1)+'px');
+    s.style.setProperty('--dy',(Math.sin(ang)*d).toFixed(1)+'px');
+    s.style.setProperty('--dur',(0.6+Math.random()*0.5)+'s');
+    document.body.appendChild(s); s.addEventListener('animationend',()=>s.remove());
+  }
+}
+
+function wrongBurst(el){
+  const{x,y}=centerOf(el);
+  // Puff cloud
+  const puff=document.createElement('div'); puff.className='pb-puff';
+  puff.style.cssText=`left:${x}px;top:${y}px;width:66px;height:66px;`;
+  document.body.appendChild(puff); puff.addEventListener('animationend',()=>puff.remove());
+  // Red dot scatter
+  for(let i=0;i<10;i++){
+    const ang=(i/10)*Math.PI*2,d=28+Math.random()*46;
+    const bit=document.createElement('div'); bit.className='pb-bit';
+    const sz=(5+Math.random()*6)+'px';
+    bit.style.cssText=`left:${x}px;top:${y}px;width:${sz};height:${sz};background:${PB_WRONG_COLS[Math.floor(Math.random()*PB_WRONG_COLS.length)]};`;
+    bit.style.setProperty('--dx',(Math.cos(ang)*d).toFixed(1)+'px');
+    bit.style.setProperty('--dy',(Math.sin(ang)*d).toFixed(1)+'px');
+    bit.style.setProperty('--dur',(0.35+Math.random()*0.3)+'s');
+    document.body.appendChild(bit); bit.addEventListener('animationend',()=>bit.remove());
+  }
+}
+
+/* ═══════════════════════════════════════════
+   GAME STATE
+   ═══════════════════════════════════════════ */
+let MASTER=[], rounds=[], roundIndex=0, totalScore=0, connections={}, jpOrder=[];
+let selectedEn=null,selectedEnId=null,selectedEnEl=null,isGrading=false;
+
+/* ═══════════════════════════════════════════
+   LOAD JSON
+   ═══════════════════════════════════════════ */
+async function loadVocab(){
+  const weekKey = getWeekKey();
+  const [lo, hi] = WEEK_RANGES[weekKey] || WEEK_RANGES.w1;
+
+  let cards = [];
+  try {
+    const res  = await fetch(JSON_URL);
+    const data = await res.json();
+    cards = (data.cards || []).filter(c => c.n >= lo && c.n <= hi);
+  } catch(e) {
+    console.error('[pb_vocab] fetch failed:', e);
+    $('#subEn').textContent = 'Could not load vocab data.';
+    return;
+  }
+  if(!cards.length){ $('#subEn').textContent = 'No cards for ' + weekKey; return; }
+
+  // Normalise — support {n, en, jp, hira, mp3?} and legacy {id, ...}
+  MASTER = cards.map(c => ({ id: c.n ?? c.id, en: c.en, jp: c.jp, hira: c.hira, mp3: c.mp3 || '' }));
+
+  // Build sage audio cache — metadata to save mobile bandwidth
+  MASTER.forEach(item => {
+    const a = new Audio(vocabUrl(item));
+    a.preload = 'metadata'; try { a.load(); } catch {}
+    sage.set(item.id, a);
+  });
+
+  const wNum  = weekKey.replace('w', '');
+  const mIdx  = MONTH_ABBR_3.indexOf(MONTH);
+  const monEn = mIdx >= 0 ? MONTH_NAMES_EN[mIdx] : MONTH.charAt(0).toUpperCase() + MONTH.slice(1);
+  const monJp = mIdx >= 0 ? MONTH_NAMES_JP[mIdx] : MONTH.toUpperCase();
+  $('#subEn').textContent = `${monEn} – Week ${wNum} – Vocabulary`;
+  $('#subJp').textContent = `${monJp}第${wNum}週 – 語彙`;
+
+  initGame();
+}
+
+/* ═══════════════════════════════════════════
+   ROUND DOTS
+   ═══════════════════════════════════════════ */
+function updateDots(){
+  for(let i=0;i<3;i++){
+    const d=$(`#dot${i}`); d.className='round-dot';
+    if(i<roundIndex)d.classList.add('done');
+    else if(i===roundIndex)d.classList.add('active');
+  }
+}
+
+/* ═══════════════════════════════════════════
+   UI HELPERS
+   ═══════════════════════════════════════════ */
+function setJpAwake(on){ document.body.classList.toggle('jpAwake',!!on); }
+function clearEnSelection(){
+  if(selectedEnEl)selectedEnEl.classList.remove('selected');
+  selectedEn=null;selectedEnId=null;selectedEnEl=null;setJpAwake(false);
+}
+
+function clearJPCard(jpCard){
+  const enId=Number(jpCard.dataset.connectedId||0); if(!enId)return;
+  playVocabById(enId);
+  const enCard=document.querySelector(`.en[data-id="${enId}"]`); if(enCard)enCard.style.visibility='visible';
+  jpCard.classList.remove('combined','matchedBlue','pairedPop','correct','wrong','locked','animate');
+  jpCard.classList.add('jp');
+  jpCard.innerHTML=`${jpCard.dataset.jp}\n(${jpCard.dataset.hira})`;
+  jpCard.dataset.connectedId=''; delete connections[jpCard.dataset.jp];
+  $('#checkBtn').disabled=Object.keys(connections).length!==5; clearEnSelection();
+}
+
+function combineIntoJP(jpCard,enText,enId){
+  if(!jpCard?.dataset)return;
+  if(jpCard.dataset.connectedId){ const old=document.querySelector(`.en[data-id="${jpCard.dataset.connectedId}"]`); if(old)old.style.visibility='visible'; }
+  const enCard=document.querySelector(`.en[data-id="${enId}"]`); if(enCard)enCard.style.visibility='hidden';
+  const jp=jpCard.dataset.jp,hira=jpCard.dataset.hira;
+  jpCard.classList.add('combined','matchedBlue','pairedPop');
+  jpCard.classList.remove('jp','selected');
+  jpCard.innerHTML=`<div class="enTxt">${enText}</div><div class="jpTxt">${jp}（${hira}）</div>`;
+  jpCard.dataset.connectedId=String(enId); connections[jp]=`${enId}|${enText}`;
+  setTimeout(()=>jpCard.classList.remove('pairedPop'),250);
+  $('#checkBtn').disabled=Object.keys(connections).length!==5; clearEnSelection();
+}
+
+function showRoundFlash(n){
+  const o=$('#roundFlash');
+  $('#roundFlashT1').textContent=`ROUND ${n}`;
+  $('#roundFlashT2').textContent=`ラウンド${n}`;
+  o.classList.add('show'); setTimeout(()=>o.classList.remove('show'),1000);
+}
+
+/* ═══════════════════════════════════════════
+   INIT / LOAD ROUND
+   ═══════════════════════════════════════════ */
+function initGame(){
+  totalScore=0;roundIndex=0; document.body.className='';
+  $('#page-results').classList.remove('active'); $('#page-round').classList.add('active');
+  clearEnSelection();isGrading=false;
+  const shuffled=shuffle([...MASTER]);
+  rounds=[shuffled.slice(0,5),shuffled.slice(5,10),shuffled.slice(10,15)];
+  updateDots(); showRoundFlash(1); loadRound();
+}
+
+const PB_EN_CLASSES=['pb-en-0','pb-en-1','pb-en-2','pb-en-3','pb-en-4'];
+
+function loadRound(){
+  connections={};clearEnSelection();isGrading=false;
+  const set=rounds[roundIndex],colEn=$('#col-en'),colJp=$('#col-jp');
+  colEn.innerHTML='';colJp.innerHTML='';
+  const gradOrder=shuffle([...PB_EN_CLASSES]);
+
+  shuffle([...set]).forEach((item,idx)=>{
+    const c=document.createElement('div');
+    c.className=`card en ${gradOrder[idx%gradOrder.length]}`;
+    c.innerHTML=`<div class="en-shimmer"></div>${item.en.toLowerCase()}`;
+    c.dataset.id=String(item.id);
+    c.addEventListener('click',async()=>{
+      if(isGrading||c.style.visibility==='hidden')return;
+      await unlockAudioOnce(); playVocabById(item.id);
+      if(selectedEnEl===c)return;
+      clearEnSelection(); selectedEn=item.en.toLowerCase(); selectedEnId=item.id; selectedEnEl=c;
+      c.classList.add('selected'); setJpAwake(true);
+    });
+    colEn.appendChild(c);
+  });
+
+  shuffle([...set]).forEach(item=>{
+    const c=document.createElement('div');
+    c.className='card jp'; c.dataset.jp=item.jp; c.dataset.hira=item.hira; c.dataset.connectedId='';
+    c.textContent=`${item.jp}\n(${item.hira})`;
+    c.addEventListener('click',async()=>{
+      if(isGrading||c.classList.contains('correct')||c.classList.contains('wrong'))return;
+      await unlockAudioOnce();
+      if(c.dataset.connectedId){clearJPCard(c);return;}
+      if(!selectedEnId)return;
+      combineIntoJP(c,selectedEn,selectedEnId); playVocabById(selectedEnId);
+    });
+    colJp.appendChild(c);
+  });
+  jpOrder=[...colJp.querySelectorAll('[data-jp]')];
+  $('#checkBtn').disabled=true;
+}
+
+/* ═══════════════════════════════════════════
+   CHECK / GRADE
+   ═══════════════════════════════════════════ */
+$('#checkBtn').addEventListener('click',async()=>{
+  await unlockAudioOnce(); if(isGrading)return;
+  isGrading=true;$('#checkBtn').disabled=true;clearEnSelection();
+  let i=0;
+  const step=setInterval(()=>{
+    if(i>=jpOrder.length){
+      clearInterval(step);
+      setTimeout(()=>{ roundIndex++;updateDots(); if(roundIndex<3){showRoundFlash(roundIndex+1);loadRound();}else{showResults();} },950);
+      return;
+    }
+    const card=jpOrder[i],jp=card.dataset.jp;
+    const chosenId=Number(card.dataset.connectedId||0);
+    const correctId=rounds.flat().find(v=>v.jp===jp)?.id||0;
+    card.classList.remove('matchedBlue','pairedPop');
+    if(chosenId&&chosenId===correctId){
+      card.classList.remove('wrong');card.classList.add('correct','locked','animate');
+      playSfx('ding');correctBurst(card);totalScore++;
+      setTimeout(()=>card.classList.remove('animate'),600);
+    }else{
+      card.classList.remove('correct');card.classList.add('wrong','animate');
+      playSfx('fart');wrongBurst(card);
+      setTimeout(()=>card.classList.remove('animate'),650);
+    }
+    i++;
+  },880);
+});
+
+/* ═══════════════════════════════════════════
+   RESULTS
+   ═══════════════════════════════════════════ */
+function showResults(){
+  $('#page-round').classList.remove('active');
+  $('#page-results').classList.add('active');
+  const pct=Math.round((totalScore/15)*100);
+
+  /* ── 4-tier scorecard ──
+     Matching the session summary:
+     0–5   ★☆☆  red    もっとがんばろう！
+     6–10  ★★☆  orange いいかんじ！もっとできるよ！
+     11–14 ★★★  blue   いいね！もうちょっと！
+     15    ★★★  gold   すごい！パーフェクト！
+  ───────────────────────── */
+  const TIERS = [
+    {
+      bg:'res-red', stars:'★☆☆',
+      msg:'もっとがんばろう！',
+      sub:"Let's try again! You can do it!",
+      snd:'r0_5'
+    },
+    {
+      bg:'res-orange', stars:'★★☆',
+      msg:'いいかんじ！もっとできるよ！',
+      sub:"Good feeling! You can do even better!",
+      snd:'r6_10'
+    },
+    {
+      bg:'res-blue', stars:'★★★',
+      msg:'いいね！もうちょっと！',
+      sub:"So close! Almost perfect!",
+      snd:'r11_14'
+    },
+    {
+      bg:'res-gold', stars:'★★★',
+      msg:'すごい！パーフェクト！',
+      sub:"PERFECT! Amazing work!",
+      snd:'r15'
+    }
+  ];
+
+  let tier;
+  if     (totalScore <= 5)  tier = TIERS[0];
+  else if(totalScore <= 10) tier = TIERS[1];
+  else if(totalScore < 15)  tier = TIERS[2];
+  else                      tier = TIERS[3];
+
+  document.body.className = tier.bg;
+  $('#resultStars').textContent = tier.stars;
+  $('#resultMsg').textContent   = tier.msg;
+  $('#resultSub').textContent   = tier.sub;
+  $('#resultScore').textContent = `${totalScore} / 15（${pct}%）`;
+
+  playSfx(tier.snd);
+
+  // Perfect confetti rain
+  if(totalScore === 15){
+    for(let i=0;i<150;i++) setTimeout(()=>{
+      const c=document.createElement('div'); c.className='pb-confetti';
+      c.style.cssText=`left:${Math.random()*100}vw;top:-10px;width:${5+Math.random()*6}px;height:${4+Math.random()*8}px;background:hsl(${Math.random()*360},90%,65%);`;
+      c.style.setProperty('--dur',(0.9+Math.random()*0.9)+'s');
+      document.body.appendChild(c); setTimeout(()=>c.remove(),2200);
+    }, i*10);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   BUTTONS + HELP
+   ═══════════════════════════════════════════ */
+
+// Nav lock — prevents button smashing / double-tap navigation
+let navLocked = false;
+function navTo(href){
+  if(navLocked) return;
+  navLocked = true;
+  window.location.href = href;
+}
+
+$('#playAgain').addEventListener('click', () => {
+  if(isGrading) return;
+  navLocked = false; // reset for the new session
+  initGame();
+});
+$('#backToMenu').addEventListener('click', () => { navTo('../pb_games.html'); });
+$('#closeBtn').addEventListener('click', function(e){ e.preventDefault(); navTo('../pb_games.html'); });
+$('#helpBtn').addEventListener('click', () => $('#helpOverlay').classList.add('show'));
+$('#helpClose').addEventListener('click', () => $('#helpOverlay').classList.remove('show'));
+$('#helpOverlay').addEventListener('click', e => { if(e.target === $('#helpOverlay')) $('#helpOverlay').classList.remove('show'); });
+
+loadVocab();
+</script>
+</body>
+</html>
