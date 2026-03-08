@@ -553,14 +553,8 @@ function goToHub(){
   sessionStorage.setItem('booha_return_to_hub', '1');
   window.location.href = 'index.html#hub';
 }
-
-function jumpToHub(){
-  sessionStorage.removeItem('booha_return_to_hub');
-  if (window.location.hash !== '#hub') {
-    window.location.hash = 'hub';
-  }
-}  
-
+  
+  
 // ─────────────────────────────────────────────────────────
 //  DOM
 // ─────────────────────────────────────────────────────────
@@ -1231,20 +1225,31 @@ cpScrim.addEventListener('click',closePopup);
 
 // ── Icon clicks ─────────────────────────────────────────
 iconPreBoo.addEventListener('click',()=>{
+  if (ghostLocked) return;
+  closePopup();
+  try{bgMusic.pause();}catch(e){}
+  fadeOut();
   sessionStorage.setItem('booha_return_to_hub', '1');
-  window.location.href = `template/pb_games.html?week=${activeWeek}`;
+  setTimeout(()=>{ window.location.href = `template/pb_games.html?week=${activeWeek}`; }, FADE_MS);
 });
 
 iconBooTree.addEventListener('click',()=>{
+  if (ghostLocked) return;
+  closePopup();
+  try{bgMusic.pause();}catch(e){}
+  fadeOut();
   sessionStorage.setItem('booha_return_to_hub', '1');
-  window.location.href = `template/br_games.html?week=${activeWeek}`;
+  setTimeout(()=>{ window.location.href = `template/br_games.html?week=${activeWeek}`; }, FADE_MS);
 });
 
 iconContTree.addEventListener('click',()=>{
+  if (ghostLocked) return;
+  closePopup();
+  try{bgMusic.pause();}catch(e){}
+  fadeOut();
   sessionStorage.setItem('booha_return_to_hub', '1');
-  window.location.href = `template/bc_games.html?week=${activeWeek}`;
+  setTimeout(()=>{ window.location.href = `template/bc_games.html?week=${activeWeek}`; }, FADE_MS);
 });
-
 // ─────────────────────────────────────────────────────────
 //  BRYAN MODE
 // ─────────────────────────────────────────────────────────
@@ -1383,16 +1388,6 @@ document.addEventListener('visibilitychange',()=>{
 });
 
 
-/* On bfcache restore or hash-based return */
-window.addEventListener('pageshow', ev => {
-  if (
-    ev.persisted ||
-    window.location.hash === '#hub' ||
-    sessionStorage.getItem('booha_return_to_hub')
-  ) {
-    jumpToHub();
-  }
-});  
 // ─────────────────────────────────────────────────────────
 //  INIT
 // ─────────────────────────────────────────────────────────
