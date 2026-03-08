@@ -690,6 +690,62 @@ const CP_FAIRIES=CHECKPOINTS.map(()=>
 
 let bMouseX=-1, bMouseY=-1, rafHandle=null;
 
+function restoreMazeFromCheckpoint(){
+  const returnWeek = parseInt(sessionStorage.getItem('booha_return_week') || '', 10);
+  const returnGhost = parseInt(sessionStorage.getItem('booha_return_ghost') || '', 10);
+
+  sessionStorage.removeItem('booha_return_to_checkpoint');
+  sessionStorage.removeItem('booha_return_week');
+  sessionStorage.removeItem('booha_return_ghost');
+
+  if (Number.isInteger(returnGhost) && returnGhost >= 0 && returnGhost < GHOSTS.length) {
+    activeGhostIdx = returnGhost;
+    startGhost.src = GHOSTS[activeGhostIdx];
+  }
+
+  if (Number.isInteger(returnWeek) && returnWeek >= 1 && returnWeek <= CHECKPOINTS.length) {
+    activeWeek = returnWeek;
+  } else {
+    activeWeek = CURRENT_WEEK;
+  }
+
+  const cp = CHECKPOINTS.find(c => c.w === activeWeek) || startCP;
+
+  mazeStarted = true;
+  mazeLaunched = true;
+  videoPlayed = true;
+  o2shown = true;
+  introPhase = 'done';
+
+  ghostIX = cp.ix;
+  ghostIY = cp.iy;
+  ghostSrcIX = cp.ix;
+  ghostSrcIY = cp.iy;
+  ghostDstIX = cp.ix;
+  ghostDstIY = cp.iy;
+  ghostT = 1;
+  pendingPopupCP = null;
+
+  overlay1.classList.add('hidden');
+  overlay1.classList.add('gone');
+  overlay2.classList.remove('show');
+  overlay2.classList.add('hidden');
+  overlay2.classList.add('gone');
+  videoWrap.classList.remove('show');
+  cpPopup.classList.remove('show');
+  cpScrim.classList.remove('show');
+  app.classList.remove('inTransition');
+
+  resizeCanvas();
+  buildWanderers();
+  startLoop();
+
+  try{
+    bgMusic.volume = .65;
+    bgMusic.play();
+  }catch(e){}
+}  
+
 // ─────────────────────────────────────────────────────────
 //  WANDERING GHOST SYSTEM
 // ─────────────────────────────────────────────────────────
@@ -1242,7 +1298,11 @@ iconPreBoo.addEventListener('click',()=>{
   closePopup();
   try{bgMusic.pause();}catch(e){}
   fadeOut();
-  sessionStorage.setItem('booha_return_to_hub', '1');
+
+  sessionStorage.setItem('booha_return_to_checkpoint', '1');
+  sessionStorage.setItem('booha_return_week', String(activeWeek));
+  sessionStorage.setItem('booha_return_ghost', String(activeGhostIdx));
+
   const weekSlug = getWeekSlug(activeWeek);
   setTimeout(()=>{ window.location.href = `template/pb_games.html?week=${encodeURIComponent(weekSlug)}`; }, FADE_MS);
 });
@@ -1252,7 +1312,11 @@ iconBooTree.addEventListener('click',()=>{
   closePopup();
   try{bgMusic.pause();}catch(e){}
   fadeOut();
-  sessionStorage.setItem('booha_return_to_hub', '1');
+
+  sessionStorage.setItem('booha_return_to_checkpoint', '1');
+  sessionStorage.setItem('booha_return_week', String(activeWeek));
+  sessionStorage.setItem('booha_return_ghost', String(activeGhostIdx));
+
   const weekSlug = getWeekSlug(activeWeek);
   setTimeout(()=>{ window.location.href = `template/br_games.html?week=${encodeURIComponent(weekSlug)}`; }, FADE_MS);
 });
@@ -1262,7 +1326,11 @@ iconContTree.addEventListener('click',()=>{
   closePopup();
   try{bgMusic.pause();}catch(e){}
   fadeOut();
-  sessionStorage.setItem('booha_return_to_hub', '1');
+
+  sessionStorage.setItem('booha_return_to_checkpoint', '1');
+  sessionStorage.setItem('booha_return_week', String(activeWeek));
+  sessionStorage.setItem('booha_return_ghost', String(activeGhostIdx));
+
   const weekSlug = getWeekSlug(activeWeek);
   setTimeout(()=>{ window.location.href = `template/bc_games.html?week=${encodeURIComponent(weekSlug)}`; }, FADE_MS);
 });
@@ -1407,7 +1475,13 @@ document.addEventListener('visibilitychange',()=>{
 // ─────────────────────────────────────────────────────────
 //  INIT
 // ─────────────────────────────────────────────────────────
-resizeCanvas();
+if (sessionStorage.getItem('booha_return_to_checkpoint') === '1') {
+  restoreMazeFromCheckpoint();
+} else {
+  resizeCanvas();
+}
+
+  
 </script>
 </body>
 </html>
