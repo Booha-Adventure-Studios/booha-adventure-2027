@@ -295,7 +295,7 @@ hr.sep-help{border:0;height:1px;background:rgba(255,255,255,0.15);margin:8px 0;}
 <body>
 
 <div class="blob3"></div>
-<a class="close-btn" href="../br_games.html" id="closeBtn" title="Back">✕</a>
+<a class="close-btn" href="br_games.html" id="closeBtn" title="Back">✕</a>
 
 <header>
   <h1>BOO-RICULUM</h1>
@@ -379,6 +379,8 @@ hr.sep-help{border:0;height:1px;background:rgba(255,255,255,0.15);margin:8px 0;}
 <audio id="s_r15"  preload="auto" playsinline></audio>
 
 <script>
+
+const GAMES_HOME = 'br_games.html';   
 /* ═══════════════════════════════════════════
    AUDIO + JSON CONFIG
    ═══════════════════════════════════════════ */
@@ -824,8 +826,9 @@ $('#playAgain').addEventListener('click', () => {
   initGame();
 });
 
-$('#backToMenu').addEventListener('click', () => { navTo('../br_games.html'); });
-$('#closeBtn').addEventListener('click', function(e){ e.preventDefault(); navTo('../br_games.html'); });
+$('#backToMenu').addEventListener('click', () => { navTo(GAMES_HOME); });
+$('#closeBtn').addEventListener('click', function(e){ e.preventDefault(); navTo(GAMES_HOME); });
+   
 $('#helpBtn').addEventListener('click', () => $('#helpOverlay').classList.add('show'));
 $('#helpClose').addEventListener('click', () => $('#helpOverlay').classList.remove('show'));
 $('#helpOverlay').addEventListener('click', e => { if(e.target === $('#helpOverlay')) $('#helpOverlay').classList.remove('show'); });
