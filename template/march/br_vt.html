@@ -477,7 +477,16 @@ async function unlockAudioOnce(){
 
 const sage=new Map();
 function stopAllSage(){ sage.forEach(a=>{try{a.pause();a.currentTime=0;}catch{}}); }
-function playVocabById(id){ const a=sage.get(id); if(!a)return; stopAllSage(); try{a.pause();a.currentTime=0;}catch{} const p=a.play(); if(p&&p.catch)p.catch(()=>{}); }
+   
+function playVocabById(id){
+  const a = sage.get(id);
+  if(!a) return;
+  console.log('PLAYING:', id, a.src);
+  stopAllSage();
+  try{ a.pause(); a.currentTime = 0; }catch{}
+  const p = a.play();
+  if (p && p.catch) p.catch(err => console.log('AUDIO ERROR:', err, a.src));
+}
 
 /* ═══════════════════════════════════════════
    PARTICLE EFFECTS
@@ -577,11 +586,10 @@ async function loadVocab(){
   // Build sage audio cache
   MASTER.forEach(item => {
   const a = new Audio(vocabUrl(item));
-  a.preload = 'auto';
-  a.crossOrigin = 'anonymous';
+  a.preload = 'metadata';
   try { a.load(); } catch {}
   sage.set(item.id, a);
- });
+});
 
   // Subtitle — resolved month + week
   const wNum  = weekKey.replace('w', '');
