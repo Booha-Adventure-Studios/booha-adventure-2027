@@ -360,16 +360,25 @@ hr.sep-help{border:0;height:1px;background:rgba(255,255,255,0.15);margin:8px 0;}
 <audio id="s_r15"  preload="auto" playsinline></audio>
 
 <script>
+
+   
 /* ═══════════════════════════════════════════
    AUDIO + JSON CONFIG
    ═══════════════════════════════════════════ */
 const AUDIO_ROOT = 'https://pub-8d5941f302df44b899ce9d9a4606dcb7.r2.dev/audio-2027';
-const JSON_URL   = 'br_vocab.json';
 
-// ── Month detection (3 sources, priority order) ──────────────────
-// 1. URL path: template/march/br_vt.html  →  "march"
-// 2. ?week= param:  br_vt.html?week=br_mar_w2  →  "mar"
-// 3. Current calendar month as fallback
+const MONTH_ABBR_3 = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+
+const MONTH_NAMES_EN = [
+  'January','February','March','April','May','June',
+  'July','August','September','October','November','December'
+];
+
+const MONTH_NAMES_JP = [
+  '1月','2月','3月','4月','5月','6月',
+  '7月','8月','9月','10月','11月','12月'
+];
+
 const MONTH_FOLDER_MAP = {
   jan: 'january',
   feb: 'february',
@@ -385,15 +394,15 @@ const MONTH_FOLDER_MAP = {
   dec: 'december'
 };
 
-// Source 1 — folder name in the URL path (most reliable)
+// Source 1 — folder name in the URL path
 const _pathParts  = window.location.pathname.split('/');
-const _folderName = _pathParts[_pathParts.length - 2] || ''; // e.g. "march"
+const _folderName = _pathParts[_pathParts.length - 2] || '';
 const _pathMonth  = MONTH_ABBR_3.find(m =>
-  _folderName.toLowerCase().startsWith(m) ||            // "march" starts with "mar"
-  _folderName.toLowerCase() === m                       // exact "mar"
+  _folderName.toLowerCase().startsWith(m) ||
+  _folderName.toLowerCase() === m
 ) || null;
 
-// Source 2 — ?week= param  (e.g. br_mar_w1)
+// Source 2 — ?week= param
 const params       = new URLSearchParams(window.location.search);
 const weekParam    = params.get('week') || '';
 const _paramMatch  = weekParam.match(/_([a-z]{3})_w/i);
@@ -403,18 +412,18 @@ const _paramMonth  = _paramMatch ? _paramMatch[1].toLowerCase() : null;
 const _now         = new Date();
 const _calMonth    = MONTH_ABBR_3[_now.getMonth()];
 
-// Resolved 3-letter month abbreviation
+// Resolved month
 const MONTH = _pathMonth || _paramMonth || _calMonth;
-
 const MONTH_FOLDER = MONTH_FOLDER_MAP[MONTH] || MONTH;
-const AUDIO_BASE   = `${AUDIO_ROOT}/${MONTH_FOLDER}/boo_riculum/vocab/`;
+
+const JSON_URL   = `${MONTH_FOLDER}/br_vocab.json`;
+const AUDIO_BASE = `${AUDIO_ROOT}/${MONTH_FOLDER}/boo_riculum/vocab/`;
+
 const WEEK_RANGES  = { w1:[1,15], w2:[16,30], w3:[31,45], w4:[46,60] };
 
-// ── SFX: booha-adventure-2027/assets/audio/
-// File lives at: booha-adventure-2027/template/[month]/br_vt.html
-// So two levels up from this file reaches booha-adventure-2027/
+// SFX
 const SFX_BASE = '../../assets/audio/';
-
+   
 /* ── Week detection: ?week= param → then current date ── */
 function getWeekKey() {
   const wm = weekParam.match(/(w[1-4])/i);
