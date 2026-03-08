@@ -5,8 +5,8 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>BOO-RICULUM – Vocabulary Tap</title>
-<link rel="icon" type="image/png" href="../BoohaYellow.png">
-<link rel="apple-touch-icon" href="../BoohaYellow.png">
+<link rel="icon" type="image/png" href="../../BoohaYellow.png">
+<link rel="apple-touch-icon" href="../../BoohaYellow.png">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
 /* ══════════════════════════════════════════
@@ -39,9 +39,11 @@ body{
 
 /* Animated bg blobs */
 body::before,body::after{content:'';position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;}
-body::before{width:400px;height:400px;background:#a855f7;opacity:0.12;top:-80px;left:-120px;animation:blobA 13s ease-in-out infinite alternate;}
-body::after{width:350px;height:350px;background:#00d4ff;opacity:0.10;bottom:-60px;right:-80px;animation:blobA 17s ease-in-out infinite alternate;}
+body::before{width:480px;height:480px;background:#a855f7;opacity:0.14;top:-100px;left:-130px;animation:blobA 13s ease-in-out infinite alternate;}
+body::after{width:380px;height:380px;background:#00d4ff;opacity:0.11;bottom:-70px;right:-90px;animation:blobA 17s ease-in-out infinite alternate;}
 @keyframes blobA{from{transform:translate(0,0) scale(1);}to{transform:translate(24px,32px) scale(1.08);}}
+/* Third blob — hot pink centre depth */
+.blob3{position:fixed;width:280px;height:280px;border-radius:50%;background:#ff6b9d;opacity:0.07;filter:blur(80px);pointer-events:none;z-index:0;top:45%;left:38%;animation:blobA 21s ease-in-out infinite alternate-reverse;}
 
 /* ── X close button ── */
 .close-btn{
@@ -65,16 +67,18 @@ header{
 header h1{
   font-family:'Fredoka One',sans-serif;
   font-size:clamp(1.2rem,3.5vw,1.8rem);letter-spacing:0.06em;
-  background:linear-gradient(120deg,#ff6b9d,#ffe94a,#00d4ff);
+  background:linear-gradient(120deg,#ff6b9d,#ffe94a,#00d4ff,#a855f7);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  background-size:200% auto;animation:rainbowShift 4s linear infinite;
+  background-size:300% auto;animation:rainbowShift 4s linear infinite;
 }
-@keyframes rainbowShift{0%{background-position:0%;}100%{background-position:200%;}}
+@keyframes rainbowShift{0%{background-position:0%;}100%{background-position:300%;}}
 header h2{
   font-family:'Fredoka One',sans-serif;
   font-size:clamp(1.7rem,5vw,2.6rem);letter-spacing:0.04em;color:#fff;margin-top:2px;
-  text-shadow:0 0 20px rgba(255,107,157,0.5);
+  text-shadow:0 0 20px rgba(255,107,157,0.6),0 0 60px rgba(255,107,157,0.2);
+  animation:h2Pulse 3.5s ease-in-out infinite;
 }
+@keyframes h2Pulse{0%,100%{text-shadow:0 0 20px rgba(255,107,157,0.6),0 0 60px rgba(255,107,157,0.2);}50%{text-shadow:0 0 30px rgba(255,107,157,0.9),0 0 90px rgba(255,209,102,0.3);}}
 .subtitle-stack{
   font-family:'M PLUS Rounded 1c',sans-serif;
   font-size:.88rem;color:rgba(255,255,255,0.6);
@@ -82,10 +86,12 @@ header h2{
 }
 
 /* Round tracker */
-.round-dots{display:flex;gap:10px;justify-content:center;margin:8px 0 2px;}
-.round-dot{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,0.12);border:2px solid rgba(255,255,255,0.2);transition:all 0.3s ease;}
-.round-dot.done{background:#22c55e;border-color:#15803d;box-shadow:0 0 10px rgba(34,197,94,0.6);}
-.round-dot.active{background:#ff6b9d;border-color:#be185d;box-shadow:0 0 12px rgba(255,107,157,0.7);transform:scale(1.25);}
+.round-dots{display:flex;gap:14px;justify-content:center;margin:8px 0 2px;}
+.round-dot{width:13px;height:13px;border-radius:50%;background:rgba(255,255,255,0.12);border:2px solid rgba(255,255,255,0.2);transition:all 0.35s ease;position:relative;}
+.round-dot.done{background:#22c55e;border-color:#15803d;box-shadow:0 0 12px rgba(34,197,94,0.7);}
+.round-dot.active{background:#ff6b9d;border-color:#be185d;box-shadow:0 0 16px rgba(255,107,157,0.8),0 0 30px rgba(255,107,157,0.3);transform:scale(1.3);}
+.round-dot.active::after{content:'';position:absolute;inset:-5px;border-radius:50%;border:2px solid rgba(255,107,157,0.4);animation:dotRipple 1.4s ease-out infinite;}
+@keyframes dotRipple{0%{transform:scale(1);opacity:0.8;}100%{transform:scale(2);opacity:0;}}
 
 hr.sep{border:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);margin:8px 0}
 
@@ -106,6 +112,13 @@ hr.sep{border:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255
 .sv3{background-image:repeating-linear-gradient(0deg,#34d399 0 18px,#fbbf24 18px 36px,#60a5fa 36px 54px);}
 .sv4{background-image:repeating-linear-gradient(0deg,#fca5a5 0 18px,#86efac 18px 36px,#93c5fd 36px 54px);}
 .sv5{background-image:repeating-linear-gradient(0deg,#f9a8d4 0 18px,#fef08a 18px 36px,#6ee7b7 36px 54px);}
+/* Shimmer overlay on EN cards */
+.card.en::before{
+  content:'';position:absolute;top:0;left:-80%;width:60%;height:100%;
+  background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,0.22) 50%,transparent 70%);
+  transform:skewX(-15deg);transition:left 0.55s ease;pointer-events:none;z-index:2;
+}
+.card.en:hover::before,.card.en.selected::before{left:140%;}
 
 /* ── Cards ── */
 .card{
@@ -131,13 +144,15 @@ hr.sep{border:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255
 
 /* Selected EN */
 .card.selected{
-  transform:scale(1.03) translateY(-2px);
-  box-shadow:0 0 0 3px rgba(255,255,255,0.6),0 0 20px rgba(255,107,157,0.8),0 0 40px rgba(255,209,102,0.5);
+  transform:scale(1.04) translateY(-3px);
+  box-shadow:0 0 0 3px rgba(255,255,255,0.7),0 0 28px rgba(255,107,157,0.9),0 0 55px rgba(255,209,102,0.5);
 }
-/* JP awake */
+/* JP awake — gentle float */
 .jpAwake .card.jp:not(.combined):not(.correct):not(.wrong){
-  border-color:#ffffffdd;box-shadow:0 0 14px rgba(255,255,255,0.2);filter:brightness(1.08);
+  border-color:#ffffffdd;box-shadow:0 0 18px rgba(255,255,255,0.18);filter:brightness(1.1);
+  animation:jpFloat 2s ease-in-out infinite alternate;
 }
+@keyframes jpFloat{from{transform:translateY(0);}to{transform:translateY(-3px);}}
 
 /* Combined */
 .card.combined{border:0;display:flex;flex-direction:column;gap:6px;}
@@ -193,9 +208,12 @@ hr.sep{border:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255
 .btn:active{transform:scale(0.96) translateY(1px);}
 .btn-check{
   background:linear-gradient(135deg,#22c55e,#15803d);color:#fff;
-  box-shadow:0 0 0 0 rgba(34,197,94,0.5),0 6px 0 #14532d,0 0 20px rgba(34,197,94,0.5);
+  box-shadow:0 6px 0 #14532d,0 0 24px rgba(34,197,94,0.55);
+  animation:checkGlow 2.8s ease-in-out infinite;
 }
-.btn-check:disabled{filter:saturate(.2) brightness(.7);box-shadow:none;cursor:not-allowed;}
+@keyframes checkGlow{0%,100%{box-shadow:0 6px 0 #14532d,0 0 24px rgba(34,197,94,0.55);}50%{box-shadow:0 6px 0 #14532d,0 0 40px rgba(34,197,94,0.85),0 0 70px rgba(34,197,94,0.3);}}
+.btn-check:not(:disabled):hover{transform:translateY(-2px) scale(1.04);filter:brightness(1.1);}
+.btn-check:disabled{filter:saturate(.2) brightness(.7);box-shadow:none;cursor:not-allowed;animation:none;}
 .btn-secondary{
   background:rgba(255,255,255,0.08);color:#fff;
   border:1.5px solid rgba(255,255,255,0.25);
@@ -276,6 +294,7 @@ hr.sep-help{border:0;height:1px;background:rgba(255,255,255,0.15);margin:8px 0;}
 </head>
 <body>
 
+<div class="blob3"></div>
 <a class="close-btn" href="../br_games.html" id="closeBtn" title="Back">✕</a>
 
 <header>
@@ -360,49 +379,32 @@ hr.sep-help{border:0;height:1px;background:rgba(255,255,255,0.15);margin:8px 0;}
 <audio id="s_r15"  preload="auto" playsinline></audio>
 
 <script>
-
-   
 /* ═══════════════════════════════════════════
    AUDIO + JSON CONFIG
    ═══════════════════════════════════════════ */
 const AUDIO_ROOT = 'https://pub-8d5941f302df44b899ce9d9a4606dcb7.r2.dev/audio-2027';
+const JSON_URL   = 'br_vocab.json';
 
-const MONTH_ABBR_3 = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+// ── Month detection (3 sources, priority order) ──────────────────
+// 1. URL path: template/march/br_vt.html  →  "march"
+// 2. ?week= param:  br_vt.html?week=br_mar_w2  →  "mar"
+// 3. Current calendar month as fallback
+const MONTH_ABBR_3 = ['jan','feb','mar','apr','may','jun',
+                       'jul','aug','sep','oct','nov','dec'];
+const MONTH_NAMES_EN = ['January','February','March','April','May','June',
+                        'July','August','September','October','November','December'];
+const MONTH_NAMES_JP = ['1月','2月','3月','4月','5月','6月',
+                        '7月','8月','9月','10月','11月','12月'];
 
-const MONTH_NAMES_EN = [
-  'January','February','March','April','May','June',
-  'July','August','September','October','November','December'
-];
-
-const MONTH_NAMES_JP = [
-  '1月','2月','3月','4月','5月','6月',
-  '7月','8月','9月','10月','11月','12月'
-];
-
-const MONTH_FOLDER_MAP = {
-  jan: 'january',
-  feb: 'february',
-  mar: 'march',
-  apr: 'april',
-  may: 'may',
-  jun: 'june',
-  jul: 'july',
-  aug: 'august',
-  sep: 'september',
-  oct: 'october',
-  nov: 'november',
-  dec: 'december'
-};
-
-// Source 1 — folder name in the URL path
+// Source 1 — folder name in the URL path (most reliable)
 const _pathParts  = window.location.pathname.split('/');
-const _folderName = _pathParts[_pathParts.length - 2] || '';
+const _folderName = _pathParts[_pathParts.length - 2] || ''; // e.g. "march"
 const _pathMonth  = MONTH_ABBR_3.find(m =>
-  _folderName.toLowerCase().startsWith(m) ||
-  _folderName.toLowerCase() === m
+  _folderName.toLowerCase().startsWith(m) ||            // "march" starts with "mar"
+  _folderName.toLowerCase() === m                       // exact "mar"
 ) || null;
 
-// Source 2 — ?week= param
+// Source 2 — ?week= param  (e.g. br_mar_w1)
 const params       = new URLSearchParams(window.location.search);
 const weekParam    = params.get('week') || '';
 const _paramMatch  = weekParam.match(/_([a-z]{3})_w/i);
@@ -412,22 +414,17 @@ const _paramMonth  = _paramMatch ? _paramMatch[1].toLowerCase() : null;
 const _now         = new Date();
 const _calMonth    = MONTH_ABBR_3[_now.getMonth()];
 
-// Resolved month
-// Resolved month (always 3-letter format)
+// Resolved 3-letter month abbreviation
 const MONTH = _pathMonth || _paramMonth || _calMonth;
 
-// JSON lives beside the game
-const JSON_URL = `br_vocab.json`;
-
-// Audio lives on Cloudflare
-const AUDIO_BASE = `${AUDIO_ROOT}/${MONTH}/boo_riculum/vocab/`;
-
-
+const AUDIO_BASE   = `${AUDIO_ROOT}/${MONTH}/boo_riculum/vocab/`;
 const WEEK_RANGES  = { w1:[1,15], w2:[16,30], w3:[31,45], w4:[46,60] };
 
-// SFX
+// ── SFX: booha-adventure-2027/assets/audio/
+// File lives at: booha-adventure-2027/template/[month]/br_vt.html
+// So two levels up from this file reaches booha-adventure-2027/
 const SFX_BASE = '../../assets/audio/';
-   
+
 /* ── Week detection: ?week= param → then current date ── */
 function getWeekKey() {
   const wm = weekParam.match(/(w[1-4])/i);
@@ -445,10 +442,12 @@ function pad2(n){ return String(n).padStart(2,'0'); }
 function safeWord(s){ return (s||'').toLowerCase().trim().replace(/\s+/g,'_').replace(/[^a-z0-9_'-]/g,''); }
 function centerOf(el){ const r=el.getBoundingClientRect(); return{x:r.left+r.width/2,y:r.top+r.height/2}; }
 function vocabUrl(item){
-  if (item.mp3) return `${AUDIO_BASE}${item.mp3}`;
-  return `${AUDIO_BASE}v${pad2(item.id)}_${safeWord(item.en)}.mp3`;
+  if(item && item.mp3) return `${AUDIO_BASE}${item.mp3}`;
+  const id = typeof item === 'object' ? item.id : item;
+  const en = typeof item === 'object' ? item.en : '';
+  return `${AUDIO_BASE}v${pad2(id)}_${safeWord(en)}.mp3`;
 }
-   
+
 /* ═══════════════════════════════════════════
    AUDIO ENGINE
    ═══════════════════════════════════════════ */
@@ -463,8 +462,37 @@ const SFX_BUFFERS=new Map();
 function getAC(){ if(AC)return AC; const C=window.AudioContext||window.webkitAudioContext; if(!C)return null; AC=new C(); return AC; }
 async function decodeToBuffer(url){ const ctx=getAC(); if(!ctx)return null; const r=await fetch(url,{cache:'force-cache'}).catch(()=>null); if(!r||!r.ok)return null; const ab=await r.arrayBuffer(); return ctx.decodeAudioData(ab.slice(0)).catch(()=>null); }
 function playSfxBuffer(name){ const ctx=getAC(); const b=SFX_BUFFERS.get(name); if(!ctx||!b)return false; const s=ctx.createBufferSource(); s.buffer=b; s.connect(ctx.destination); try{s.start(0);}catch{} return true; }
-function playAudioTag(a){ if(!a)return; try{a.pause();a.currentTime=0;const p=a.play();if(p&&p.catch)p.catch(()=>{});}catch{} }
-function playSfx(name){ if(playSfxBuffer(name))return; const m={ding:TAGS.ding,fart:TAGS.fart,r0_5:TAGS.r0_5,r6_10:TAGS.r6_10,r11_14:TAGS.r11_14,r15:TAGS.r15}; playAudioTag(m[name]); }
+// SFX: stop any currently-playing SFX tag before starting the next
+let _activeSfxNode = null; // tracks WebAudio node
+let _activeSfxTag  = null; // tracks <audio> tag
+function playSfx(name){
+  // WebAudio path — inherently non-overlapping per-name via tracking
+  const ctx=getAC(); const b=SFX_BUFFERS.get(name);
+  if(ctx && b){
+    if(_activeSfxNode){ try{_activeSfxNode.stop();}catch{} }
+    const s=ctx.createBufferSource(); s.buffer=b; s.connect(ctx.destination);
+    try{s.start(0);}catch{}
+    _activeSfxNode=s;
+    s.onended=()=>{ if(_activeSfxNode===s)_activeSfxNode=null; };
+    return;
+  }
+  // <audio> tag fallback
+  const m={ding:TAGS.ding,fart:TAGS.fart,r0_5:TAGS.r0_5,r6_10:TAGS.r6_10,r11_14:TAGS.r11_14,r15:TAGS.r15};
+  const a=m[name]; if(!a)return;
+  if(_activeSfxTag && _activeSfxTag!==a){ try{_activeSfxTag.pause();_activeSfxTag.currentTime=0;}catch{} }
+  _activeSfxTag=a;
+  try{a.pause();a.currentTime=0;const p=a.play();if(p&&p.catch)p.catch(()=>{});}catch{}
+}
+
+const sage=new Map();
+function stopAllSage(){ sage.forEach(a=>{try{a.pause();a.currentTime=0;}catch{}}); }
+function playVocabById(id){
+  const a=sage.get(id); if(!a)return;
+  stopAllSage();
+  try{a.pause();a.currentTime=0;}catch{}
+  const p=a.play(); if(p&&p.catch)p.catch(()=>{});
+}
+
 async function primeTag(a){ if(!a)return; try{const m=a.muted,v=a.volume;a.muted=true;a.volume=0;const p=a.play();if(p&&p.catch)await p.catch(()=>{});a.pause();a.currentTime=0;a.volume=v;a.muted=m;}catch{} }
 async function unlockAudioOnce(){
   if(audioUnlocked)return; audioUnlocked=true;
@@ -474,19 +502,6 @@ async function unlockAudioOnce(){
   if(ctx){ for(const[n,u] of [['ding',SFX_BASE+'ding.mp3'],['fart',SFX_BASE+'fart.mp3'],['r0_5',SFX_BASE+'result_0-5.mp3'],['r6_10',SFX_BASE+'result_6-10.mp3'],['r11_14',SFX_BASE+'result_11-14.mp3'],['r15',SFX_BASE+'result_15.mp3']]){ const b=await decodeToBuffer(u); if(b)SFX_BUFFERS.set(n,b); } }
 }
 ['pointerdown','touchstart','mousedown','keydown'].forEach(e=>window.addEventListener(e,unlockAudioOnce,{once:true,passive:true}));
-
-const sage=new Map();
-function stopAllSage(){ sage.forEach(a=>{try{a.pause();a.currentTime=0;}catch{}}); }
-   
-function playVocabById(id){
-  const a = sage.get(id);
-  if(!a) return;
-  console.log('PLAYING:', id, a.src);
-  stopAllSage();
-  try{ a.pause(); a.currentTime = 0; }catch{}
-  const p = a.play();
-  if (p && p.catch) p.catch(err => console.log('AUDIO ERROR:', err, a.src));
-}
 
 /* ═══════════════════════════════════════════
    PARTICLE EFFECTS
@@ -574,22 +589,15 @@ async function loadVocab(){
     return;
   }
 
-  // Normalise: support both {n, en, jp, hira} and legacy {id, en, jp, hira}
-  MASTER = cards.map(c => ({
-  id: c.n ?? c.id,
-  en: c.en,
-  jp: c.jp,
-  hira: c.hira,
-  mp3: c.mp3 || ''
- }));
+  // Normalise: support {n, en, jp, hira, mp3?} and legacy {id, ...}
+  MASTER = cards.map(c => ({ id: c.n ?? c.id, en: c.en, jp: c.jp, hira: c.hira, mp3: c.mp3 || '' }));
 
-  // Build sage audio cache
+  // Build sage audio cache — preload='metadata' avoids mobile data waste
   MASTER.forEach(item => {
-  const a = new Audio(vocabUrl(item));
-  a.preload = 'metadata';
-  try { a.load(); } catch {}
-  sage.set(item.id, a);
-});
+    const a = new Audio(vocabUrl(item));
+    a.preload = 'metadata'; try { a.load(); } catch {}
+    sage.set(item.id, a);
+  });
 
   // Subtitle — resolved month + week
   const wNum  = weekKey.replace('w', '');
@@ -801,21 +809,26 @@ function showResults(){
 /* ═══════════════════════════════════════════
    BUTTONS + HELP
    ═══════════════════════════════════════════ */
-$('#playAgain').addEventListener('click',initGame);
 
-$('#backToMenu').addEventListener('click',()=>{
-  window.location.href = '../br_games.html';
+// Nav lock — prevents button smashing / double-tap navigation
+let navLocked = false;
+function navTo(href){
+  if(navLocked) return;
+  navLocked = true;
+  window.location.href = href;
+}
+
+$('#playAgain').addEventListener('click', () => {
+  if(isGrading) return;
+  navLocked = false; // reset so the new game session allows navigation again
+  initGame();
 });
 
-$('#closeBtn').addEventListener('click',function(e){
-  e.preventDefault();
-  window.location.href = '../br_games.html';
-});
-
-$('#helpBtn').addEventListener('click',()=>$('#helpOverlay').classList.add('show'));
-   
-$('#helpClose').addEventListener('click',()=>$('#helpOverlay').classList.remove('show'));
-$('#helpOverlay').addEventListener('click',e=>{ if(e.target===$('#helpOverlay'))$('#helpOverlay').classList.remove('show'); });
+$('#backToMenu').addEventListener('click', () => { navTo('../br_games.html'); });
+$('#closeBtn').addEventListener('click', function(e){ e.preventDefault(); navTo('../br_games.html'); });
+$('#helpBtn').addEventListener('click', () => $('#helpOverlay').classList.add('show'));
+$('#helpClose').addEventListener('click', () => $('#helpOverlay').classList.remove('show'));
+$('#helpOverlay').addEventListener('click', e => { if(e.target === $('#helpOverlay')) $('#helpOverlay').classList.remove('show'); });
 
 loadVocab();
 </script>
