@@ -295,7 +295,7 @@ hr.sep-help{border:0;height:1px;background:rgba(255,255,255,0.15);margin:8px 0;}
 <body>
 
 <div class="blob3"></div>
-<a class="close-btn" href="../br_games.html" id="closeBtn" title="Back">✕</a>
+<a class="close-btn" href="#" id="closeBtn" title="Back">✕</a>
 
 <header>
   <h1>BOO-RICULUM</h1>
@@ -380,7 +380,15 @@ hr.sep-help{border:0;height:1px;background:rgba(255,255,255,0.15);margin:8px 0;}
 
 <script>
 
-const GAMES_HOME = '../br_games.html';   
+function goBackToBrGames() {
+  const params = new URLSearchParams(window.location.search);
+  const weekParam = params.get('week') || '';
+  const target =
+    `${window.location.origin}/booha-adventure-2027/template/br_games.html` +
+    (weekParam ? `?week=${encodeURIComponent(weekParam)}` : '');
+
+  window.location.assign(target);
+}
 /* ═══════════════════════════════════════════
    AUDIO + JSON CONFIG
    ═══════════════════════════════════════════ */
@@ -392,32 +400,31 @@ const JSON_URL   = 'br_vocab.json';
 // 2. ?week= param:  br_vt.html?week=br_mar_w2  →  "mar"
 // 3. Current calendar month as fallback
 const MONTH_ABBR_3 = ['jan','feb','mar','apr','may','jun',
-                       'jul','aug','sep','oct','nov','dec'];
+                      'jul','aug','sep','oct','nov','dec'];
 const MONTH_NAMES_EN = ['January','February','March','April','May','June',
                         'July','August','September','October','November','December'];
 const MONTH_NAMES_JP = ['1月','2月','3月','4月','5月','6月',
                         '7月','8月','9月','10月','11月','12月'];
 
-// Source 1 — folder name in the URL path (most reliable)
-const _pathParts  = window.location.pathname.split('/');
-const _folderName = _pathParts[_pathParts.length - 2] || ''; // e.g. "march"
-const _pathMonth  = MONTH_ABBR_3.find(m =>
-  _folderName.toLowerCase().startsWith(m) ||            // "march" starts with "mar"
-  _folderName.toLowerCase() === m                       // exact "mar"
+const params    = new URLSearchParams(window.location.search);
+const weekParam = params.get('week') || '';
+
+// 1. Try week param first: br_mar_w1 → mar
+const monthMatch = weekParam.match(/_([a-z]{3})_w/i);
+const paramMonth = monthMatch ? monthMatch[1].toLowerCase() : null;
+
+// 2. Then try folder name: /march/br_vt.html → mar
+const pathParts   = window.location.pathname.split('/');
+const folderName  = pathParts[pathParts.length - 2] || '';
+const folderMonth = MONTH_ABBR_3.find(m =>
+  folderName.toLowerCase().startsWith(m) || folderName.toLowerCase() === m
 ) || null;
 
-// Source 2 — ?week= param  (e.g. br_mar_w1)
-const params       = new URLSearchParams(window.location.search);
-const weekParam    = params.get('week') || '';
-const _paramMatch  = weekParam.match(/_([a-z]{3})_w/i);
-const _paramMonth  = _paramMatch ? _paramMatch[1].toLowerCase() : null;
+// 3. Fallback to current calendar month
+const _now      = new Date();
+const calMonth  = MONTH_ABBR_3[_now.getMonth()];
 
-// Source 3 — current calendar month
-const _now         = new Date();
-const _calMonth    = MONTH_ABBR_3[_now.getMonth()];
-
-// Resolved 3-letter month abbreviation
-const MONTH = _pathMonth || _paramMonth || _calMonth;
+const MONTH = paramMonth || folderMonth || calMonth;
 
 const AUDIO_BASE   = `${AUDIO_ROOT}/${MONTH}/boo_riculum/vocab/`;
 const WEEK_RANGES  = { w1:[1,15], w2:[16,30], w3:[31,45], w4:[46,60] };
@@ -431,6 +438,7 @@ const SFX_BASE = '../../assets/audio/';
 function getWeekKey() {
   const wm = weekParam.match(/(w[1-4])/i);
   if (wm) return wm[1].toLowerCase();
+
   const weekN = Math.min(4, Math.ceil(_now.getDate() / 7));
   return 'w' + weekN;
 }
@@ -826,8 +834,11 @@ $('#playAgain').addEventListener('click', () => {
   initGame();
 });
 
-$('#backToMenu').addEventListener('click', () => { navTo(GAMES_HOME); });
-$('#closeBtn').addEventListener('click', function(e){ e.preventDefault(); navTo(GAMES_HOME); });
+$('#backToMenu').addEventListener('click', () => { goBackToBrGames(); });
+$('#closeBtn').addEventListener('click', function(e){
+  e.preventDefault();
+  goBackToBrGames();
+});
    
 $('#helpBtn').addEventListener('click', () => $('#helpOverlay').classList.add('show'));
 $('#helpClose').addEventListener('click', () => $('#helpOverlay').classList.remove('show'));
