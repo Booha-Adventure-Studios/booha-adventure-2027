@@ -996,6 +996,7 @@ document.querySelectorAll('.pickTile').forEach(btn => {
 ════════════════════════════════════════════════════════════ */
 const mazeBtn = document.getElementById('mazeBtn');
 mazeBtn.addEventListener('click', () => {
+  sessionStorage.setItem('booha_return_to_hub', '1');
   fadeToBlack(true);
   setTimeout(() => { window.location.href = 'maze.html'; }, 520);
 });
@@ -1071,6 +1072,8 @@ document.addEventListener('visibilitychange', () => {
 ════════════════════════════════════════════════════════════ */
 function jumpToHub() {
   try { introVideo.pause(); } catch(e2) {}
+  closePicker();
+  ghostWrap.classList.remove('flyAway');
   [startScene, videoScene, hubScene].forEach(s => s.classList.remove('active'));
   hubScene.classList.add('active');
   fade.classList.remove('on');
