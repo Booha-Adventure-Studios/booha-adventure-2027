@@ -183,7 +183,7 @@ body{
 </div>
 
 <header class="header">
-  <a class="close-btn" href="../maze.html" id="closeBtn" title="Back / もどる">✕</a>
+  <a class="close-btn" href="../../maze.html#hub" id="closeBtn" title="Back / もどる">✕</a>
   <div class="header-inner">
     <div class="title-rainbow">BOO-RICULUM GAMES</div>
     <div class="title-jp">ブー・リキュラム ゲームズ</div>
@@ -192,31 +192,31 @@ body{
 </header>
 
 <div class="grid-wrap" id="gameGrid">
-  <a class="tile" href="br_vt.html"><div class="tile-content">
+  <a class="tile" href="./br_vt.html"><div class="tile-content">
     <div class="tile-en">Vocabulary Tap</div><div class="tile-jp">たんごをタップ</div><div class="tile-kanji">単語タップ</div>
   </div></a>
-  <a class="tile" href="br_spell.html"><div class="tile-content">
+  <a class="tile" href="./br_spell.html"><div class="tile-content">
     <div class="tile-en">Spell the Word</div><div class="tile-jp">もじをならべよう</div><div class="tile-kanji">文字並べ</div>
   </div></a>
-  <a class="tile" href="br_vs.html"><div class="tile-content">
+  <a class="tile" href="./br_vs.html"><div class="tile-content">
     <div class="tile-en">Vocabulary Speed</div><div class="tile-jp">たんごスピード</div><div class="tile-kanji">単語速読</div>
   </div></a>
-  <a class="tile" href="br_st.html"><div class="tile-content">
+  <a class="tile" href="./br_st.html"><div class="tile-content">
     <div class="tile-en">Sentences Tap</div><div class="tile-jp">ぶんをタップ</div><div class="tile-kanji">文タップ</div>
   </div></a>
-  <a class="tile" href="br_so.html"><div class="tile-content">
+  <a class="tile" href="./br_so.html"><div class="tile-content">
     <div class="tile-en">Sentence Order</div><div class="tile-jp">ぶんをならべよう</div><div class="tile-kanji">文の順番</div>
   </div></a>
-  <a class="tile" href="br_se.html"><div class="tile-content">
+  <a class="tile" href="./br_se.html"><div class="tile-content">
     <div class="tile-en">Sentence Speed</div><div class="tile-jp">ぶんのスピード</div><div class="tile-kanji">文速読</div>
   </div></a>
-  <a class="tile" href="br_stw.html"><div class="tile-content">
+  <a class="tile" href="./br_stw.html"><div class="tile-content">
     <div class="tile-en">Say the Word</div><div class="tile-jp">ことばをいおう</div><div class="tile-kanji">言葉を言おう</div>
   </div></a>
-  <a class="tile" href="br_sts.html"><div class="tile-content">
+  <a class="tile" href="./br_sts.html"><div class="tile-content">
     <div class="tile-en">Say the Sentence</div><div class="tile-jp">ぶんをいおう</div><div class="tile-kanji">文を言おう</div>
   </div></a>
-  <a class="tile" href="br_atq.html"><div class="tile-content">
+  <a class="tile" href="./br_atq.html"><div class="tile-content">
     <div class="tile-en">Ask the Question</div><div class="tile-jp">しつもんしよう</div><div class="tile-kanji">質問しよう</div>
   </div></a>
 </div>
@@ -263,13 +263,31 @@ function kaboom(cx,cy,ringColor){
 let locked=false;
 const swipe=document.getElementById('swipeScreen');
 
-function safeNavigate(href,cx,cy,tileEl,ringColor){
-  if(locked)return;locked=true;
+function safeNavigate(href, cx, cy, tileEl, ringColor){
+  if (locked) return;
+  locked = true;
+
+  const weekParam = new URLSearchParams(window.location.search).get('week') || '';
+  const finalHref = weekParam
+    ? `${href}${href.includes('?') ? '&' : '?'}week=${encodeURIComponent(weekParam)}`
+    : href;
+
   tileEl.classList.add('warp');
-  kaboom(cx,cy,ringColor);
-  setTimeout(()=>{document.body.style.transition='background 0.08s';document.body.style.background='#fff';},280);
-  setTimeout(()=>{document.body.style.background='var(--bg)';swipe.classList.add('go');},380);
-  setTimeout(()=>{window.location.assign(href);},560);
+  kaboom(cx, cy, ringColor);
+
+  setTimeout(() => {
+    document.body.style.transition = 'background 0.08s';
+    document.body.style.background = '#fff';
+  }, 280);
+
+  setTimeout(() => {
+    document.body.style.background = 'var(--bg)';
+    swipe.classList.add('go');
+  }, 380);
+
+  setTimeout(() => {
+    window.location.href = finalHref;
+  }, 560);
 }
 
 const RING_COLORS=['#ff6b9d','#00d4ff','#ffe94a','#a855f7','#34d399','#ff8c42','#e879f9','#38bdf8','#86efac'];
@@ -283,21 +301,21 @@ document.getElementById('gameGrid').addEventListener('click',e=>{
   safeNavigate(tile.getAttribute('href'),r.left+r.width/2,r.top+r.height/2,tile,RING_COLORS[idx]||'#fff');
 });
 
-document.getElementById('closeBtn').addEventListener('click',function(e){
-  e.preventDefault();if(locked)return;locked=true;
-  const r=this.getBoundingClientRect();
-  kaboom(r.left+r.width/2,r.top+r.height/2,'#ff6b9d');
-  setTimeout(()=>{swipe.classList.add('go');},280);
-  setTimeout(()=>{
-    if(window.history.length>1)window.history.back();
-    else window.location.assign(this.getAttribute('href'));
-  },480);
+document.getElementById('closeBtn').addEventListener('click', function(e){
+  e.preventDefault();
+  if (locked) return;
+  locked = true;
+
+  const r = this.getBoundingClientRect();
+  kaboom(r.left + r.width / 2, r.top + r.height / 2, '#ff6b9d');
+
+  setTimeout(() => { swipe.classList.add('go'); }, 280);
+  setTimeout(() => {
+    sessionStorage.setItem('booha_return_to_hub', '1');
+    window.location.href = this.getAttribute('href');
+  }, 480);
 });
 
-history.pushState({brGames:true},'');
-window.addEventListener('popstate',function(){
-  if(locked){history.pushState({brGames:true},'');return;}
-});
 </script>
 </body>
 </html>
