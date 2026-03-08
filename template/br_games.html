@@ -271,7 +271,7 @@ function getMonthFromWeek() {
   
 function getMonthFolder() {
   const map = {
-    jan:'january', feb:'february', mar:'march', apr:'apil',
+    jan:'january', feb:'february', mar:'march', apr:'april',
     may:'may', jun:'june', jul:'july', aug:'august',
     sep:'september', oct:'october', nov:'november', dec:'december'
   };
@@ -280,24 +280,21 @@ function getMonthFolder() {
   return m ? map[m] : null;
 }
 
-  const m = weekParam.match(/_([a-z]{3})_w/i);
-  if (m && map[m[1].toLowerCase()]) return map[m[1].toLowerCase()];
-
-  return null;
-}
 
 function buildGameHref(baseHref) {
-  const weekParam = new URLSearchParams(window.location.search).get('week') || '';
-  const monthFolder = getMonthFolderFromWeekParam();
+  const params = new URLSearchParams(window.location.search);
+  const weekParam = params.get('week') || '';
+  const monthFolder = getMonthFolder();
 
   const hrefWithFolder = monthFolder
-  ? `${monthFolder}/${baseHref}`
-  : baseHref;
-  
+    ? `${monthFolder}/${baseHref}`
+    : baseHref;
+
   return weekParam
-    ? `${hrefWithFolder}${hrefWithFolder.includes('?') ? '&' : '?'}week=${encodeURIComponent(weekParam)}`
+    ? `${hrefWithFolder}?week=${encodeURIComponent(weekParam)}`
     : hrefWithFolder;
-}  
+}
+  
 
 function safeNavigate(href, cx, cy, tileEl, ringColor){
   if (locked) return;
