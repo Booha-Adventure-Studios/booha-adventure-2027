@@ -549,6 +549,19 @@ function monthColors(w){ const m=WEEK_MONTH[w-1]; return MONTH_COLORS[m]||['#fff
 function monthPrimary(w)   { return monthColors(w)[0]; }
 function monthSecondary(w) { return monthColors(w)[1]; }
 
+function getWeekSlug(w){
+  const MONTH_ABBR = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov'];
+  const mo = MONTH_ABBR[WEEK_MONTH[w - 1]] || 'jan';
+
+  let weekInMonth = 0;
+  for(let i = 0; i < w; i++){
+    if(WEEK_MONTH[i] === WEEK_MONTH[w - 1]) weekInMonth++;
+  }
+  weekInMonth = Math.min(weekInMonth, 4);
+
+  return `2027_w${String(w).padStart(2,'0')}_${mo}_w${weekInMonth}`;
+}  
+
 function goToHub(){
   sessionStorage.setItem('booha_return_to_hub', '1');
   window.location.href = 'index.html#hub';
@@ -1230,7 +1243,8 @@ iconPreBoo.addEventListener('click',()=>{
   try{bgMusic.pause();}catch(e){}
   fadeOut();
   sessionStorage.setItem('booha_return_to_hub', '1');
-  setTimeout(()=>{ window.location.href = `template/pb_games.html?week=${activeWeek}`; }, FADE_MS);
+  const weekSlug = getWeekSlug(activeWeek);
+  setTimeout(()=>{ window.location.href = `template/pb_games.html?week=${encodeURIComponent(weekSlug)}`; }, FADE_MS);
 });
 
 iconBooTree.addEventListener('click',()=>{
@@ -1239,7 +1253,8 @@ iconBooTree.addEventListener('click',()=>{
   try{bgMusic.pause();}catch(e){}
   fadeOut();
   sessionStorage.setItem('booha_return_to_hub', '1');
-  setTimeout(()=>{ window.location.href = `template/br_games.html?week=${activeWeek}`; }, FADE_MS);
+  const weekSlug = getWeekSlug(activeWeek);
+  setTimeout(()=>{ window.location.href = `template/br_games.html?week=${encodeURIComponent(weekSlug)}`; }, FADE_MS);
 });
 
 iconContTree.addEventListener('click',()=>{
@@ -1248,7 +1263,8 @@ iconContTree.addEventListener('click',()=>{
   try{bgMusic.pause();}catch(e){}
   fadeOut();
   sessionStorage.setItem('booha_return_to_hub', '1');
-  setTimeout(()=>{ window.location.href = `template/bc_games.html?week=${activeWeek}`; }, FADE_MS);
+  const weekSlug = getWeekSlug(activeWeek);
+  setTimeout(()=>{ window.location.href = `template/bc_games.html?week=${encodeURIComponent(weekSlug)}`; }, FADE_MS);
 });
 // ─────────────────────────────────────────────────────────
 //  BRYAN MODE
