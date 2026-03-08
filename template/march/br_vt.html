@@ -436,10 +436,13 @@ const SFX_BASE = '../../assets/audio/';
 
 /* ── Week detection: ?week= param → then current date ── */
 function getWeekKey() {
+  const params = new URLSearchParams(window.location.search);
+  const weekParam = params.get('week') || '';
+
   const wm = weekParam.match(/(w[1-4])/i);
   if (wm) return wm[1].toLowerCase();
 
-  const weekN = Math.min(4, Math.ceil(_now.getDate() / 7));
+  const weekN = Math.min(4, Math.ceil(new Date().getDate() / 7));
   return 'w' + weekN;
 }
 
