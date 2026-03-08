@@ -183,7 +183,7 @@ body{
 </div>
 
 <header class="header">
-   <a class="close-btn" href="../maze.html#hub" id="closeBtn" title="Back / もどる">✕</a>
+   <a class="close-btn" href="../maze.html" id="closeBtn" title="Back / もどる">✕</a>
   <div class="header-inner">
     <div class="title-rainbow">BOO-RICULUM GAMES</div>
     <div class="title-jp">ブー・リキュラム ゲームズ</div>
@@ -342,7 +342,6 @@ document.getElementById('closeBtn').addEventListener('click', function(e){
 
   setTimeout(() => { swipe.classList.add('go'); }, 280);
   setTimeout(() => {
-    sessionStorage.setItem('booha_return_to_hub', '1');
     window.location.href = this.getAttribute('href');
   }, 480);
 });
