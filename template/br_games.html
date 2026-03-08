@@ -291,8 +291,8 @@ function buildGameHref(baseHref) {
   const monthFolder = getMonthFolderFromWeekParam();
 
   const hrefWithFolder = monthFolder
-  ? `../${monthFolder}/${baseHref}`
-  : `../${baseHref}`;
+  ? `${monthFolder}/${baseHref}`
+  : baseHref;
   
   return weekParam
     ? `${hrefWithFolder}${hrefWithFolder.includes('?') ? '&' : '?'}week=${encodeURIComponent(weekParam)}`
