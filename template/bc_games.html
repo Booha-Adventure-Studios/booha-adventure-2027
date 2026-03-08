@@ -1,0 +1,562 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>BOO-CONTINUUM GAMES</title>
+<meta name="theme-color" content="#060d1a">
+<link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+/* ═══════════════════════════════════════════
+   BOO-CONTINUUM — advanced dark sci-fi
+   Deep navy/charcoal, electric teal, gold, steel
+   9 unique tile colors — no repeats
+   ═══════════════════════════════════════════ */
+:root {
+  --bg:    #060d1a;
+  --panel: rgba(8,18,38,0.82);
+
+  /* 9 distinct tile accents */
+  --t1a:#00f5d4; --t1b:#0077b6;   /* electric teal  */
+  --t2a:#ffd166; --t2b:#e76f51;   /* amber gold      */
+  --t3a:#a8dadc; --t3b:#457b9d;   /* steel blue      */
+  --t4a:#c77dff; --t4b:#7b2d8b;   /* plasma violet   */
+  --t5a:#06ffa5; --t5b:#007944;   /* neon green      */
+  --t6a:#ff6b6b; --t6b:#c1121f;   /* alarm red       */
+  --t7a:#90e0ef; --t7b:#023e8a;   /* ice blue        */
+  --t8a:#f4d35e; --t8b:#9c6b00;   /* deep gold       */
+  --t9a:#b7e4c7; --t9b:#1b4332;   /* sage mist       */
+
+  --card-h: 128px;
+  --radius: 12px;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  font-family:'Oxanium','Noto Sans JP',sans-serif;
+  background:var(--bg);color:#ccd6f6;
+  min-height:100dvh;overflow-y:auto;overflow-x:hidden;padding-bottom:2.5rem;
+}
+
+/* ── Grid scanlines overlay ── */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,245,212,0.025) 3px,
+    rgba(0,245,212,0.025) 4px
+  );
+}
+
+/* ── Deep space background ── */
+.bg-layer{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+
+/* Nebula blobs */
+.nebula{
+  position:absolute;border-radius:50%;
+  filter:blur(90px);
+  animation:nebulaDrift var(--nd,20s) ease-in-out infinite alternate;
+}
+.nebula:nth-child(1){width:600px;height:400px;background:rgba(0,119,182,0.14);top:-80px;left:-100px;--nd:22s;}
+.nebula:nth-child(2){width:500px;height:300px;background:rgba(0,245,212,0.09);bottom:-60px;right:-80px;--nd:18s;}
+.nebula:nth-child(3){width:350px;height:350px;background:rgba(124,45,139,0.11);top:35%;left:55%;--nd:26s;}
+@keyframes nebulaDrift{
+  from{transform:translate(0,0) scale(1);}
+  to  {transform:translate(20px,30px) scale(1.06);}
+}
+
+/* Grid dots */
+.grid-bg{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle, rgba(0,245,212,0.12) 1px, transparent 1px);
+  background-size:36px 36px;
+}
+
+/* Moving scan line */
+.scan-line{
+  position:fixed;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(0,245,212,0.4),transparent);
+  z-index:1;pointer-events:none;
+  animation:scanMove 6s linear infinite;
+}
+@keyframes scanMove{
+  0%  {top:-2px;opacity:0;}
+  5%  {opacity:1;}
+  95% {opacity:1;}
+  100%{top:100vh;opacity:0;}
+}
+
+/* ── Particles ── */
+.particle{
+  position:fixed;width:2px;height:2px;border-radius:50%;
+  background:var(--pc,#00f5d4);opacity:0;pointer-events:none;z-index:0;
+  animation:particleDrift var(--pd,8s) var(--pde,0s) linear infinite;
+}
+@keyframes particleDrift{
+  0%  {transform:translate(0,100vh);opacity:0;}
+  5%  {opacity:var(--po,0.7);}
+  90% {opacity:var(--po,0.5);}
+  100%{transform:translate(var(--pdx,10px),-20px);opacity:0;}
+}
+
+/* ── Header ── */
+.header{
+  position:relative;z-index:10;text-align:center;
+  padding:1.8rem 1rem 0.4rem;
+}
+.header-inner{display:inline-flex;flex-direction:column;align-items:center;gap:0.2rem;}
+
+.close-btn{
+  position:absolute;top:1.3rem;right:1.3rem;
+  width:44px;height:44px;border-radius:8px;
+  background:rgba(0,245,212,0.06);
+  border:1.5px solid rgba(0,245,212,0.3);
+  color:#00f5d4;font-size:1.2rem;
+  font-family:'Oxanium',sans-serif;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;text-decoration:none;z-index:20;
+  transition:background 0.2s,box-shadow 0.2s,transform 0.15s;
+  line-height:1;
+}
+.close-btn:hover{
+  background:rgba(0,245,212,0.15);
+  box-shadow:0 0 18px rgba(0,245,212,0.4),inset 0 0 8px rgba(0,245,212,0.08);
+  transform:scale(1.08);
+}
+
+.title-main{
+  font-family:'Oxanium',sans-serif;
+  font-size:clamp(22px,5.5vw,46px);
+  font-weight:800;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:#00f5d4;
+  text-shadow:
+    0 0 20px rgba(0,245,212,0.6),
+    0 0 50px rgba(0,245,212,0.25),
+    0 2px 4px rgba(0,0,0,0.8);
+  line-height:1.1;
+  animation:titlePulse 3s ease-in-out infinite;
+}
+@keyframes titlePulse{
+  0%,100%{text-shadow:0 0 20px rgba(0,245,212,0.6),0 0 50px rgba(0,245,212,0.25),0 2px 4px rgba(0,0,0,0.8);}
+  50%    {text-shadow:0 0 30px rgba(0,245,212,0.9),0 0 80px rgba(0,245,212,0.4),0 2px 4px rgba(0,0,0,0.8);}
+}
+
+.title-sub{
+  font-family:'Oxanium',sans-serif;
+  font-size:clamp(10px,2vw,14px);
+  font-weight:600;letter-spacing:0.22em;
+  color:rgba(0,245,212,0.5);text-transform:uppercase;margin-top:1px;
+}
+.title-jp{
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:clamp(11px,2.2vw,15px);
+  color:rgba(160,200,220,0.55);font-weight:400;letter-spacing:0.06em;margin-top:2px;
+}
+
+/* Hex divider */
+.hex-divider{
+  display:flex;align-items:center;gap:10px;margin:0.9rem 0 0.1rem;
+}
+.hex-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(0,245,212,0.4),transparent);}
+.hex-icon{
+  width:22px;height:22px;background:rgba(0,245,212,0.15);
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  border:1px solid rgba(0,245,212,0.35);display:flex;align-items:center;justify-content:center;
+  animation:hexSpin 6s linear infinite;
+}
+@keyframes hexSpin{to{transform:rotate(360deg);}}
+
+/* ── Grid ── */
+.grid-wrap{
+  position:relative;z-index:10;display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;padding:1rem 1rem 2rem;
+  max-width:700px;margin:0 auto;
+}
+
+/* ── Tiles ── */
+.tile{
+  position:relative;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  height:var(--card-h);border-radius:var(--radius);
+  text-decoration:none;cursor:pointer;overflow:hidden;
+  background:var(--panel);
+  transition:transform 0.15s ease,box-shadow 0.15s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* Each tile: unique top-edge accent + left bar + subtle bg tint */
+.tile:nth-child(1){
+  border:1px solid rgba(0,245,212,0.25);
+  box-shadow:0 0 0 0 rgba(0,245,212,0);
+  --accent:var(--t1a); --accent2:var(--t1b);
+}
+.tile:nth-child(2){
+  border:1px solid rgba(255,209,102,0.28);
+  --accent:var(--t2a); --accent2:var(--t2b);
+}
+.tile:nth-child(3){
+  border:1px solid rgba(168,218,220,0.25);
+  --accent:var(--t3a); --accent2:var(--t3b);
+}
+.tile:nth-child(4){
+  border:1px solid rgba(199,125,255,0.28);
+  --accent:var(--t4a); --accent2:var(--t4b);
+}
+.tile:nth-child(5){
+  border:1px solid rgba(6,255,165,0.25);
+  --accent:var(--t5a); --accent2:var(--t5b);
+}
+.tile:nth-child(6){
+  border:1px solid rgba(255,107,107,0.28);
+  --accent:var(--t6a); --accent2:var(--t6b);
+}
+.tile:nth-child(7){
+  border:1px solid rgba(144,224,239,0.25);
+  --accent:var(--t7a); --accent2:var(--t7b);
+}
+.tile:nth-child(8){
+  border:1px solid rgba(244,211,94,0.25);
+  --accent:var(--t8a); --accent2:var(--t8b);
+}
+.tile:nth-child(9){
+  border:1px solid rgba(183,228,199,0.22);
+  --accent:var(--t9a); --accent2:var(--t9b);
+}
+
+/* Top accent bar */
+.tile::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  z-index:3;pointer-events:none;
+}
+/* Left accent bar */
+.tile::after{
+  content:'';position:absolute;top:3px;left:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--accent),transparent);
+  z-index:3;pointer-events:none;
+}
+
+/* Hover glow */
+.tile:hover{
+  transform:translateY(-3px) scale(1.025);
+  box-shadow:0 0 24px rgba(0,245,212,0.18),0 8px 30px rgba(0,0,0,0.5);
+  border-color:rgba(255,255,255,0.22);
+}
+.tile:active{transform:scale(0.97);}
+
+/* Scanning light on hover */
+.tile .tile-scan{
+  position:absolute;inset:0;pointer-events:none;z-index:2;
+  background:linear-gradient(180deg,rgba(255,255,255,0.04),transparent 60%);
+  opacity:0;transition:opacity 0.2s;
+}
+.tile:hover .tile-scan{opacity:1;}
+
+.tile-content{
+  position:relative;z-index:4;display:flex;flex-direction:column;
+  align-items:flex-start;gap:3px;text-align:left;padding:0 14px 0 18px;width:100%;
+}
+.tile-en{
+  font-family:'Oxanium',sans-serif;
+  font-size:clamp(12px,2.6vw,16px);font-weight:700;
+  color:#e0f4ff;letter-spacing:0.04em;line-height:1.15;
+  text-shadow:0 1px 4px rgba(0,0,0,0.6);
+}
+.tile-jp{
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:clamp(10px,1.8vw,12px);
+  color:rgba(180,220,240,0.72);font-weight:700;line-height:1.2;
+}
+.tile-kanji{
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:clamp(9px,1.5vw,11px);
+  color:rgba(180,220,240,0.42);font-weight:400;line-height:1.1;
+}
+/* Accent dot next to title */
+.tile-en::before{
+  content:'';display:inline-block;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent);
+  margin-right:7px;margin-bottom:1px;vertical-align:middle;
+  box-shadow:0 0 8px var(--accent);
+}
+
+/* ── CHARGE click animation (no emoji) ── */
+/* Hex shockwave */
+.charge-hex{
+  position:fixed;pointer-events:none;z-index:9998;
+  width:80px;height:80px;
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  background:transparent;border:2px solid var(--hc,#00f5d4);
+  animation:hexExpand 0.5s ease-out forwards;
+}
+@keyframes hexExpand{
+  from{transform:translate(-50%,-50%) scale(0);opacity:1;}
+  to  {transform:translate(-50%,-50%) scale(5);opacity:0;}
+}
+/* Data line particles */
+.data-line{
+  position:fixed;pointer-events:none;z-index:9999;
+  width:var(--dl,2px);height:var(--dh,12px);
+  background:var(--dc,#00f5d4);
+  border-radius:1px;
+  animation:dataFly var(--dur,0.6s) ease-out forwards;
+}
+@keyframes dataFly{
+  0%  {transform:translate(-50%,-50%) translate(0,0) scaleY(1);opacity:1;}
+  100%{transform:translate(-50%,-50%) translate(var(--bx),var(--by)) scaleY(0.1);opacity:0;}
+}
+/* Charge ring ripple */
+.charge-ring{
+  position:fixed;border-radius:50%;pointer-events:none;z-index:9997;
+  border:1.5px solid rgba(0,245,212,0.6);
+  animation:chargeRing 0.65s ease-out forwards;
+}
+@keyframes chargeRing{
+  from{transform:translate(-50%,-50%) scale(0);opacity:0.8;}
+  to  {transform:translate(-50%,-50%) scale(6);opacity:0;}
+}
+
+.tile.charge{animation:tileCharge 0.3s ease-out forwards;}
+@keyframes tileCharge{
+  0%  {transform:scale(1);}
+  40% {transform:scale(1.07);filter:brightness(1.3);}
+  100%{transform:scale(1);}
+}
+
+/* ── Black swipe — slide from left ── */
+#swipeScreen{
+  position:fixed;inset:0;background:#060d1a;z-index:9997;
+  transform:translateX(-100%);
+  transition:transform 0.14s ease-in;pointer-events:none;
+}
+#swipeScreen.go{transform:translateX(0);}
+
+/* ── Mobile ── */
+@media(max-width:500px){
+  .grid-wrap{grid-template-columns:repeat(2,1fr);gap:10px;padding:0.9rem 0.85rem 2rem;}
+  :root{--card-h:118px;}
+  .tile-content{padding:0 10px 0 14px;}
+  .title-main{letter-spacing:0.06em;}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-layer">
+  <div class="nebula"></div>
+  <div class="nebula"></div>
+  <div class="nebula"></div>
+</div>
+<div class="grid-bg"></div>
+<div class="scan-line"></div>
+
+<header class="header">
+  <a class="close-btn" href="../maze.html" id="closeBtn" title="Back / もどる">✕</a>
+  <div class="header-inner">
+    <div class="title-main">BOO-CONTINUUM</div>
+    <div class="title-sub">ADVANCED GAME SYSTEMS</div>
+    <div class="title-jp">ブーコンティニュアム ゲームズ</div>
+    <div class="hex-divider">
+      <div class="hex-line"></div>
+      <div class="hex-icon"></div>
+      <div class="hex-line"></div>
+    </div>
+  </div>
+</header>
+
+<div class="grid-wrap" id="gameGrid">
+
+  <a class="tile" href="bc_vt.html">
+    <div class="tile-scan"></div>
+    <div class="tile-content">
+      <div class="tile-en">Vocabulary Tap</div>
+      <div class="tile-jp">たんごをタップ</div>
+      <div class="tile-kanji">単語タップ</div>
+    </div>
+  </a>
+
+  <a class="tile" href="bc_spell.html">
+    <div class="tile-scan"></div>
+    <div class="tile-content">
+      <div class="tile-en">Spell the Word</div>
+      <div class="tile-jp">もじをならべよう</div>
+      <div class="tile-kanji">文字並べ</div>
+    </div>
+  </a>
+
+  <a class="tile" href="bc_vs.html">
+    <div class="tile-scan"></div>
+    <div class="tile-content">
+      <div class="tile-en">Vocabulary Speed</div>
+      <div class="tile-jp">たんごスピード</div>
+      <div class="tile-kanji">単語速読</div>
+    </div>
+  </a>
+
+  <a class="tile" href="bc_st.html">
+    <div class="tile-scan"></div>
+    <div class="tile-content">
+      <div class="tile-en">Sentences Tap</div>
+      <div class="tile-jp">ぶんをタップ</div>
+      <div class="tile-kanji">文タップ</div>
+    </div>
+  </a>
+
+  <a class="tile" href="bc_so.html">
+    <div class="tile-scan"></div>
+    <div class="tile-content">
+      <div class="tile-en">Sentence Order</div>
+      <div class="tile-jp">ぶんをならべよう</div>
+      <div class="tile-kanji">文の順番</div>
+    </div>
+  </a>
+
+  <a class="tile" href="bc_se.html">
+    <div class="tile-scan"></div>
+    <div class="tile-content">
+      <div class="tile-en">Sentence Speed</div>
+      <div class="tile-jp">ぶんのスピード</div>
+      <div class="tile-kanji">文速読</div>
+    </div>
+  </a>
+
+  <a class="tile" href="bc_stw.html">
+    <div class="tile-scan"></div>
+    <div class="tile-content">
+      <div class="tile-en">Say the Word</div>
+      <div class="tile-jp">ことばをいおう</div>
+      <div class="tile-kanji">言葉を言おう</div>
+    </div>
+  </a>
+
+  <a class="tile" href="bc_sts.html">
+    <div class="tile-scan"></div>
+    <div class="tile-content">
+      <div class="tile-en">Say the Sentence</div>
+      <div class="tile-jp">ぶんをいおう</div>
+      <div class="tile-kanji">文を言おう</div>
+    </div>
+  </a>
+
+  <a class="tile" href="bc_atq.html">
+    <div class="tile-scan"></div>
+    <div class="tile-content">
+      <div class="tile-en">Ask the Question</div>
+      <div class="tile-jp">しつもんしよう</div>
+      <div class="tile-kanji">質問しよう</div>
+    </div>
+  </a>
+
+</div>
+
+<div id="swipeScreen"></div>
+
+<script>
+// ── Floating particles ───────────────────────────────────────────────────
+(function(){
+  const PCOLS=['#00f5d4','#ffd166','#a8dadc','#c77dff','#06ffa5','#ff6b6b','#90e0ef','#f4d35e','#b7e4c7'];
+  for(let i=0;i<40;i++){
+    const p=document.createElement('div');p.className='particle';
+    p.style.left=(Math.random()*100)+'vw';
+    p.style.setProperty('--pc',PCOLS[i%PCOLS.length]);
+    p.style.setProperty('--pd',(6+Math.random()*10)+'s');
+    p.style.setProperty('--pde',(Math.random()*8)+'s');
+    p.style.setProperty('--pdx',((Math.random()*60)-30)+'px');
+    p.style.setProperty('--po',(0.4+Math.random()*0.5).toFixed(2));
+    p.style.width=p.style.height=(1+Math.random()*2.5)+'px';
+    document.body.appendChild(p);
+  }
+})();
+
+// ── CHARGE animation (no emoji) ─────────────────────────────────────────
+const ACCENT_COLS=['#00f5d4','#ffd166','#a8dadc','#c77dff','#06ffa5','#ff6b6b','#90e0ef','#f4d35e','#b7e4c7'];
+
+function chargeEffect(cx, cy, accentColor){
+  const col = accentColor || '#00f5d4';
+
+  // Hex shockwave
+  const hex=document.createElement('div');hex.className='charge-hex';
+  hex.style.cssText=`left:${cx}px;top:${cy}px;`;
+  hex.style.setProperty('--hc',col);
+  document.body.appendChild(hex);
+  hex.addEventListener('animationend',()=>hex.remove());
+
+  // Ring ripple
+  const ring=document.createElement('div');ring.className='charge-ring';
+  ring.style.cssText=`left:${cx}px;top:${cy}px;width:50px;height:50px;border-color:${col};`;
+  document.body.appendChild(ring);
+  ring.addEventListener('animationend',()=>ring.remove());
+
+  // Second ring
+  setTimeout(()=>{
+    const r2=ring.cloneNode();r2.style.animationDuration='0.8s';
+    r2.style.borderColor='rgba(255,255,255,0.3)';
+    document.body.appendChild(r2);r2.addEventListener('animationend',()=>r2.remove());
+  },100);
+
+  // Data line burst (straight lines, sci-fi style)
+  const N=16;
+  for(let i=0;i<N;i++){
+    const angle=(i/N)*Math.PI*2;
+    const dist=50+Math.random()*65;
+    const line=document.createElement('div');line.className='data-line';
+    line.style.left=cx+'px';line.style.top=cy+'px';
+    line.style.setProperty('--dc',i%3===0?'#fff':col);
+    line.style.setProperty('--dl',(1+Math.random()*2)+'px');
+    line.style.setProperty('--dh',(8+Math.random()*16)+'px');
+    line.style.setProperty('--bx',(Math.cos(angle)*dist).toFixed(1)+'px');
+    line.style.setProperty('--by',(Math.sin(angle)*dist).toFixed(1)+'px');
+    line.style.setProperty('--dur',(0.4+Math.random()*0.35)+'s');
+    document.body.appendChild(line);line.addEventListener('animationend',()=>line.remove());
+  }
+}
+
+// ── Navigation with smash-guard ──────────────────────────────────────────
+let locked=false;
+const swipe=document.getElementById('swipeScreen');
+const tiles=[...document.querySelectorAll('.tile')];
+
+function safeNavigate(href,cx,cy,tileEl,accentColor){
+  if(locked)return;locked=true;
+  tileEl.classList.add('charge');
+  chargeEffect(cx,cy,accentColor);
+  setTimeout(()=>{swipe.classList.add('go');},200);
+  setTimeout(()=>{window.location.assign(href);},400);
+}
+
+document.getElementById('gameGrid').addEventListener('click',e=>{
+  const tile=e.target.closest('.tile');
+  if(!tile||locked)return;
+  e.preventDefault();
+  const idx=tiles.indexOf(tile);
+  const r=tile.getBoundingClientRect();
+  safeNavigate(tile.getAttribute('href'),r.left+r.width/2,r.top+r.height/2,tile,ACCENT_COLS[idx]||'#00f5d4');
+});
+
+document.getElementById('closeBtn').addEventListener('click',function(e){
+  e.preventDefault();if(locked)return;locked=true;
+  const r=this.getBoundingClientRect();
+  chargeEffect(r.left+r.width/2,r.top+r.height/2,'#00f5d4');
+  setTimeout(()=>{swipe.classList.add('go');},200);
+  setTimeout(()=>{
+    if(window.history.length>1)window.history.back();
+    else window.location.assign(this.getAttribute('href'));
+  },400);
+});
+
+// ── Back-button smash guard ──────────────────────────────────────────────
+history.pushState({bcGames:true},'');
+window.addEventListener('popstate',function(){
+  if(locked){history.pushState({bcGames:true},'');return;}
+});
+</script>
+</body>
+</html>
