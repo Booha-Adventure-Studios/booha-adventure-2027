@@ -1,0 +1,833 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>BOO-CONTINUUM – Vocabulary Tap</title>
+<link rel="icon" type="image/png" href="../../BoohaYellow.png">
+<link rel="apple-touch-icon" href="../../BoohaYellow.png">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════
+   BOO-CONTINUUM – Vocabulary Tap
+   Dark ritual chamber — obsidian, ember, violet
+   ══════════════════════════════════════════ */
+:root{
+  --bg:#0c0a0f;
+  --panel:rgba(18,12,26,0.88);
+  --ink:#d4c8e8;
+  --ember:#ff4d2e;
+  --violet:#9b5de5;
+  --gold:#e8c547;
+  --teal:#00c9a7;
+  --green:#06ffa5;
+  --red:#ff4d6d;
+  --cardH:112px;
+  --radius:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  min-height:100vh;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Cinzel','Noto Sans JP',sans-serif;
+  display:flex;flex-direction:column;align-items:center;
+  overflow-y:auto;overflow-x:hidden;
+  overscroll-behavior-y:contain;
+  padding-bottom:env(safe-area-inset-bottom);
+  position:relative;
+}
+
+/* Grain overlay */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size:200px 200px;opacity:0.3;
+}
+
+/* Smoke blobs */
+.smoke{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;z-index:0;animation:smokeDrift var(--sd,20s) ease-in-out infinite alternate;}
+.smoke:nth-child(1){width:650px;height:450px;background:rgba(155,93,229,0.09);top:-100px;left:-160px;--sd:24s;}
+.smoke:nth-child(2){width:500px;height:350px;background:rgba(255,77,46,0.06);bottom:-80px;right:-100px;--sd:18s;}
+.smoke:nth-child(3){width:380px;height:380px;background:rgba(232,197,71,0.05);top:35%;left:52%;--sd:28s;}
+@keyframes smokeDrift{from{transform:translate(0,0) scale(1);}to{transform:translate(20px,30px) scale(1.06);}}
+
+/* ── X close button ── */
+.close-btn{
+  position:fixed;top:10px;right:12px;z-index:40;
+  width:38px;height:38px;border-radius:6px;
+  background:rgba(255,77,46,0.07);
+  border:1.5px solid rgba(255,77,46,0.35);
+  color:var(--ember);font-size:1.1rem;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;text-decoration:none;
+  transition:background 0.2s,box-shadow 0.2s,transform 0.15s;
+  line-height:1;font-family:'Cinzel',sans-serif;
+}
+.close-btn:hover{background:rgba(255,77,46,0.2);box-shadow:0 0 16px rgba(255,77,46,0.5);transform:scale(1.08);}
+
+/* ── Header ── */
+header{
+  position:relative;z-index:10;
+  padding:18px 60px 8px;text-align:center;width:100%;
+}
+header h1{
+  font-family:'Cinzel',sans-serif;font-weight:900;
+  font-size:clamp(1rem,3vw,1.6rem);
+  letter-spacing:0.2em;text-transform:uppercase;
+  background:linear-gradient(160deg,#e8c547,#ff9f1c,#ff4d2e,#9b5de5);
+  background-size:200% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:emberShift 6s ease-in-out infinite alternate;
+  filter:drop-shadow(0 0 10px rgba(232,197,71,0.35));
+}
+@keyframes emberShift{0%{background-position:0% center;}100%{background-position:100% center;}}
+header h2{
+  font-family:'Cinzel',sans-serif;font-weight:900;
+  font-size:clamp(1.4rem,4.2vw,2.2rem);
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:#e8dff5;margin-top:3px;
+  text-shadow:0 0 14px rgba(155,93,229,0.4);
+}
+.subtitle-stack{
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:.85rem;color:rgba(180,160,220,0.5);
+  display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap;margin-top:4px;font-weight:700;
+  letter-spacing:0.04em;
+}
+
+/* Round tracker — diamond dots */
+.round-dots{display:flex;gap:12px;justify-content:center;margin:8px 0 2px;}
+.round-dot{
+  width:11px;height:11px;
+  clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);
+  background:rgba(232,197,71,0.1);
+  transition:all 0.3s ease;
+}
+.round-dot.done{background:rgba(0,201,167,0.7);box-shadow:0 0 10px rgba(0,201,167,0.5);}
+.round-dot.active{background:var(--gold);box-shadow:0 0 14px rgba(232,197,71,0.8);transform:scale(1.35);}
+
+hr.sep{border:0;height:1px;background:linear-gradient(90deg,transparent,rgba(232,197,71,0.25),transparent);margin:8px 0}
+
+/* ── Pages ── */
+.page{width:100%;max-width:980px;margin:0 auto;display:none;padding:8px 16px 24px;position:relative;z-index:10;}
+.page.active{display:block}
+
+/* ── Round layout ── */
+.round-wrap{display:flex;gap:18px;align-items:flex-start;justify-content:center;flex-wrap:wrap;margin-top:12px;}
+.col{flex:1 1 400px;max-width:445px;display:flex;flex-direction:column;gap:11px;}
+.round-wrap,.card,.col{touch-action:pan-y;}
+
+/* ── EN card accent colors ── */
+.bc-ac-0{--accent-color:#ff4d2e;}
+.bc-ac-1{--accent-color:#9b5de5;}
+.bc-ac-2{--accent-color:#e8c547;}
+.bc-ac-3{--accent-color:#00c9a7;}
+.bc-ac-4{--accent-color:#f72585;}
+
+/* ── Cards ── */
+.card{
+  border-radius:var(--radius);
+  height:var(--cardH);
+  padding:14px 18px;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  font-family:'Cinzel',sans-serif;
+  font-size:clamp(1.2rem,3.8vw,2rem);font-weight:700;line-height:1.2;
+  user-select:none;
+  transition:transform .15s cubic-bezier(.34,1.46,.64,1),box-shadow .2s ease;
+  word-break:break-word;cursor:pointer;
+  position:relative;overflow:hidden;
+}
+
+/* EN card */
+.card.en{
+  background:rgba(18,12,26,0.9);
+  color:#e8dff5;font-weight:800;
+  font-size:clamp(1.4rem,4.5vw,2.4rem);
+  letter-spacing:0.05em;text-align:left;padding-left:22px;
+  border:1px solid rgba(155,93,229,0.2);
+  word-break:keep-all;overflow-wrap:normal;hyphens:none;
+}
+.card.en::before{
+  content:'';position:absolute;top:0;left:0;width:3px;height:100%;
+  background:var(--accent-color,var(--violet));
+  box-shadow:0 0 8px var(--accent-color,var(--violet));
+  pointer-events:none;z-index:2;
+}
+.card.en::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--accent-color,var(--violet)),transparent);
+  pointer-events:none;z-index:2;
+}
+.card.en .en-dot{
+  display:inline-block;width:6px;height:6px;
+  clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);
+  background:var(--accent-color,var(--violet));
+  box-shadow:0 0 6px var(--accent-color,var(--violet));
+  margin-right:10px;flex-shrink:0;vertical-align:middle;margin-bottom:2px;
+}
+.card.en .en-inner{display:flex;align-items:center;}
+
+/* JP card */
+.card.jp{
+  background:var(--panel);
+  border:1px solid rgba(155,93,229,0.18);
+  color:var(--ink);white-space:pre-line;
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:clamp(1.0rem,2.8vw,1.5rem);font-weight:700;
+  letter-spacing:0.02em;
+}
+
+/* Selected EN */
+.card.selected{
+  transform:translateY(-2px) scale(1.02);
+  border-color:rgba(232,197,71,0.6)!important;
+  box-shadow:0 0 0 1px rgba(232,197,71,0.3),0 0 22px rgba(232,197,71,0.25),0 0 50px rgba(232,197,71,0.1);
+}
+/* JP awake */
+.jpAwake .card.jp:not(.combined):not(.correct):not(.wrong){
+  border-color:rgba(232,197,71,0.35);
+  box-shadow:0 0 12px rgba(232,197,71,0.1);filter:brightness(1.06);
+}
+
+/* Combined */
+.card.combined{border:0;display:flex;flex-direction:column;gap:5px;text-align:center;padding-left:14px;}
+.card.matchedBlue{
+  background:linear-gradient(135deg,rgba(20,10,38,0.98),rgba(40,15,70,0.98))!important;
+  border:1px solid rgba(155,93,229,0.5)!important;
+  box-shadow:0 0 20px rgba(155,93,229,0.3),inset 0 0 20px rgba(155,93,229,0.05)!important;
+  color:#e8dff5!important;
+}
+.card.combined .enTxt{font-family:'Cinzel',sans-serif;font-size:1.05em;font-weight:800;letter-spacing:0.04em;}
+.card.combined .jpTxt{font-family:'Noto Sans JP',sans-serif;font-size:.68em;opacity:.8;font-weight:700;}
+
+@keyframes pairPop{0%{transform:scale(0.97)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+.card.pairedPop{animation:pairPop .2s ease-out;}
+
+/* CORRECT — teal ritual glow */
+.card.correct{
+  background:linear-gradient(135deg,rgba(0,30,20,0.98),rgba(0,60,40,0.98))!important;
+  border:1px solid rgba(0,201,167,0.55)!important;
+  color:#b7ffd8!important;
+}
+@keyframes correctReveal{
+  0%{transform:scaleX(0);opacity:0;}50%{transform:scaleX(1);opacity:1;}100%{transform:scaleX(1);opacity:0;}
+}
+.card.correct.animate::before{
+  content:'';position:absolute;inset:0;background:rgba(0,201,167,0.15);
+  animation:correctReveal 0.4s ease-out forwards;transform-origin:left;
+  pointer-events:none;z-index:5;
+}
+
+/* WRONG — ember glitch */
+.card.wrong{
+  background:linear-gradient(135deg,rgba(40,0,10,0.98),rgba(80,5,20,0.98))!important;
+  border:1px solid rgba(255,77,109,0.55)!important;
+  color:#ffc0cb!important;
+}
+@keyframes glitchShiver{
+  0%,100%{transform:translateX(0) skewX(0);}
+  15%{transform:translateX(-6px) skewX(-2deg);}
+  30%{transform:translateX(6px) skewX(2deg);}
+  50%{transform:translateX(-4px) skewX(-1deg);}
+  70%{transform:translateX(4px) skewX(1deg);}
+  85%{transform:translateX(-2px);}
+}
+.card.wrong.animate{animation:glitchShiver 0.5s ease-in-out;}
+.card.locked{pointer-events:none;}
+
+/* ── Buttons ── */
+.actions{display:flex;gap:12px;justify-content:center;margin-top:16px;flex-wrap:wrap;}
+.btn{
+  border:0;border-radius:7px;padding:11px 32px;font-weight:800;
+  font-family:'Cinzel',sans-serif;font-size:1rem;cursor:pointer;
+  letter-spacing:0.1em;text-transform:uppercase;
+  transition:transform .1s ease,box-shadow .2s ease;touch-action:manipulation;
+}
+.btn:active{transform:scale(0.96);}
+.btn-check{
+  background:transparent;color:var(--gold);
+  border:1.5px solid rgba(232,197,71,0.45);
+  box-shadow:0 0 18px rgba(232,197,71,0.2),inset 0 0 10px rgba(232,197,71,0.04);
+}
+.btn-check:hover{box-shadow:0 0 28px rgba(232,197,71,0.45),inset 0 0 14px rgba(232,197,71,0.08);}
+.btn-check:disabled{filter:saturate(.2) brightness(.5);box-shadow:none;cursor:not-allowed;}
+.btn-secondary{
+  background:transparent;color:rgba(200,180,240,0.6);
+  border:1px solid rgba(200,180,240,0.18);font-size:.9rem;
+}
+
+/* ── Results ── */
+#page-results .result-box{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;}
+.result-icon{font-size:clamp(2.6rem,8vw,4rem);line-height:1;filter:drop-shadow(0 0 16px rgba(232,197,71,0.5));}
+.result-msg{font-family:'Cinzel',sans-serif;font-size:clamp(1.6rem,5vw,2.6rem);font-weight:900;letter-spacing:0.08em;line-height:1.2;}
+.result-sub{font-family:'Noto Sans JP',sans-serif;font-size:clamp(.95rem,3vw,1.35rem);font-weight:700;opacity:0.85;line-height:1.3;}
+.result-kanji{font-family:'Noto Sans JP',sans-serif;font-size:clamp(.8rem,2vw,1rem);font-weight:400;opacity:0.5;letter-spacing:0.08em;}
+.result-score{font-family:'Cinzel',sans-serif;font-size:clamp(1.3rem,4vw,2rem);opacity:.9;letter-spacing:0.1em;}
+.res-red   {background:radial-gradient(ellipse at center,rgba(80,0,15,0.9) 0%,var(--bg) 70%);}
+.res-orange{background:radial-gradient(ellipse at center,rgba(65,25,0,0.9) 0%,var(--bg) 70%);}
+.res-blue  {background:radial-gradient(ellipse at center,rgba(20,5,50,0.9) 0%,var(--bg) 70%);}
+.res-gold  {background:radial-gradient(ellipse at center,rgba(45,30,0,0.9) 0%,var(--bg) 70%);}
+
+/* ── Round flash ── */
+.round-flash{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(12,10,15,0.88);backdrop-filter:blur(4px);}
+.round-flash.show{display:flex;}
+.round-flash .box{
+  padding:22px 44px;border-radius:10px;
+  background:rgba(18,12,26,0.97);
+  border:1px solid rgba(232,197,71,0.3);
+  box-shadow:0 0 40px rgba(232,197,71,0.15),inset 0 0 20px rgba(232,197,71,0.03);
+  text-align:center;
+}
+.round-flash .t1{font-family:'Cinzel',sans-serif;font-size:1.8rem;font-weight:900;letter-spacing:.16em;color:var(--gold);text-shadow:0 0 20px rgba(232,197,71,0.6);}
+.round-flash .t2{margin-top:6px;font-family:'Noto Sans JP',sans-serif;color:rgba(200,180,240,0.65);font-size:.9rem;}
+
+/* ── CORRECT: ember + diamond burst ── */
+.bc-ember{
+  position:fixed;border-radius:50%;pointer-events:none;z-index:100;
+  animation:bcEmberFly var(--dur,0.65s) ease-out forwards;
+}
+@keyframes bcEmberFly{
+  0%{opacity:1;transform:translate(-50%,-50%) translate(0,0) scale(1);}
+  100%{opacity:0;transform:translate(-50%,-50%) translate(var(--dx),var(--dy)) scale(0.15);}
+}
+.bc-diamond{
+  position:fixed;pointer-events:none;z-index:100;
+  clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);
+  animation:bcDiamondFly var(--dur,0.65s) ease-out forwards;
+}
+@keyframes bcDiamondFly{
+  0%{opacity:1;transform:translate(-50%,-50%) translate(0,0) scale(1) rotate(0deg);}
+  100%{opacity:0;transform:translate(-50%,-50%) translate(var(--dx),var(--dy)) scale(0.1) rotate(180deg);}
+}
+.bc-ring{
+  position:fixed;pointer-events:none;z-index:99;
+  border-radius:50%;
+  animation:bcRingExpand 0.55s ease-out forwards;
+}
+@keyframes bcRingExpand{
+  from{transform:translate(-50%,-50%) scale(0);opacity:0.9;}
+  to  {transform:translate(-50%,-50%) scale(5.5);opacity:0;}
+}
+
+/* ── WRONG: glitch bars + static overlay ── */
+.bc-glitch{
+  position:fixed;pointer-events:none;z-index:100;
+  height:var(--gh,3px);
+  animation:bcGlitchFly var(--dur,0.5s) ease-out forwards;opacity:0.9;
+}
+@keyframes bcGlitchFly{
+  0%{opacity:0.9;transform:translate(0,0) skewX(var(--sk,0deg));}
+  60%{opacity:0.7;transform:translate(var(--dx),var(--dy)) skewX(var(--sk,0deg));}
+  100%{opacity:0;transform:translate(var(--dx2),var(--dy2)) skewX(0deg);}
+}
+.bc-static{
+  position:fixed;pointer-events:none;z-index:99;
+  border-radius:6px;
+  background:rgba(255,77,109,0.12);
+  animation:bcStaticPulse 0.4s ease-out forwards;
+}
+@keyframes bcStaticPulse{
+  0%{opacity:0;transform:scale(0.95);}
+  40%{opacity:0.8;transform:scale(1.08);}
+  100%{opacity:0;transform:scale(1.4);}
+}
+
+/* ── Confetti for perfect ── */
+.bc-confetti{
+  position:fixed;pointer-events:none;z-index:200;
+  border-radius:2px;
+  animation:bcConfettiFall var(--dur,1.1s) linear forwards;
+}
+@keyframes bcConfettiFall{
+  0%{transform:translateY(-8px) rotate(0deg);opacity:1;}
+  100%{transform:translateY(110vh) rotate(540deg);opacity:0;}
+}
+
+/* ── Help ── */
+.help-icon{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));width:34px;height:34px;border-radius:7px;border:1.5px solid rgba(232,197,71,0.35);background:rgba(232,197,71,0.06);color:var(--gold);font-weight:800;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:35;font-family:'Cinzel',sans-serif;}
+.help-overlay{position:fixed;inset:0;background:rgba(12,10,15,0.92);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:50;}
+.help-overlay.show{display:flex;}
+.help-dialog{max-width:500px;width:90%;padding:22px;border-radius:10px;background:rgba(18,12,26,0.98);border:1px solid rgba(232,197,71,0.2);box-shadow:0 0 40px rgba(0,0,0,0.8);position:relative;max-height:80vh;overflow-y:auto;}
+.help-title{font-family:'Cinzel',sans-serif;font-size:1.2rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;text-align:center;color:var(--gold);}
+.help-sub{font-size:.86rem;opacity:.6;text-align:center;margin-bottom:10px;letter-spacing:.06em;font-family:'Cinzel',sans-serif;}
+.help-content{font-size:.9rem;line-height:1.65;font-family:'Noto Sans JP',sans-serif;}
+.help-content ul{padding-left:1.1em;margin:4px 0 10px;}
+.help-content li{margin-bottom:4px;}
+.help-close{position:absolute;top:10px;right:12px;border:1px solid rgba(232,197,71,0.3);border-radius:5px;width:28px;height:28px;background:rgba(232,197,71,0.07);color:var(--gold);font-weight:800;cursor:pointer;font-size:.95rem;}
+hr.sep-h{border:0;height:1px;background:rgba(232,197,71,0.15);margin:8px 0;}
+
+/* ── Mobile ── */
+@media(max-width:700px){
+  :root{--cardH:90px;}
+  .round-wrap{flex-wrap:nowrap;gap:10px;}
+  .col{flex:0 0 48%;max-width:48%;}
+  .card{height:var(--cardH);padding:10px 12px;font-size:.95rem;}
+  .card.en{font-size:1.2rem;padding-left:14px;}
+  .card.jp{font-size:.85rem;line-height:1.3;}
+  .actions{position:sticky;bottom:0;z-index:5;background:linear-gradient(transparent,rgba(12,10,15,0.92));padding:8px 0 calc(env(safe-area-inset-bottom));}
+}
+</style>
+</head>
+<body>
+
+<div class="smoke"></div>
+<div class="smoke"></div>
+<div class="smoke"></div>
+
+<a class="close-btn" href="../bc_games.html" id="closeBtn" title="Back">✕</a>
+
+<header>
+  <h1>BOO-CONTINUUM</h1>
+  <h2>VOCABULARY TAP</h2>
+  <div class="subtitle-stack">
+    <span id="subEn">Loading...</span>
+    <span id="subJp"></span>
+  </div>
+  <div class="round-dots">
+    <div class="round-dot" id="dot0"></div>
+    <div class="round-dot" id="dot1"></div>
+    <div class="round-dot" id="dot2"></div>
+  </div>
+  <hr class="sep">
+</header>
+
+<section id="page-round" class="page active">
+  <div class="round-wrap" id="tapArea">
+    <div id="col-en" class="col"></div>
+    <div id="col-jp" class="col"></div>
+  </div>
+  <div class="actions">
+    <button id="checkBtn" class="btn btn-check" disabled>CHECK ›</button>
+  </div>
+</section>
+
+<section id="page-results" class="page">
+  <div class="result-box">
+    <div id="resultIcon"  class="result-icon"></div>
+    <div id="resultMsg"   class="result-msg"></div>
+    <div id="resultSub"   class="result-sub"></div>
+    <div id="resultKanji" class="result-kanji"></div>
+    <div id="resultScore" class="result-score"></div>
+  </div>
+  <div class="actions">
+    <button id="playAgain" class="btn btn-check">再挑戦 / RETRY</button>
+    <button id="backToMenu" class="btn btn-secondary">もどる / BACK</button>
+  </div>
+</section>
+
+<button id="helpBtn" class="help-icon">?</button>
+<div id="helpOverlay" class="help-overlay">
+  <div class="help-dialog">
+    <button id="helpClose" class="help-close">✕</button>
+    <div class="help-title">遊び方 / How to Play</div>
+    <div class="help-sub">BOO-CONTINUUM VOCABULARY TAP</div>
+    <div class="help-content">
+      <p><strong>日本語</strong></p>
+      <ul>
+        <li>左の<strong>英語カード</strong>をタップして選びます。</li>
+        <li>右の<strong>日本語カード</strong>をタップしてペアにします。</li>
+        <li>青くなったら合ってます。タップで取り消しできます。</li>
+        <li>5つペアにできたら<strong>CHECK</strong>を押します。</li>
+        <li><strong>3ラウンド（合計15問）</strong>あります。</li>
+      </ul>
+      <hr class="sep-h">
+      <p><strong>English</strong></p>
+      <ul>
+        <li>Tap an <strong>English card</strong> to select it.</li>
+        <li>Tap the matching <strong>Japanese card</strong> to pair them.</li>
+        <li>Blue = paired. Tap to undo.</li>
+        <li>Pair all 5, then tap <strong>CHECK</strong>.</li>
+        <li><strong>3 rounds</strong> (15 total). Aim for perfect!</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div id="roundFlash" class="round-flash">
+  <div class="box">
+    <div class="t1" id="roundFlashT1">ROUND 1</div>
+    <div class="t2" id="roundFlashT2">ラウンド１</div>
+  </div>
+</div>
+
+<audio id="s_ding"  preload="auto" playsinline></audio>
+<audio id="s_fart"  preload="auto" playsinline></audio>
+<audio id="s_r05"   preload="auto" playsinline></audio>
+<audio id="s_r610"  preload="auto" playsinline></audio>
+<audio id="s_r1114" preload="auto" playsinline></audio>
+<audio id="s_r15"   preload="auto" playsinline></audio>
+
+<script>
+/* ═══════════════════════════════════════════
+   AUDIO + JSON CONFIG
+   ═══════════════════════════════════════════ */
+const AUDIO_ROOT = 'https://pub-8d5941f302df44b899ce9d9a4606dcb7.r2.dev/audio-2027';
+const JSON_URL   = 'bc_vocab.json';
+
+// ── Month detection (3-source priority) ──────────────────────────────────
+// 1. URL folder: template/march/bc_vt.html → "mar"
+// 2. ?week= param: bc_mar_w2 → "mar"
+// 3. Current calendar month
+const MONTH_ABBR_3  = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+const MONTH_NAMES_EN= ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTH_NAMES_JP= ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+
+const _pathParts  = window.location.pathname.split('/');
+const _folderName = _pathParts[_pathParts.length - 2] || '';
+const _pathMonth  = MONTH_ABBR_3.find(m =>
+  _folderName.toLowerCase().startsWith(m) || _folderName.toLowerCase() === m
+) || null;
+
+const params      = new URLSearchParams(window.location.search);
+const weekParam   = params.get('week') || '';
+const _paramMatch = weekParam.match(/_([a-z]{3})_w/i);
+const _paramMonth = _paramMatch ? _paramMatch[1].toLowerCase() : null;
+
+const _now       = new Date();
+const _calMonth  = MONTH_ABBR_3[_now.getMonth()];
+
+const MONTH      = _pathMonth || _paramMonth || _calMonth;
+
+const AUDIO_BASE  = `${AUDIO_ROOT}/${MONTH}/boo_continuum/vocab/`;
+const WEEK_RANGES = { w1:[1,15], w2:[16,30], w3:[31,45], w4:[46,60] };
+
+// SFX: two levels up from template/[month]/ → booha-adventure-2027/assets/audio/
+const SFX_BASE = '../../assets/audio/';
+
+function getWeekKey(){
+  const wm = weekParam.match(/(w[1-4])/i);
+  if(wm) return wm[1].toLowerCase();
+  return 'w' + Math.min(4, Math.ceil(_now.getDate() / 7));
+}
+
+/* ═══════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════ */
+const $ = s => document.querySelector(s);
+function shuffle(a){ return a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]); }
+function pad2(n){ return String(n).padStart(2,'0'); }
+function safeWord(s){ return (s||'').toLowerCase().trim().replace(/\s+/g,'_').replace(/[^a-z0-9_'-]/g,''); }
+function centerOf(el){ const r=el.getBoundingClientRect(); return{x:r.left+r.width/2,y:r.top+r.height/2}; }
+function vocabUrl(id,en){ return `${AUDIO_BASE}v${pad2(id)}_${safeWord(en)}.mp3`; }
+
+/* ═══════════════════════════════════════════
+   AUDIO ENGINE
+   ═══════════════════════════════════════════ */
+const TAGS={ding:$('#s_ding'),fart:$('#s_fart'),r0_5:$('#s_r05'),r6_10:$('#s_r610'),r11_14:$('#s_r1114'),r15:$('#s_r15')};
+[[TAGS.ding,SFX_BASE+'ding.mp3'],[TAGS.fart,SFX_BASE+'fart.mp3'],
+ [TAGS.r0_5,SFX_BASE+'result_0-5.mp3'],[TAGS.r6_10,SFX_BASE+'result_6-10.mp3'],
+ [TAGS.r11_14,SFX_BASE+'result_11-14.mp3'],[TAGS.r15,SFX_BASE+'result_15.mp3']
+].forEach(([t,u])=>{ if(!t)return; t.src=u; t.preload='auto'; try{t.load();}catch{} });
+
+let AC=null, audioUnlocked=false;
+const SFX_BUFFERS=new Map();
+function getAC(){ if(AC)return AC; const C=window.AudioContext||window.webkitAudioContext; if(!C)return null; AC=new C(); return AC; }
+async function decodeToBuffer(url){ const ctx=getAC(); if(!ctx)return null; const r=await fetch(url,{cache:'force-cache'}).catch(()=>null); if(!r||!r.ok)return null; const ab=await r.arrayBuffer(); return ctx.decodeAudioData(ab.slice(0)).catch(()=>null); }
+function playSfxBuffer(name){ const ctx=getAC(); const b=SFX_BUFFERS.get(name); if(!ctx||!b)return false; const s=ctx.createBufferSource(); s.buffer=b; s.connect(ctx.destination); try{s.start(0);}catch{} return true; }
+function playAudioTag(a){ if(!a)return; try{a.pause();a.currentTime=0;const p=a.play();if(p&&p.catch)p.catch(()=>{});}catch{} }
+function playSfx(name){ if(playSfxBuffer(name))return; const m={ding:TAGS.ding,fart:TAGS.fart,r0_5:TAGS.r0_5,r6_10:TAGS.r6_10,r11_14:TAGS.r11_14,r15:TAGS.r15}; playAudioTag(m[name]); }
+async function primeTag(a){ if(!a)return; try{const m=a.muted,v=a.volume;a.muted=true;a.volume=0;const p=a.play();if(p&&p.catch)await p.catch(()=>{});a.pause();a.currentTime=0;a.volume=v;a.muted=m;}catch{} }
+async function unlockAudioOnce(){
+  if(audioUnlocked)return; audioUnlocked=true;
+  const ctx=getAC(); if(ctx&&ctx.state==='suspended')await ctx.resume().catch(()=>{});
+  await primeTag(TAGS.ding);
+  for(const a of sage.values())await primeTag(a);
+  if(ctx){ for(const[n,u] of [['ding',SFX_BASE+'ding.mp3'],['fart',SFX_BASE+'fart.mp3'],['r0_5',SFX_BASE+'result_0-5.mp3'],['r6_10',SFX_BASE+'result_6-10.mp3'],['r11_14',SFX_BASE+'result_11-14.mp3'],['r15',SFX_BASE+'result_15.mp3']]){ const b=await decodeToBuffer(u); if(b)SFX_BUFFERS.set(n,b); } }
+}
+['pointerdown','touchstart','mousedown','keydown'].forEach(e=>window.addEventListener(e,unlockAudioOnce,{once:true,passive:true}));
+
+const sage=new Map();
+function stopAllSage(){ sage.forEach(a=>{try{a.pause();a.currentTime=0;}catch{}}); }
+function playVocabById(id){ const a=sage.get(id); if(!a)return; stopAllSage(); try{a.pause();a.currentTime=0;}catch{} const p=a.play(); if(p&&p.catch)p.catch(()=>{}); }
+
+/* ═══════════════════════════════════════════
+   PARTICLE EFFECTS
+   ═══════════════════════════════════════════ */
+const CORRECT_COLS=['#e8c547','#ff9f1c','#00c9a7','#9b5de5','#06ffa5','#fff','#ff4d2e'];
+const WRONG_COLS  =['#ff4d6d','#ff6b6b','#fca5a5','#ff0055'];
+
+function correctBurst(el){
+  const{x,y}=centerOf(el);
+  // Shockwave ring
+  const ring=document.createElement('div'); ring.className='bc-ring';
+  ring.style.cssText=`left:${x}px;top:${y}px;width:50px;height:50px;background:rgba(232,197,71,0.2);border:2px solid rgba(232,197,71,0.8);`;
+  document.body.appendChild(ring); ring.addEventListener('animationend',()=>ring.remove());
+  // Second ring
+  setTimeout(()=>{
+    const r2=ring.cloneNode();
+    r2.style.background='transparent';r2.style.borderColor='rgba(0,201,167,0.5)';r2.style.animationDuration='0.7s';
+    document.body.appendChild(r2); r2.addEventListener('animationend',()=>r2.remove());
+  },90);
+  // Ember round sparks
+  for(let i=0;i<18;i++){
+    const ang=(i/18)*Math.PI*2+(Math.random()-0.5)*0.3,d=45+Math.random()*75;
+    const e=document.createElement('div'); e.className='bc-ember';
+    const sz=(4+Math.random()*7)+'px';
+    e.style.cssText=`left:${x}px;top:${y}px;width:${sz};height:${sz};background:${CORRECT_COLS[Math.floor(Math.random()*CORRECT_COLS.length)]};box-shadow:0 0 4px currentColor;`;
+    e.style.setProperty('--dx',(Math.cos(ang)*d).toFixed(1)+'px');
+    e.style.setProperty('--dy',(Math.sin(ang)*d).toFixed(1)+'px');
+    e.style.setProperty('--dur',(0.45+Math.random()*0.45)+'s');
+    document.body.appendChild(e); e.addEventListener('animationend',()=>e.remove());
+  }
+  // Diamond sparks
+  for(let i=0;i<10;i++){
+    const ang=(i/10)*Math.PI*2,d=35+Math.random()*55;
+    const d2=document.createElement('div'); d2.className='bc-diamond';
+    const sz=(5+Math.random()*8)+'px';
+    d2.style.cssText=`left:${x}px;top:${y}px;width:${sz};height:${sz};background:${CORRECT_COLS[Math.floor(Math.random()*CORRECT_COLS.length)]};`;
+    d2.style.setProperty('--dx',(Math.cos(ang)*d).toFixed(1)+'px');
+    d2.style.setProperty('--dy',(Math.sin(ang)*d).toFixed(1)+'px');
+    d2.style.setProperty('--dur',(0.5+Math.random()*0.4)+'s');
+    document.body.appendChild(d2); d2.addEventListener('animationend',()=>d2.remove());
+  }
+}
+
+function wrongBurst(el){
+  const{x,y}=centerOf(el);
+  const r=el.getBoundingClientRect();
+  // Static overlay on card
+  const stat=document.createElement('div'); stat.className='bc-static';
+  stat.style.cssText=`left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;border:1px solid rgba(255,77,109,0.45);border-radius:${getComputedStyle(el).borderRadius};`;
+  document.body.appendChild(stat); stat.addEventListener('animationend',()=>stat.remove());
+  // Glitch bars
+  for(let i=0;i<14;i++){
+    const g=document.createElement('div'); g.className='bc-glitch';
+    const w=20+Math.random()*55;
+    const ang=(i/14)*Math.PI*2,d=30+Math.random()*50;
+    g.style.cssText=`left:${x-(w/2)}px;top:${y+(-10+Math.random()*20)}px;width:${w}px;background:${WRONG_COLS[Math.floor(Math.random()*WRONG_COLS.length)]};opacity:0.85;`;
+    g.style.setProperty('--gh',(2+Math.random()*3)+'px');
+    g.style.setProperty('--sk',(Math.random()*8-4)+'deg');
+    g.style.setProperty('--dx',(Math.cos(ang)*d).toFixed(1)+'px');
+    g.style.setProperty('--dy',(Math.sin(ang)*(d*0.6)).toFixed(1)+'px');
+    g.style.setProperty('--dx2',((Math.cos(ang)+0.5)*d*1.3).toFixed(1)+'px');
+    g.style.setProperty('--dy2',((Math.sin(ang))*d*1.2).toFixed(1)+'px');
+    g.style.setProperty('--dur',(0.35+Math.random()*0.3)+'s');
+    document.body.appendChild(g); g.addEventListener('animationend',()=>g.remove());
+  }
+}
+
+/* ═══════════════════════════════════════════
+   GAME STATE
+   ═══════════════════════════════════════════ */
+let MASTER=[], rounds=[], roundIndex=0, totalScore=0, connections={}, jpOrder=[];
+let selectedEn=null,selectedEnId=null,selectedEnEl=null,isGrading=false;
+
+/* ═══════════════════════════════════════════
+   LOAD JSON
+   ═══════════════════════════════════════════ */
+async function loadVocab(){
+  const weekKey = getWeekKey();
+  const [lo, hi] = WEEK_RANGES[weekKey] || WEEK_RANGES.w1;
+
+  let cards = [];
+  try {
+    const res  = await fetch(JSON_URL);
+    const data = await res.json();
+    cards = (data.cards || []).filter(c => c.n >= lo && c.n <= hi);
+  } catch(e) {
+    console.error('[bc_vocab] fetch failed:', e);
+    $('#subEn').textContent = 'Could not load vocab data.';
+    return;
+  }
+  if(!cards.length){ $('#subEn').textContent = 'No cards for ' + weekKey; return; }
+
+  MASTER = cards.map(c => ({ id: c.n ?? c.id, en: c.en, jp: c.jp, hira: c.hira }));
+
+  MASTER.forEach(item => {
+    const a = new Audio(vocabUrl(item.id, item.en));
+    a.preload = 'auto'; a.crossOrigin = 'anonymous'; try { a.load(); } catch {}
+    sage.set(item.id, a);
+  });
+
+  const wNum  = weekKey.replace('w', '');
+  const mIdx  = MONTH_ABBR_3.indexOf(MONTH);
+  const monEn = mIdx >= 0 ? MONTH_NAMES_EN[mIdx] : MONTH.charAt(0).toUpperCase() + MONTH.slice(1);
+  const monJp = mIdx >= 0 ? MONTH_NAMES_JP[mIdx] : MONTH.toUpperCase();
+  $('#subEn').textContent = `${monEn} – Week ${wNum} – Vocabulary`;
+  $('#subJp').textContent = `${monJp}第${wNum}週 – 語彙`;
+
+  initGame();
+}
+
+/* ═══════════════════════════════════════════
+   ROUND DOTS
+   ═══════════════════════════════════════════ */
+function updateDots(){ for(let i=0;i<3;i++){ const d=$(`#dot${i}`); d.className='round-dot'; if(i<roundIndex)d.classList.add('done'); else if(i===roundIndex)d.classList.add('active'); } }
+
+/* ═══════════════════════════════════════════
+   UI HELPERS
+   ═══════════════════════════════════════════ */
+function setJpAwake(on){ document.body.classList.toggle('jpAwake',!!on); }
+function clearEnSelection(){ if(selectedEnEl)selectedEnEl.classList.remove('selected'); selectedEn=null;selectedEnId=null;selectedEnEl=null;setJpAwake(false); }
+
+function clearJPCard(jpCard){
+  const enId=Number(jpCard.dataset.connectedId||0); if(!enId)return;
+  playVocabById(enId);
+  const enCard=document.querySelector(`.en[data-id="${enId}"]`); if(enCard)enCard.style.visibility='visible';
+  jpCard.classList.remove('combined','matchedBlue','pairedPop','correct','wrong','locked','animate');
+  jpCard.classList.add('jp');
+  jpCard.innerHTML=`${jpCard.dataset.jp}\n(${jpCard.dataset.hira})`;
+  jpCard.dataset.connectedId=''; delete connections[jpCard.dataset.jp];
+  $('#checkBtn').disabled=Object.keys(connections).length!==5; clearEnSelection();
+}
+
+function combineIntoJP(jpCard,enText,enId){
+  if(!jpCard?.dataset)return;
+  if(jpCard.dataset.connectedId){ const old=document.querySelector(`.en[data-id="${jpCard.dataset.connectedId}"]`); if(old)old.style.visibility='visible'; }
+  const enCard=document.querySelector(`.en[data-id="${enId}"]`); if(enCard)enCard.style.visibility='hidden';
+  const jp=jpCard.dataset.jp,hira=jpCard.dataset.hira;
+  jpCard.classList.add('combined','matchedBlue','pairedPop');
+  jpCard.classList.remove('jp','selected');
+  jpCard.innerHTML=`<div class="enTxt">${enText}</div><div class="jpTxt">${jp}（${hira}）</div>`;
+  jpCard.dataset.connectedId=String(enId); connections[jp]=`${enId}|${enText}`;
+  setTimeout(()=>jpCard.classList.remove('pairedPop'),220);
+  $('#checkBtn').disabled=Object.keys(connections).length!==5; clearEnSelection();
+}
+
+function showRoundFlash(n){
+  const o=$('#roundFlash');
+  $('#roundFlashT1').textContent=`ROUND ${n}`;
+  $('#roundFlashT2').textContent=`ラウンド${n}`;
+  o.classList.add('show'); setTimeout(()=>o.classList.remove('show'),1000);
+}
+
+/* ═══════════════════════════════════════════
+   INIT / LOAD ROUND
+   ═══════════════════════════════════════════ */
+function initGame(){
+  totalScore=0;roundIndex=0; document.body.className='';
+  $('#page-results').classList.remove('active'); $('#page-round').classList.add('active');
+  clearEnSelection();isGrading=false;
+  const shuffled=shuffle([...MASTER]);
+  rounds=[shuffled.slice(0,5),shuffled.slice(5,10),shuffled.slice(10,15)];
+  updateDots(); showRoundFlash(1); loadRound();
+}
+
+const BC_ACCENT_CLASSES=['bc-ac-0','bc-ac-1','bc-ac-2','bc-ac-3','bc-ac-4'];
+
+function loadRound(){
+  connections={};clearEnSelection();isGrading=false;
+  const set=rounds[roundIndex],colEn=$('#col-en'),colJp=$('#col-jp');
+  colEn.innerHTML='';colJp.innerHTML='';
+  const accentOrder=shuffle([...BC_ACCENT_CLASSES]);
+
+  shuffle([...set]).forEach((item,idx)=>{
+    const c=document.createElement('div');
+    c.className=`card en ${accentOrder[idx%accentOrder.length]}`;
+    c.innerHTML=`<div class="en-inner"><span class="en-dot"></span>${item.en.toLowerCase()}</div>`;
+    c.dataset.id=String(item.id);
+    c.addEventListener('click',async()=>{
+      if(isGrading||c.style.visibility==='hidden')return;
+      await unlockAudioOnce(); playVocabById(item.id);
+      if(selectedEnEl===c)return;
+      clearEnSelection(); selectedEn=item.en.toLowerCase(); selectedEnId=item.id; selectedEnEl=c;
+      c.classList.add('selected'); setJpAwake(true);
+    });
+    colEn.appendChild(c);
+  });
+
+  shuffle([...set]).forEach(item=>{
+    const c=document.createElement('div');
+    c.className='card jp'; c.dataset.jp=item.jp; c.dataset.hira=item.hira; c.dataset.connectedId='';
+    c.textContent=`${item.jp}\n(${item.hira})`;
+    c.addEventListener('click',async()=>{
+      if(isGrading||c.classList.contains('correct')||c.classList.contains('wrong'))return;
+      await unlockAudioOnce();
+      if(c.dataset.connectedId){clearJPCard(c);return;}
+      if(!selectedEnId)return;
+      combineIntoJP(c,selectedEn,selectedEnId); playVocabById(selectedEnId);
+    });
+    colJp.appendChild(c);
+  });
+  jpOrder=[...colJp.querySelectorAll('[data-jp]')];
+  $('#checkBtn').disabled=true;
+}
+
+/* ═══════════════════════════════════════════
+   CHECK / GRADE
+   ═══════════════════════════════════════════ */
+$('#checkBtn').addEventListener('click',async()=>{
+  await unlockAudioOnce(); if(isGrading)return;
+  isGrading=true;$('#checkBtn').disabled=true;clearEnSelection();
+  let i=0;
+  const step=setInterval(()=>{
+    if(i>=jpOrder.length){
+      clearInterval(step);
+      setTimeout(()=>{ roundIndex++;updateDots(); if(roundIndex<3){showRoundFlash(roundIndex+1);loadRound();}else{showResults();} },950);
+      return;
+    }
+    const card=jpOrder[i],jp=card.dataset.jp;
+    const chosenId=Number(card.dataset.connectedId||0);
+    const correctId=rounds.flat().find(v=>v.jp===jp)?.id||0;
+    card.classList.remove('matchedBlue','pairedPop');
+    if(chosenId&&chosenId===correctId){
+      card.classList.remove('wrong');card.classList.add('correct','locked','animate');
+      playSfx('ding');correctBurst(card);totalScore++;
+      setTimeout(()=>card.classList.remove('animate'),500);
+    }else{
+      card.classList.remove('correct');card.classList.add('wrong','animate');
+      playSfx('fart');wrongBurst(card);
+      setTimeout(()=>card.classList.remove('animate'),600);
+    }
+    i++;
+  },880);
+});
+
+/* ═══════════════════════════════════════════
+   RESULTS
+   ═══════════════════════════════════════════ */
+function showResults(){
+  $('#page-round').classList.remove('active');
+  $('#page-results').classList.add('active');
+  const pct = Math.round((totalScore/15)*100);
+
+  const TIERS = [
+    { bg:'res-red',    icon:'☽',  en:'RITUAL FAILED',        sub:'もう一度やってみよう！',        kanji:'もう一度挑戦しよう！',         snd:'r0_5'   },
+    { bg:'res-orange', icon:'◈',  en:'POWER RISING',         sub:'だんだん強くなってる！',         kanji:'だんだん強くなってる！',        snd:'r6_10'  },
+    { bg:'res-blue',   icon:'⬡',  en:'ALMOST UNLEASHED',     sub:'もうすこしで かんぺき！',        kanji:'もう少しで完璧！',             snd:'r11_14' },
+    { bg:'res-gold',   icon:'★',  en:'POWER UNLOCKED',       sub:'かんぺき！きみは さいきょう！',  kanji:'完璧！君は最強！',             snd:'r15'    }
+  ];
+
+  let tier;
+  if     (totalScore <= 5)  tier = TIERS[0];
+  else if(totalScore <= 10) tier = TIERS[1];
+  else if(totalScore < 15)  tier = TIERS[2];
+  else                      tier = TIERS[3];
+
+  document.body.className = tier.bg;
+  $('#resultIcon').textContent  = tier.icon;
+  $('#resultMsg').textContent   = tier.en;
+  $('#resultSub').textContent   = tier.sub;
+  $('#resultKanji').textContent = tier.kanji;
+  $('#resultScore').textContent = `${totalScore} / 15  ·  ${pct}%`;
+
+  playSfx(tier.snd);
+
+  if(totalScore === 15){
+    for(let i=0;i<130;i++) setTimeout(()=>{
+      const c=document.createElement('div'); c.className='bc-confetti';
+      const w=3+Math.random()*6;
+      c.style.cssText=`left:${Math.random()*100}vw;top:-8px;width:${w}px;height:${4+Math.random()*10}px;background:hsl(${Math.random()*360},90%,65%);`;
+      c.style.setProperty('--dur',(0.9+Math.random()*0.9)+'s');
+      document.body.appendChild(c); setTimeout(()=>c.remove(),2200);
+    }, i*10);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   BUTTONS + HELP
+   ═══════════════════════════════════════════ */
+$('#playAgain').addEventListener('click',initGame);
+$('#backToMenu').addEventListener('click',()=>{ if(window.history.length>1)window.history.back(); else window.location.href='../bc_games.html'; });
+$('#closeBtn').addEventListener('click',function(e){ e.preventDefault(); if(window.history.length>1)window.history.back(); else window.location.assign(this.getAttribute('href')); });
+$('#helpBtn').addEventListener('click',()=>$('#helpOverlay').classList.add('show'));
+$('#helpClose').addEventListener('click',()=>$('#helpOverlay').classList.remove('show'));
+$('#helpOverlay').addEventListener('click',e=>{ if(e.target===$('#helpOverlay'))$('#helpOverlay').classList.remove('show'); });
+
+loadVocab();
+</script>
+</body>
+</html>
