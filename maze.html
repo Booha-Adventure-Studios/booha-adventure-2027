@@ -549,7 +549,7 @@ function monthColors(w){ const m=WEEK_MONTH[w-1]; return MONTH_COLORS[m]||['#fff
 function monthPrimary(w)   { return monthColors(w)[0]; }
 function monthSecondary(w) { return monthColors(w)[1]; }
 
-function getWeekSlug(w){
+function getWeekSlug(prefix, w){
   const MONTH_ABBR = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov'];
   const mo = MONTH_ABBR[WEEK_MONTH[w - 1]] || 'jan';
 
@@ -559,8 +559,8 @@ function getWeekSlug(w){
   }
   weekInMonth = Math.min(weekInMonth, 4);
 
-  return `2027_w${String(w).padStart(2,'0')}_${mo}_w${weekInMonth}`;
-}  
+  return `${prefix}_${mo}_w${weekInMonth}`;
+}
 
 function goToHub(){
   sessionStorage.setItem('booha_return_to_hub', '1');
@@ -1303,7 +1303,7 @@ iconPreBoo.addEventListener('click',()=>{
   sessionStorage.setItem('booha_return_week', String(activeWeek));
   sessionStorage.setItem('booha_return_ghost', String(activeGhostIdx));
 
-  const weekSlug = getWeekSlug(activeWeek);
+  const weekSlug = getWeekSlug('pb', activeWeek);
   setTimeout(()=>{ window.location.href = `template/pb_games.html?week=${encodeURIComponent(weekSlug)}`; }, FADE_MS);
 });
 
@@ -1317,8 +1317,8 @@ iconBooTree.addEventListener('click',()=>{
   sessionStorage.setItem('booha_return_week', String(activeWeek));
   sessionStorage.setItem('booha_return_ghost', String(activeGhostIdx));
 
-  const weekSlug = getWeekSlug(activeWeek);
-  setTimeout(()=>{ window.location.href = `template/br_games.html?week=${encodeURIComponent(weekSlug)}`; }, FADE_MS);
+ const weekSlug = getWeekSlug('br', activeWeek);
+ setTimeout(()=>{ window.location.href = `template/br_games.html?week=${encodeURIComponent(weekSlug)}`; }, FADE_MS);
 });
 
 iconContTree.addEventListener('click',()=>{
@@ -1331,7 +1331,7 @@ iconContTree.addEventListener('click',()=>{
   sessionStorage.setItem('booha_return_week', String(activeWeek));
   sessionStorage.setItem('booha_return_ghost', String(activeGhostIdx));
 
-  const weekSlug = getWeekSlug(activeWeek);
+  const weekSlug = getWeekSlug('bc', activeWeek);
   setTimeout(()=>{ window.location.href = `template/bc_games.html?week=${encodeURIComponent(weekSlug)}`; }, FADE_MS);
 });
 // ─────────────────────────────────────────────────────────
