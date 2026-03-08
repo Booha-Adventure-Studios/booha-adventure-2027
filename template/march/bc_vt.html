@@ -47,11 +47,12 @@ body::before{
   background-size:200px 200px;opacity:0.3;
 }
 
-/* Smoke blobs */
+/* Smoke blobs — 4 for depth */
 .smoke{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;z-index:0;animation:smokeDrift var(--sd,20s) ease-in-out infinite alternate;}
-.smoke:nth-child(1){width:650px;height:450px;background:rgba(155,93,229,0.09);top:-100px;left:-160px;--sd:24s;}
-.smoke:nth-child(2){width:500px;height:350px;background:rgba(255,77,46,0.06);bottom:-80px;right:-100px;--sd:18s;}
-.smoke:nth-child(3){width:380px;height:380px;background:rgba(232,197,71,0.05);top:35%;left:52%;--sd:28s;}
+.smoke:nth-child(1){width:700px;height:480px;background:rgba(155,93,229,0.10);top:-110px;left:-160px;--sd:24s;}
+.smoke:nth-child(2){width:520px;height:360px;background:rgba(255,77,46,0.07);bottom:-80px;right:-100px;--sd:18s;}
+.smoke:nth-child(3){width:400px;height:400px;background:rgba(232,197,71,0.06);top:35%;left:52%;--sd:28s;}
+.smoke:nth-child(4){width:280px;height:280px;background:rgba(0,201,167,0.05);top:58%;left:10%;--sd:21s;}
 @keyframes smokeDrift{from{transform:translate(0,0) scale(1);}to{transform:translate(20px,30px) scale(1.06);}}
 
 /* ── X close button ── */
@@ -78,19 +79,26 @@ header h1{
   font-size:clamp(1rem,3vw,1.6rem);
   letter-spacing:0.2em;text-transform:uppercase;
   background:linear-gradient(160deg,#e8c547,#ff9f1c,#ff4d2e,#9b5de5);
-  background-size:200% auto;
+  background-size:300% auto;
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
   animation:emberShift 6s ease-in-out infinite alternate;
   filter:drop-shadow(0 0 10px rgba(232,197,71,0.35));
 }
 @keyframes emberShift{0%{background-position:0% center;}100%{background-position:100% center;}}
+
 header h2{
   font-family:'Cinzel',sans-serif;font-weight:900;
   font-size:clamp(1.4rem,4.2vw,2.2rem);
   letter-spacing:0.1em;text-transform:uppercase;
   color:#e8dff5;margin-top:3px;
-  text-shadow:0 0 14px rgba(155,93,229,0.4);
+  text-shadow:0 0 14px rgba(155,93,229,0.5),0 0 40px rgba(155,93,229,0.15);
+  animation:h2RitualPulse 3.8s ease-in-out infinite;
 }
+@keyframes h2RitualPulse{
+  0%,100%{text-shadow:0 0 14px rgba(155,93,229,0.5),0 0 40px rgba(155,93,229,0.15);}
+  50%{text-shadow:0 0 28px rgba(155,93,229,0.9),0 0 70px rgba(232,197,71,0.2);}
+}
+
 .subtitle-stack{
   font-family:'Noto Sans JP',sans-serif;
   font-size:.85rem;color:rgba(180,160,220,0.5);
@@ -98,16 +106,23 @@ header h2{
   letter-spacing:0.04em;
 }
 
-/* Round tracker — diamond dots */
-.round-dots{display:flex;gap:12px;justify-content:center;margin:8px 0 2px;}
+/* Round tracker — diamond dots with ripple */
+.round-dots{display:flex;gap:14px;justify-content:center;margin:8px 0 2px;}
 .round-dot{
-  width:11px;height:11px;
+  width:12px;height:12px;
   clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);
   background:rgba(232,197,71,0.1);
-  transition:all 0.3s ease;
+  transition:all 0.35s ease;position:relative;
 }
-.round-dot.done{background:rgba(0,201,167,0.7);box-shadow:0 0 10px rgba(0,201,167,0.5);}
-.round-dot.active{background:var(--gold);box-shadow:0 0 14px rgba(232,197,71,0.8);transform:scale(1.35);}
+.round-dot.done{background:rgba(0,201,167,0.75);box-shadow:0 0 12px rgba(0,201,167,0.6);}
+.round-dot.active{background:var(--gold);box-shadow:0 0 18px rgba(232,197,71,0.9),0 0 35px rgba(232,197,71,0.3);transform:scale(1.45);}
+.round-dot.active::after{
+  content:'';position:absolute;inset:-5px;
+  clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);
+  border:1.5px solid rgba(232,197,71,0.5);
+  animation:dotRippleBC 1.5s ease-out infinite;
+}
+@keyframes dotRippleBC{0%{transform:scale(1);opacity:0.8;}100%{transform:scale(2.4);opacity:0;}}
 
 hr.sep{border:0;height:1px;background:linear-gradient(90deg,transparent,rgba(232,197,71,0.25),transparent);margin:8px 0}
 
@@ -136,7 +151,7 @@ hr.sep{border:0;height:1px;background:linear-gradient(90deg,transparent,rgba(232
   font-family:'Cinzel',sans-serif;
   font-size:clamp(1.2rem,3.8vw,2rem);font-weight:700;line-height:1.2;
   user-select:none;
-  transition:transform .15s cubic-bezier(.34,1.46,.64,1),box-shadow .2s ease;
+  transition:transform .15s cubic-bezier(.34,1.46,.64,1),box-shadow .2s ease,border-color .2s ease;
   word-break:break-word;cursor:pointer;
   position:relative;overflow:hidden;
 }
@@ -150,17 +165,28 @@ hr.sep{border:0;height:1px;background:linear-gradient(90deg,transparent,rgba(232
   border:1px solid rgba(155,93,229,0.2);
   word-break:keep-all;overflow-wrap:normal;hyphens:none;
 }
+/* Left accent bar */
 .card.en::before{
   content:'';position:absolute;top:0;left:0;width:3px;height:100%;
   background:var(--accent-color,var(--violet));
   box-shadow:0 0 8px var(--accent-color,var(--violet));
   pointer-events:none;z-index:2;
 }
+/* Top accent line */
 .card.en::after{
   content:'';position:absolute;top:0;left:0;right:0;height:3px;
   background:linear-gradient(90deg,var(--accent-color,var(--violet)),transparent);
   pointer-events:none;z-index:2;
 }
+/* Shimmer layer — triggered on select/hover */
+.card.en .en-shimmer{
+  position:absolute;inset:0;pointer-events:none;z-index:3;border-radius:inherit;
+  background:linear-gradient(110deg,transparent 25%,rgba(255,255,255,0.10) 50%,transparent 75%);
+  transform:translateX(-130%);transition:transform 0.55s ease;
+}
+.card.en.selected .en-shimmer,
+.card.en:hover:not(.locked) .en-shimmer{transform:translateX(130%);}
+
 .card.en .en-dot{
   display:inline-block;width:6px;height:6px;
   clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);
@@ -182,15 +208,19 @@ hr.sep{border:0;height:1px;background:linear-gradient(90deg,transparent,rgba(232
 
 /* Selected EN */
 .card.selected{
-  transform:translateY(-2px) scale(1.02);
-  border-color:rgba(232,197,71,0.6)!important;
-  box-shadow:0 0 0 1px rgba(232,197,71,0.3),0 0 22px rgba(232,197,71,0.25),0 0 50px rgba(232,197,71,0.1);
+  transform:translateY(-3px) scale(1.025);
+  border-color:rgba(232,197,71,0.65)!important;
+  box-shadow:0 0 0 1px rgba(232,197,71,0.35),0 0 26px rgba(232,197,71,0.3),0 0 55px rgba(232,197,71,0.12);
 }
-/* JP awake */
+
+/* JP awake — float gently when an EN is selected */
 .jpAwake .card.jp:not(.combined):not(.correct):not(.wrong){
-  border-color:rgba(232,197,71,0.35);
-  box-shadow:0 0 12px rgba(232,197,71,0.1);filter:brightness(1.06);
+  border-color:rgba(232,197,71,0.38);
+  box-shadow:0 0 16px rgba(232,197,71,0.12);
+  filter:brightness(1.08);
+  animation:jpFloatBC 2.2s ease-in-out infinite alternate;
 }
+@keyframes jpFloatBC{from{transform:translateY(0);}to{transform:translateY(-3px);}}
 
 /* Combined */
 .card.combined{border:0;display:flex;flex-direction:column;gap:5px;text-align:center;padding-left:14px;}
@@ -244,16 +274,22 @@ hr.sep{border:0;height:1px;background:linear-gradient(90deg,transparent,rgba(232
   border:0;border-radius:7px;padding:11px 32px;font-weight:800;
   font-family:'Cinzel',sans-serif;font-size:1rem;cursor:pointer;
   letter-spacing:0.1em;text-transform:uppercase;
-  transition:transform .1s ease,box-shadow .2s ease;touch-action:manipulation;
+  transition:transform .1s ease,box-shadow .2s ease,filter .2s ease;
+  touch-action:manipulation;
 }
 .btn:active{transform:scale(0.96);}
 .btn-check{
   background:transparent;color:var(--gold);
-  border:1.5px solid rgba(232,197,71,0.45);
-  box-shadow:0 0 18px rgba(232,197,71,0.2),inset 0 0 10px rgba(232,197,71,0.04);
+  border:1.5px solid rgba(232,197,71,0.5);
+  box-shadow:0 0 18px rgba(232,197,71,0.25),inset 0 0 10px rgba(232,197,71,0.04);
+  animation:checkGlowBC 3s ease-in-out infinite;
 }
-.btn-check:hover{box-shadow:0 0 28px rgba(232,197,71,0.45),inset 0 0 14px rgba(232,197,71,0.08);}
-.btn-check:disabled{filter:saturate(.2) brightness(.5);box-shadow:none;cursor:not-allowed;}
+@keyframes checkGlowBC{
+  0%,100%{box-shadow:0 0 18px rgba(232,197,71,0.25),inset 0 0 10px rgba(232,197,71,0.04);}
+  50%{box-shadow:0 0 38px rgba(232,197,71,0.65),0 0 75px rgba(232,197,71,0.18),inset 0 0 16px rgba(232,197,71,0.08);}
+}
+.btn-check:not(:disabled):hover{transform:translateY(-2px) scale(1.04);filter:brightness(1.12);}
+.btn-check:disabled{filter:saturate(.2) brightness(.5);box-shadow:none;cursor:not-allowed;animation:none;}
 .btn-secondary{
   background:transparent;color:rgba(200,180,240,0.6);
   border:1px solid rgba(200,180,240,0.18);font-size:.9rem;
@@ -376,6 +412,7 @@ hr.sep-h{border:0;height:1px;background:rgba(232,197,71,0.15);margin:8px 0;}
 <div class="smoke"></div>
 <div class="smoke"></div>
 <div class="smoke"></div>
+<div class="smoke"></div>
 
 <a class="close-btn" href="../bc_games.html" id="closeBtn" title="Back">✕</a>
 
@@ -467,10 +504,7 @@ hr.sep-h{border:0;height:1px;background:rgba(232,197,71,0.15);margin:8px 0;}
 const AUDIO_ROOT = 'https://pub-8d5941f302df44b899ce9d9a4606dcb7.r2.dev/audio-2027';
 const JSON_URL   = 'bc_vocab.json';
 
-// ── Month detection (3-source priority) ──────────────────────────────────
-// 1. URL folder: template/march/bc_vt.html → "mar"
-// 2. ?week= param: bc_mar_w2 → "mar"
-// 3. Current calendar month
+// ── Month detection (3-source priority) ──
 const MONTH_ABBR_3  = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
 const MONTH_NAMES_EN= ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MONTH_NAMES_JP= ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
@@ -493,9 +527,7 @@ const MONTH      = _pathMonth || _paramMonth || _calMonth;
 
 const AUDIO_BASE  = `${AUDIO_ROOT}/${MONTH}/boo_continuum/vocab/`;
 const WEEK_RANGES = { w1:[1,15], w2:[16,30], w3:[31,45], w4:[46,60] };
-
-// SFX: two levels up from template/[month]/ → booha-adventure-2027/assets/audio/
-const SFX_BASE = '../../assets/audio/';
+const SFX_BASE    = '../../assets/audio/';
 
 function getWeekKey(){
   const wm = weekParam.match(/(w[1-4])/i);
@@ -511,7 +543,12 @@ function shuffle(a){ return a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).m
 function pad2(n){ return String(n).padStart(2,'0'); }
 function safeWord(s){ return (s||'').toLowerCase().trim().replace(/\s+/g,'_').replace(/[^a-z0-9_'-]/g,''); }
 function centerOf(el){ const r=el.getBoundingClientRect(); return{x:r.left+r.width/2,y:r.top+r.height/2}; }
-function vocabUrl(id,en){ return `${AUDIO_BASE}v${pad2(id)}_${safeWord(en)}.mp3`; }
+function vocabUrl(item){
+  if(item && item.mp3) return `${AUDIO_BASE}${item.mp3}`;
+  const id = typeof item === 'object' ? item.id : item;
+  const en = typeof item === 'object' ? item.en : '';
+  return `${AUDIO_BASE}v${pad2(id)}_${safeWord(en)}.mp3`;
+}
 
 /* ═══════════════════════════════════════════
    AUDIO ENGINE
@@ -527,8 +564,27 @@ const SFX_BUFFERS=new Map();
 function getAC(){ if(AC)return AC; const C=window.AudioContext||window.webkitAudioContext; if(!C)return null; AC=new C(); return AC; }
 async function decodeToBuffer(url){ const ctx=getAC(); if(!ctx)return null; const r=await fetch(url,{cache:'force-cache'}).catch(()=>null); if(!r||!r.ok)return null; const ab=await r.arrayBuffer(); return ctx.decodeAudioData(ab.slice(0)).catch(()=>null); }
 function playSfxBuffer(name){ const ctx=getAC(); const b=SFX_BUFFERS.get(name); if(!ctx||!b)return false; const s=ctx.createBufferSource(); s.buffer=b; s.connect(ctx.destination); try{s.start(0);}catch{} return true; }
-function playAudioTag(a){ if(!a)return; try{a.pause();a.currentTime=0;const p=a.play();if(p&&p.catch)p.catch(()=>{});}catch{} }
-function playSfx(name){ if(playSfxBuffer(name))return; const m={ding:TAGS.ding,fart:TAGS.fart,r0_5:TAGS.r0_5,r6_10:TAGS.r6_10,r11_14:TAGS.r11_14,r15:TAGS.r15}; playAudioTag(m[name]); }
+
+// SFX overlap prevention — tracked node (WebAudio) + tracked tag (fallback)
+let _activeSfxNode=null, _activeSfxTag=null;
+function playSfx(name){
+  // WebAudio path — stop previous node before starting next
+  const ctx=getAC(); const b=SFX_BUFFERS.get(name);
+  if(ctx && b){
+    if(_activeSfxNode){ try{_activeSfxNode.stop();}catch{} }
+    const s=ctx.createBufferSource(); s.buffer=b; s.connect(ctx.destination);
+    try{s.start(0);}catch{} _activeSfxNode=s;
+    s.onended=()=>{ if(_activeSfxNode===s)_activeSfxNode=null; };
+    return;
+  }
+  // <audio> tag fallback — stop previous tag before starting next
+  const m={ding:TAGS.ding,fart:TAGS.fart,r0_5:TAGS.r0_5,r6_10:TAGS.r6_10,r11_14:TAGS.r11_14,r15:TAGS.r15};
+  const a=m[name]; if(!a)return;
+  if(_activeSfxTag && _activeSfxTag!==a){ try{_activeSfxTag.pause();_activeSfxTag.currentTime=0;}catch{} }
+  _activeSfxTag=a;
+  try{a.pause();a.currentTime=0;const p=a.play();if(p&&p.catch)p.catch(()=>{});}catch{}
+}
+
 async function primeTag(a){ if(!a)return; try{const m=a.muted,v=a.volume;a.muted=true;a.volume=0;const p=a.play();if(p&&p.catch)await p.catch(()=>{});a.pause();a.currentTime=0;a.volume=v;a.muted=m;}catch{} }
 async function unlockAudioOnce(){
   if(audioUnlocked)return; audioUnlocked=true;
@@ -541,7 +597,12 @@ async function unlockAudioOnce(){
 
 const sage=new Map();
 function stopAllSage(){ sage.forEach(a=>{try{a.pause();a.currentTime=0;}catch{}}); }
-function playVocabById(id){ const a=sage.get(id); if(!a)return; stopAllSage(); try{a.pause();a.currentTime=0;}catch{} const p=a.play(); if(p&&p.catch)p.catch(()=>{}); }
+function playVocabById(id){
+  const a=sage.get(id); if(!a)return;
+  stopAllSage();
+  try{a.pause();a.currentTime=0;}catch{}
+  const p=a.play(); if(p&&p.catch)p.catch(()=>{});
+}
 
 /* ═══════════════════════════════════════════
    PARTICLE EFFECTS
@@ -557,8 +618,8 @@ function correctBurst(el){
   document.body.appendChild(ring); ring.addEventListener('animationend',()=>ring.remove());
   // Second ring
   setTimeout(()=>{
-    const r2=ring.cloneNode();
-    r2.style.background='transparent';r2.style.borderColor='rgba(0,201,167,0.5)';r2.style.animationDuration='0.7s';
+    const r2=document.createElement('div'); r2.className='bc-ring';
+    r2.style.cssText=`left:${x}px;top:${y}px;width:50px;height:50px;background:transparent;border:2px solid rgba(0,201,167,0.5);animation-duration:0.7s;`;
     document.body.appendChild(r2); r2.addEventListener('animationend',()=>r2.remove());
   },90);
   // Ember round sparks
@@ -634,11 +695,13 @@ async function loadVocab(){
   }
   if(!cards.length){ $('#subEn').textContent = 'No cards for ' + weekKey; return; }
 
-  MASTER = cards.map(c => ({ id: c.n ?? c.id, en: c.en, jp: c.jp, hira: c.hira }));
+  // Normalise — support {n, en, jp, hira, mp3?} and legacy {id, ...}
+  MASTER = cards.map(c => ({ id: c.n ?? c.id, en: c.en, jp: c.jp, hira: c.hira, mp3: c.mp3 || '' }));
 
+  // Build sage audio cache — metadata only to save mobile bandwidth
   MASTER.forEach(item => {
-    const a = new Audio(vocabUrl(item.id, item.en));
-    a.preload = 'auto'; a.crossOrigin = 'anonymous'; try { a.load(); } catch {}
+    const a = new Audio(vocabUrl(item));
+    a.preload = 'metadata'; try { a.load(); } catch {}
     sage.set(item.id, a);
   });
 
@@ -655,7 +718,13 @@ async function loadVocab(){
 /* ═══════════════════════════════════════════
    ROUND DOTS
    ═══════════════════════════════════════════ */
-function updateDots(){ for(let i=0;i<3;i++){ const d=$(`#dot${i}`); d.className='round-dot'; if(i<roundIndex)d.classList.add('done'); else if(i===roundIndex)d.classList.add('active'); } }
+function updateDots(){
+  for(let i=0;i<3;i++){
+    const d=$(`#dot${i}`); d.className='round-dot';
+    if(i<roundIndex)d.classList.add('done');
+    else if(i===roundIndex)d.classList.add('active');
+  }
+}
 
 /* ═══════════════════════════════════════════
    UI HELPERS
@@ -717,7 +786,8 @@ function loadRound(){
   shuffle([...set]).forEach((item,idx)=>{
     const c=document.createElement('div');
     c.className=`card en ${accentOrder[idx%accentOrder.length]}`;
-    c.innerHTML=`<div class="en-inner"><span class="en-dot"></span>${item.en.toLowerCase()}</div>`;
+    // Shimmer layer + en-inner content
+    c.innerHTML=`<div class="en-shimmer"></div><div class="en-inner"><span class="en-dot"></span>${item.en.toLowerCase()}</div>`;
     c.dataset.id=String(item.id);
     c.addEventListener('click',async()=>{
       if(isGrading||c.style.visibility==='hidden')return;
@@ -820,12 +890,25 @@ function showResults(){
 /* ═══════════════════════════════════════════
    BUTTONS + HELP
    ═══════════════════════════════════════════ */
-$('#playAgain').addEventListener('click',initGame);
-$('#backToMenu').addEventListener('click',()=>{ if(window.history.length>1)window.history.back(); else window.location.href='../bc_games.html'; });
-$('#closeBtn').addEventListener('click',function(e){ e.preventDefault(); if(window.history.length>1)window.history.back(); else window.location.assign(this.getAttribute('href')); });
-$('#helpBtn').addEventListener('click',()=>$('#helpOverlay').classList.add('show'));
-$('#helpClose').addEventListener('click',()=>$('#helpOverlay').classList.remove('show'));
-$('#helpOverlay').addEventListener('click',e=>{ if(e.target===$('#helpOverlay'))$('#helpOverlay').classList.remove('show'); });
+
+// Nav lock — prevents button smashing / double-tap navigation
+let navLocked = false;
+function navTo(href){
+  if(navLocked) return;
+  navLocked = true;
+  window.location.href = href;
+}
+
+$('#playAgain').addEventListener('click', () => {
+  if(isGrading) return;
+  navLocked = false; // reset so the new game session can navigate
+  initGame();
+});
+$('#backToMenu').addEventListener('click', () => { navTo('../bc_games.html'); });
+$('#closeBtn').addEventListener('click', function(e){ e.preventDefault(); navTo('../bc_games.html'); });
+$('#helpBtn').addEventListener('click', () => $('#helpOverlay').classList.add('show'));
+$('#helpClose').addEventListener('click', () => $('#helpOverlay').classList.remove('show'));
+$('#helpOverlay').addEventListener('click', e => { if(e.target === $('#helpOverlay')) $('#helpOverlay').classList.remove('show'); });
 
 loadVocab();
 </script>
