@@ -387,7 +387,7 @@ body {
 
 <!-- Header -->
 <header class="header">
-  <a class="close-btn" href="maze.html" id="closeBtn" title="Close / 閉じる">✕</a>
+  <a class="close-btn" href="../maze.html" id="closeBtn" title="Close / もどる">✕</a>
   <div class="header-inner">
     <div class="title-rainbow">BOO-RICULUM GAMES</div>
     <div class="title-jp">ブー・リキュラム ゲームズ</div>
@@ -601,7 +601,7 @@ document.getElementById('gameGrid').addEventListener('click',function(e){
   }, 560);
 });
 
-// ── Close (X) button — also add kaboom ───────────────────────
+// ── Close (X) button — kaboom then back to maze hub ───────────────────────
 document.getElementById('closeBtn').addEventListener('click',function(e){
   e.preventDefault();
   if(transitioning) return;
@@ -609,7 +609,15 @@ document.getElementById('closeBtn').addEventListener('click',function(e){
   const r=this.getBoundingClientRect();
   kaboom(r.left+r.width/2, r.top+r.height/2, '#ff6b9d');
   setTimeout(()=>{ swipe.classList.add('go'); }, 250);
-  setTimeout(()=>{ window.location.href=this.getAttribute('href'); }, 460);
+  setTimeout(()=>{
+    // Prefer history.back() so the maze popup re-opens naturally;
+    // fall back to the explicit href if no history entry exists
+    if(window.history.length>1){
+      window.history.back();
+    } else {
+      window.location.href = this.getAttribute('href');
+    }
+  }, 460);
 });
 </script>
 </body>
