@@ -370,12 +370,20 @@ const JSON_URL   = 'br_vocab.json';
 // 1. URL path: template/march/br_vt.html  →  "march"
 // 2. ?week= param:  br_vt.html?week=br_mar_w2  →  "mar"
 // 3. Current calendar month as fallback
-const MONTH_ABBR_3 = ['jan','feb','mar','apr','may','jun',
-                       'jul','aug','sep','oct','nov','dec'];
-const MONTH_NAMES_EN = ['January','February','March','April','May','June',
-                        'July','August','September','October','November','December'];
-const MONTH_NAMES_JP = ['1月','2月','3月','4月','5月','6月',
-                        '7月','8月','9月','10月','11月','12月'];
+const MONTH_FOLDER_MAP = {
+  jan: 'january',
+  feb: 'february',
+  mar: 'march',
+  apr: 'april',
+  may: 'may',
+  jun: 'june',
+  jul: 'july',
+  aug: 'august',
+  sep: 'september',
+  oct: 'october',
+  nov: 'november',
+  dec: 'december'
+};
 
 // Source 1 — folder name in the URL path (most reliable)
 const _pathParts  = window.location.pathname.split('/');
@@ -398,7 +406,8 @@ const _calMonth    = MONTH_ABBR_3[_now.getMonth()];
 // Resolved 3-letter month abbreviation
 const MONTH = _pathMonth || _paramMonth || _calMonth;
 
-const AUDIO_BASE   = `${AUDIO_ROOT}/${MONTH}/boo_riculum/vocab/`;
+const MONTH_FOLDER = MONTH_FOLDER_MAP[MONTH] || MONTH;
+const AUDIO_BASE   = `${AUDIO_ROOT}/${MONTH_FOLDER}/boo_riculum/vocab/`;
 const WEEK_RANGES  = { w1:[1,15], w2:[16,30], w3:[31,45], w4:[46,60] };
 
 // ── SFX: booha-adventure-2027/assets/audio/
@@ -422,8 +431,11 @@ function shuffle(a){ return a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).m
 function pad2(n){ return String(n).padStart(2,'0'); }
 function safeWord(s){ return (s||'').toLowerCase().trim().replace(/\s+/g,'_').replace(/[^a-z0-9_'-]/g,''); }
 function centerOf(el){ const r=el.getBoundingClientRect(); return{x:r.left+r.width/2,y:r.top+r.height/2}; }
-function vocabUrl(id,en){ return `${AUDIO_BASE}v${pad2(id)}_${safeWord(en)}.mp3`; }
-
+function vocabUrl(item){
+  if (item.mp3) return `${AUDIO_BASE}${item.mp3}`;
+  return `${AUDIO_BASE}v${pad2(item.id)}_${safeWord(item.en)}.mp3`;
+}
+   
 /* ═══════════════════════════════════════════
    AUDIO ENGINE
    ═══════════════════════════════════════════ */
@@ -541,14 +553,22 @@ async function loadVocab(){
   }
 
   // Normalise: support both {n, en, jp, hira} and legacy {id, en, jp, hira}
-  MASTER = cards.map(c => ({ id: c.n ?? c.id, en: c.en, jp: c.jp, hira: c.hira }));
+  MASTER = cards.map(c => ({
+  id: c.n ?? c.id,
+  en: c.en,
+  jp: c.jp,
+  hira: c.hira,
+  mp3: c.mp3 || ''
+ }));
 
   // Build sage audio cache
   MASTER.forEach(item => {
-    const a = new Audio(vocabUrl(item.id, item.en));
-    a.preload = 'auto'; a.crossOrigin = 'anonymous'; try { a.load(); } catch {}
-    sage.set(item.id, a);
-  });
+  const a = new Audio(vocabUrl(item));
+  a.preload = 'auto';
+  a.crossOrigin = 'anonymous';
+  try { a.load(); } catch {}
+  sage.set(item.id, a);
+ });
 
   // Subtitle — resolved month + week
   const wNum  = weekKey.replace('w', '');
@@ -761,9 +781,18 @@ function showResults(){
    BUTTONS + HELP
    ═══════════════════════════════════════════ */
 $('#playAgain').addEventListener('click',initGame);
-$('#backToMenu').addEventListener('click',()=>{ if(window.history.length>1)window.history.back(); else window.location.href='../br_games.html'; });
-$('#closeBtn').addEventListener('click',function(e){ e.preventDefault(); if(window.history.length>1)window.history.back(); else window.location.assign(this.getAttribute('href')); });
+
+$('#backToMenu').addEventListener('click',()=>{
+  window.location.href = '../br_games.html';
+});
+
+$('#closeBtn').addEventListener('click',function(e){
+  e.preventDefault();
+  window.location.href = '../br_games.html';
+});
+
 $('#helpBtn').addEventListener('click',()=>$('#helpOverlay').classList.add('show'));
+   
 $('#helpClose').addEventListener('click',()=>$('#helpOverlay').classList.remove('show'));
 $('#helpOverlay').addEventListener('click',e=>{ if(e.target===$('#helpOverlay'))$('#helpOverlay').classList.remove('show'); });
 
