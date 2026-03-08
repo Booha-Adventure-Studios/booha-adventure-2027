@@ -549,6 +549,18 @@ function monthColors(w){ const m=WEEK_MONTH[w-1]; return MONTH_COLORS[m]||['#fff
 function monthPrimary(w)   { return monthColors(w)[0]; }
 function monthSecondary(w) { return monthColors(w)[1]; }
 
+function goToHub(){
+  sessionStorage.setItem('booha_return_to_hub', '1');
+  window.location.href = 'index.html#hub';
+}
+
+function jumpToHub(){
+  sessionStorage.removeItem('booha_return_to_hub');
+  if (window.location.hash !== '#hub') {
+    window.location.hash = 'hub';
+  }
+}  
+
 // ─────────────────────────────────────────────────────────
 //  DOM
 // ─────────────────────────────────────────────────────────
@@ -583,6 +595,10 @@ const cpPopupBar    = document.getElementById('cpPopupBar');
 const cpCloseBtn    = document.getElementById('cpCloseBtn');
 const cpWeekBadge   = document.getElementById('cpWeekBadge');
 const FADE_MS       = 520;
+const iconPreBoo    = document.getElementById('iconPreBoo');
+const iconBooTree   = document.getElementById('iconBooTree');
+const iconContTree  = document.getElementById('iconContTree');
+  
 
 // ─────────────────────────────────────────────────────────
 //  CANVAS — DPR applied once per resize only
@@ -1214,13 +1230,20 @@ cpCloseBtn.addEventListener('click',closePopup);
 cpScrim.addEventListener('click',closePopup);
 
 // ── Icon clicks ─────────────────────────────────────────
-document.getElementById('iconPreBoo').addEventListener('click',()=>{ /* wire up */ });
-document.getElementById('iconBooTree').addEventListener('click',()=>{
-  // Navigate to the Booha Monthly Games Index for the active week
-  // Adjust path as needed for your folder structure
+iconPreBoo.addEventListener('click',()=>{
+  sessionStorage.setItem('booha_return_to_hub', '1');
+  window.location.href = `template/pb_games.html?week=${activeWeek}`;
+});
+
+iconBooTree.addEventListener('click',()=>{
+  sessionStorage.setItem('booha_return_to_hub', '1');
   window.location.href = `template/br_games.html?week=${activeWeek}`;
 });
-document.getElementById('iconContTree').addEventListener('click',()=>{ /* wire up */ });
+
+iconContTree.addEventListener('click',()=>{
+  sessionStorage.setItem('booha_return_to_hub', '1');
+  window.location.href = `template/bc_games.html?week=${activeWeek}`;
+});
 
 // ─────────────────────────────────────────────────────────
 //  BRYAN MODE
@@ -1291,7 +1314,10 @@ buildSparkles(startSp,36,true);
 // ─────────────────────────────────────────────────────────
 //  OVERLAY FLOW
 // ─────────────────────────────────────────────────────────
-returnBtn.addEventListener('click',()=>{fadeOut();setTimeout(()=>window.location.href='index.html',FADE_MS);});
+returnBtn.addEventListener('click',()=>{
+  fadeOut();
+  setTimeout(()=>goToHub(), FADE_MS);
+});
 
 let videoPlayed=false;
 continueBtn.addEventListener('click',async()=>{
@@ -1336,17 +1362,12 @@ mazeStartBtn.addEventListener('click',async()=>{
   try{bgMusic.volume=.65;await bgMusic.play();}catch(e){console.warn('Music blocked',e);}
 });
 
-// ── Back button → return to the weekly hub popup on br_games ──
-// This brings user back to maze.html itself (the hub), not away from it.
-// If maze.html IS the hub, back goes to index.html as before.
+// ── Back button → always return to index hub ─────────────────
 backBtn.addEventListener('click',()=>{
   if(ghostLocked) return;
   try{bgMusic.pause();bgMusic.currentTime=0;}catch(e){}
   fadeOut();
-  // If we came from br_games, go back there; otherwise go to index.html
-  const ref = document.referrer;
-  const dest = (ref && ref.includes('br_games')) ? ref : 'index.html';
-  setTimeout(()=>window.location.href=dest, FADE_MS);
+  setTimeout(()=>goToHub(), FADE_MS);
 });
 
 function fadeOut(){fade.classList.add('on');}
@@ -1361,6 +1382,17 @@ document.addEventListener('visibilitychange',()=>{
   }
 });
 
+
+/* On bfcache restore or hash-based return */
+window.addEventListener('pageshow', ev => {
+  if (
+    ev.persisted ||
+    window.location.hash === '#hub' ||
+    sessionStorage.getItem('booha_return_to_hub')
+  ) {
+    jumpToHub();
+  }
+});  
 // ─────────────────────────────────────────────────────────
 //  INIT
 // ─────────────────────────────────────────────────────────
