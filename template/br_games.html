@@ -262,24 +262,23 @@ function kaboom(cx,cy,ringColor){
 
 let locked=false;
 const swipe=document.getElementById('swipeScreen');
-
-function getMonthFolderFromWeekParam() {
+  
+function getMonthFromWeek() {
   const weekParam = new URLSearchParams(window.location.search).get('week') || '';
-
+  const m = weekParam.match(/_([a-z]{3})_w/i);
+  return m ? m[1].toLowerCase() : null;
+}
+  
+function getMonthFolder() {
   const map = {
-    jan: 'january',
-    feb: 'february',
-    mar: 'march',
-    apr: 'april',
-    may: 'may',
-    jun: 'june',
-    jul: 'july',
-    aug: 'august',
-    sep: 'september',
-    oct: 'october',
-    nov: 'november',
-    dec: 'december'
+    jan:'january', feb:'february', mar:'march', apr:'apil',
+    may:'may', jun:'june', jul:'july', aug:'august',
+    sep:'september', oct:'october', nov:'november', dec:'december'
   };
+
+  const m = getMonthFromWeek();
+  return m ? map[m] : null;
+}
 
   const m = weekParam.match(/_([a-z]{3})_w/i);
   if (m && map[m[1].toLowerCase()]) return map[m[1].toLowerCase()];
@@ -291,7 +290,9 @@ function buildGameHref(baseHref) {
   const weekParam = new URLSearchParams(window.location.search).get('week') || '';
   const monthFolder = getMonthFolderFromWeekParam();
 
-  const hrefWithFolder = monthFolder ? `../${monthFolder}/${baseHref}` : baseHref;
+  const hrefWithFolder = monthFolder
+  ? `../${monthFolder}/${baseHref}`
+  : `../${baseHref}`;
   return weekParam
     ? `${hrefWithFolder}${hrefWithFolder.includes('?') ? '&' : '?'}week=${encodeURIComponent(weekParam)}`
     : hrefWithFolder;
@@ -340,12 +341,17 @@ document.getElementById('closeBtn').addEventListener('click', function(e){
   const r = this.getBoundingClientRect();
   kaboom(r.left + r.width / 2, r.top + r.height / 2, '#ff6b9d');
 
+  const params = new URLSearchParams(window.location.search);
+  const week = params.get('week');
+
   setTimeout(() => { swipe.classList.add('go'); }, 280);
+
   setTimeout(() => {
-    window.location.href = this.getAttribute('href');
+    const url = week ? `../maze.html?week=${week}` : '../maze.html';
+    window.location.href = url;
   }, 480);
 });
-
+  
 </script>
 </body>
 </html>
