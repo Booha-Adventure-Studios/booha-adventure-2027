@@ -284,7 +284,7 @@ function getMonthFolder() {
 function buildGameHref(baseHref) {
   const params = new URLSearchParams(window.location.search);
   const weekParam = params.get('week') || '';
-  const monthFolder = getMonthFolder();
+  const monthFolder = getMonthFolder() || 'january';
 
   const hrefWithFolder = monthFolder
     ? `${monthFolder}/${baseHref}`
@@ -328,7 +328,7 @@ document.getElementById('gameGrid').addEventListener('click',e=>{
   e.preventDefault();
   const idx=tiles.indexOf(tile);
   const r=tile.getBoundingClientRect();
-  safeNavigate(tile.getAttribute('href'),r.left+r.width/2,r.top+r.height/2,tile,RING_COLORS[idx]||'#fff');
+  safeNavigate(tile.dataset.game,r.left+r.width/2,r.top+r.height/2,tile,RING_COLORS[idx]||'#fff');
 });
 
 document.getElementById('closeBtn').addEventListener('click', function(e){
@@ -349,46 +349,6 @@ document.getElementById('closeBtn').addEventListener('click', function(e){
   }, 480);
 });
   
-</script>
-
-<script>
-const params = new URLSearchParams(window.location.search);
-const weekParam = params.get('week') || '';
-
-const MONTH_MAP = {
-  jan: 'january',
-  feb: 'february',
-  mar: 'march',
-  apr: 'april',
-  may: 'may',
-  jun: 'june',
-  jul: 'july',
-  aug: 'august',
-  sep: 'september',
-  oct: 'october',
-  nov: 'november',
-  dec: 'december'
-};
-
-function resolveMonthFolder() {
-  const match = weekParam.match(/_([a-z]{3})_w/i);
-  if (match) return MONTH_MAP[match[1].toLowerCase()] || 'january';
-
-  const now = new Date();
-  const abbr = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'][now.getMonth()];
-  return MONTH_MAP[abbr] || 'january';
-}
-
-const MONTH_FOLDER = resolveMonthFolder();
-
-document.querySelectorAll('.tile[data-game]').forEach(tile => {
-  tile.addEventListener('click', (e) => {
-    e.preventDefault();
-    const game = tile.dataset.game;
-    const target = `${MONTH_FOLDER}/${game}` + (weekParam ? `?week=${encodeURIComponent(weekParam)}` : '');
-    window.location.href = target;
-  });
-});
 </script>
   
 </body>
