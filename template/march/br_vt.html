@@ -366,33 +366,53 @@ hr.sep-help{border:0;height:1px;background:rgba(255,255,255,0.15);margin:8px 0;}
 const AUDIO_ROOT = 'https://pub-8d5941f302df44b899ce9d9a4606dcb7.r2.dev/audio-2027';
 const JSON_URL   = 'br_vocab.json';
 
-const params     = new URLSearchParams(window.location.search);
-const weekParam  = params.get('week') || '';
-const monthMatch = weekParam.match(/_([a-z]{3})_w/i);
-const MONTH      = monthMatch ? monthMatch[1] : 'jan';
-const AUDIO_BASE = `${AUDIO_ROOT}/${MONTH}/boo_riculum/vocab/`;
-const WEEK_RANGES = { w1:[1,15], w2:[16,30], w3:[31,45], w4:[46,60] };
-
-const SFX_BASE = '../assets/audio/';
-
-/* ── Date-based week detection (override with ?week=) ── */
-function getWeekKey() {
-  // If a week param was passed, extract w1/w2/w3/w4 from it
-  const wm = weekParam.match(/(w[1-4])/i);
-  if (wm) return wm[1].toLowerCase();
-  // Otherwise derive from current date: which Monday-based week of the month
-  const now   = new Date();
-  const day1  = new Date(now.getFullYear(), now.getMonth(), 1);
-  // Week number within month (1-4) based on date ÷ 7
-  const weekN = Math.min(4, Math.ceil(now.getDate() / 7));
-  return 'w' + weekN;
-}
-
-/* ── Month abbrev for display ── */
+// ── Month detection (3 sources, priority order) ──────────────────
+// 1. URL path: template/march/br_vt.html  →  "march"
+// 2. ?week= param:  br_vt.html?week=br_mar_w2  →  "mar"
+// 3. Current calendar month as fallback
+const MONTH_ABBR_3 = ['jan','feb','mar','apr','may','jun',
+                       'jul','aug','sep','oct','nov','dec'];
 const MONTH_NAMES_EN = ['January','February','March','April','May','June',
                         'July','August','September','October','November','December'];
 const MONTH_NAMES_JP = ['1月','2月','3月','4月','5月','6月',
                         '7月','8月','9月','10月','11月','12月'];
+
+// Source 1 — folder name in the URL path (most reliable)
+const _pathParts  = window.location.pathname.split('/');
+const _folderName = _pathParts[_pathParts.length - 2] || ''; // e.g. "march"
+const _pathMonth  = MONTH_ABBR_3.find(m =>
+  _folderName.toLowerCase().startsWith(m) ||            // "march" starts with "mar"
+  _folderName.toLowerCase() === m                       // exact "mar"
+) || null;
+
+// Source 2 — ?week= param  (e.g. br_mar_w1)
+const params       = new URLSearchParams(window.location.search);
+const weekParam    = params.get('week') || '';
+const _paramMatch  = weekParam.match(/_([a-z]{3})_w/i);
+const _paramMonth  = _paramMatch ? _paramMatch[1].toLowerCase() : null;
+
+// Source 3 — current calendar month
+const _now         = new Date();
+const _calMonth    = MONTH_ABBR_3[_now.getMonth()];
+
+// Resolved 3-letter month abbreviation
+const MONTH = _pathMonth || _paramMonth || _calMonth;
+
+const AUDIO_BASE   = `${AUDIO_ROOT}/${MONTH}/boo_riculum/vocab/`;
+const WEEK_RANGES  = { w1:[1,15], w2:[16,30], w3:[31,45], w4:[46,60] };
+
+// ── SFX: booha-adventure-2027/assets/audio/
+// File lives at: booha-adventure-2027/template/[month]/br_vt.html
+// So two levels up from this file reaches booha-adventure-2027/
+const SFX_BASE = '../../assets/audio/';
+
+/* ── Week detection: ?week= param → then current date ── */
+function getWeekKey() {
+  const wm = weekParam.match(/(w[1-4])/i);
+  if (wm) return wm[1].toLowerCase();
+  const weekN = Math.min(4, Math.ceil(_now.getDate() / 7));
+  return 'w' + weekN;
+}
 
 /* ═══════════════════════════════════════════
    HELPERS
@@ -530,12 +550,11 @@ async function loadVocab(){
     sage.set(item.id, a);
   });
 
-  // Subtitle — month from param or current date
-  const now   = new Date();
-  const mIdx  = now.getMonth();
-  const wNum  = weekKey.replace('w','');
-  const monEn = monthMatch ? MONTH.charAt(0).toUpperCase()+MONTH.slice(1) : MONTH_NAMES_EN[mIdx];
-  const monJp = monthMatch ? MONTH.toUpperCase() : MONTH_NAMES_JP[mIdx];
+  // Subtitle — resolved month + week
+  const wNum  = weekKey.replace('w', '');
+  const mIdx  = MONTH_ABBR_3.indexOf(MONTH);
+  const monEn = mIdx >= 0 ? MONTH_NAMES_EN[mIdx] : MONTH.charAt(0).toUpperCase() + MONTH.slice(1);
+  const monJp = mIdx >= 0 ? MONTH_NAMES_JP[mIdx] : MONTH.toUpperCase();
   $('#subEn').textContent = `${monEn} – Week ${wNum} – Vocabulary`;
   $('#subJp').textContent = `${monJp}第${wNum}週 – 語彙`;
 
