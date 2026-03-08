@@ -293,6 +293,7 @@ function buildGameHref(baseHref) {
   const hrefWithFolder = monthFolder
   ? `../${monthFolder}/${baseHref}`
   : `../${baseHref}`;
+  
   return weekParam
     ? `${hrefWithFolder}${hrefWithFolder.includes('?') ? '&' : '?'}week=${encodeURIComponent(weekParam)}`
     : hrefWithFolder;
@@ -341,12 +342,11 @@ document.getElementById('closeBtn').addEventListener('click', function(e){
   const r = this.getBoundingClientRect();
   kaboom(r.left + r.width / 2, r.top + r.height / 2, '#ff6b9d');
 
-  const params = new URLSearchParams(window.location.search);
-  const week = params.get('week');
-
   setTimeout(() => { swipe.classList.add('go'); }, 280);
 
   setTimeout(() => {
+    const params = new URLSearchParams(window.location.search);
+    const week = params.get('week');
     const url = week ? `../maze.html?week=${week}` : '../maze.html';
     window.location.href = url;
   }, 480);
